@@ -225,7 +225,7 @@ At `k = 2051` that formula wants ~2.1 MB of shared local memory per work-group. 
 - Prefill (`n_ubatch = 2048`), 32 k context: 32768 × 2048 × 4 B = **256 MiB per layer**, ~3 GiB per ubatch. *Inferred* — this would be crippling.
 
 **Mitigations, in rough order of effort** (all *Inferred*, none verified by running):
-1. **Use the Vulkan backend instead of SYCL on the Arc.** Vulkan already has `topk_radix_select.comp` and `topk_nary_search.comp` and its `supports_op` explicitly says *"large k falls back to radix-select"* (`ggml-vulkan.cpp:19742`). This is the lowest-effort path to a fully-GPU-resident QSA on Arc — at the cost of the MoE-cache port then targeting Vulkan rather than SYCL.
+1. **Use the Vulkan backend instead of SYCL on the Arc.** Vulkan already has `topk_radix_select.comp` and `topk_nary_search.comp`, its `supports_op` explicitly says *"large k falls back to radix-select"* (`ggml-vulkan.cpp:19742`), and it carries a **dedicated `pipeline_topk_radix_qsa` pipeline** commented in-source as *"qwen4 QSA indexer fusion (f16 mask)"* — i.e. Vulkan has a kernel written specifically for this model's top-k. This is the lowest-effort path to fully-GPU-resident QSA on Arc, and §3.2 confirms it working on a 32 GB Battlemage card. Cost: the MoE-cache port then targets Vulkan rather than SYCL.
 2. **Port a radix-select top_k to SYCL.** Self-contained, well-scoped work with a working Vulkan reference shader to translate. Probably the highest-value single upstream contribution this project could make.
 3. **Disable QSA.** `src/models/qwen4exp.cpp:771` — `const bool qsa = mctx_hyb->get_idx() != nullptr && hparams.dsv4_compress_ratios[il] > 0;` — so a GGUF converted without indexer tensors runs dense. Since QSA currently provides no speed benefit anyway (§2.1), losing it costs only quality, not throughput. **Not yet verified whether a CLI flag exposes this**; see Open questions.
 
@@ -376,7 +376,7 @@ qwen4exp has **not** been enrolled — `qwen4exp.cpp:747` still passes `0`. Two 
 
 Independent of any bug report, the source establishes these as *Confirmed*:
 
-- SYCL kernels for `gated_delta_net`, `lightning-indexer`, `dsv4-hc`, `cumsum`, `fill`, `solve_tri`, `tri`, `set_rows` all exist as dedicated files in `ggml/src/ggml-sycl/`. Somebody deliberately built out this architecture family for SYCL; these are not accidental.
+- SYCL kernels for `gated_delta_net`, `cumsum`, `fill`, `solve_tri`, `tri`, `set_rows` — the ones qwen4exp actually uses — all exist as dedicated files in `ggml/src/ggml-sycl/`, and §3.5 shows Intel engineers wrote most of them deliberately for this architecture family. (`lightning-indexer.cpp` and `dsv4-hc.cpp` exist too, but serve DeepSeek V4, not this model — see §2.2.)
 - Vulkan has the matching shaders (`gated_delta_net.comp`, `lightning_indexer.comp`, `dsv4_hc_{pre,comb,post}.comp`, `solve_tri.comp`, `tri.comp`, `cumsum*.comp`, `topk_radix_select.comp`).
 - The `moe-cache` fork carries all of the above unchanged, since it tracks upstream.
 
@@ -595,30 +595,43 @@ That mixing is visible in my parse — at UD-IQ3_XXS: `ffn_down_exps` is IQ4_NL 
 
 ### 5.6 Recommendation
 
-*Inferred.*
+*Inferred, but now anchored by two real Arc datapoints.*
 
-- **Start with UD-Q2_K_XL or UD-IQ3_XXS.** IQ3_XXS is the video's known-good configuration and gives ~49 % expert residency; Q2_K_XL buys ~4 more points of residency for a modest quality cost.
-- **UD-IQ1_S** is the aggressive option at 61 % residency — worth benchmarking, since Unsloth claims 1-bit holds up unusually well here.
+- **Two quants have actually been run on Battlemage** (§3.1, §3.2): **UD-IQ3_XXS** on 3× Arc Pro B60 via SYCL, and **UD-Q3_K_XL** on a single Arc Pro B65 32 GB via Vulkan (30.4 t/s @ 8 k with `--n-cpu-moe 25`). Either is a defensible starting point with prior art; **UD-Q3_K_XL on a 32 GB card is the closest published match to our exact hardware.**
+- **Start with UD-IQ3_XXS or UD-Q3_K_XL**, then explore. IQ3_XXS gives ~49 % expert residency, Q3_K_XL ~41 % but with the direct B65 baseline to compare against.
+- **UD-Q2_K_XL / UD-IQ1_S** are the aggressive options at ~53 % / ~61 % residency — worth benchmarking, since Unsloth claims 1-bit holds up unusually well here (79.7 % top-1 at IQ1_M).
 - **Avoid Q4_K_XL and above** unless the expert cache proves so effective that residency stops mattering; at 29.6 % it is doing the most work for the least benefit, and it is penalised by the 640-divisibility issue above.
 - **Host RAM requirement is roughly `28.8 GB (PLE) + (experts − VRAM pool)`**, unless the PLE is mmap'd from SSD, in which case it is `experts − pool` plus page cache. Confirm the box's RAM before choosing.
+- **Keep `-ub` at 1024–2048 and `-c` no larger than needed** — the QSA scratch in §5.4 is charged against allocated context and silently spills over PCIe when it overflows.
 
 ---
 
 ## 6. Open questions / gaps
 
-**Blocking-ish, needs answering before committing to SYCL:**
+**The decision that gates everything else:**
 
-1. **Is there a CLI flag to disable QSA / the indexer?** §2.3's mitigation 3 depends on it. I confirmed the *graph-level* condition (`qsa = get_idx() != nullptr && compress_ratios[il] > 0`) but did not find a user-facing flag. Check `common/arg.cpp` for indexer/QSA options, and whether `--no-indexer`-style handling exists.
-2. **Measure the actual cost of the `top_k` CPU fallback.** Run `llama-bench` on SYCL and read the `layer %d is assigned to device ... (usually due to missing support)` warnings from §2.5. This converts §2.3's inferred prefill estimate into a real number and decides SYCL-vs-Vulkan.
-3. **SYCL vs Vulkan on the B70 for this model.** Vulkan wins on `top_k` outright. Does it lose enough elsewhere (matmul throughput, XMX utilisation, MoE `MUL_MAT_ID`) to matter? This is a bake-off, and it also determines which backend the MoE-cache port should target — a decision worth making *before* writing porting code.
+1. **SYCL vs Vulkan on the B70 for this model — run the bake-off before writing any porting code.** Vulkan wins on `top_k` outright (§2.3) and has the closest published datapoint (Arc Pro B65 32 GB, §3.2). SYCL has an XMX/oneMKL flash-attention path Vulkan lacks (§2.4) and its own confirmed B60 run (§3.1). Nobody has compared them on this model. **This determines which backend the MoE-cache port targets**, so it should be measured first, not assumed.
 
-**Unverified in this pass:**
+**Needs measuring during bring-up:**
 
-4. **§3 is under-evidenced.** The GitHub-issue and Reddit search for real-world non-CUDA reports did not land in time for this document. Specifically still open: any qwen4exp/Qwen3-Next SYCL or Vulkan bug reports; which PRs added the SYCL kernels and what limitations their descriptions note; the qwen4exp support PR and its stated backend coverage; and the status of **PR ggml-org/llama.cpp#27970** (referenced in-source as the gate on real sparse attention).
-5. **`SYCL_SOLVE_TRI_MAX_N/K = 64` exactly matches the GDN chunk size of 64.** Confirmed to fit today, but it is a zero-margin coincidence. Worth a comment upstream, and worth re-checking after any llama.cpp update.
-6. **Compute-buffer size on SYCL is estimated, not measured** (~1.8 GiB assumed in §5.4). With `n_ubatch = 2048` and a 10240-wide residual stream, this could be materially larger and would eat directly into the slot pool. Measure it.
-7. **Unsloth's `qwen4exp/mtp` branch contents unverified** — MTP would add ~2.6 B params and claims 1.3–1.7× decode speedup, but interacts with both the expert cache and the recurrent-state rollback slots (`[TAG_RECURRENT_ROLLBACK_SPLITS]` in `qwen4exp.cpp`). Treat as a later phase.
-8. **Vision tower on SYCL untested.** Not needed for a text-only bring-up; `mmproj` is a separate 0.90 GB file, so it can simply be omitted initially.
+2. **Actual cost of the `top_k` CPU fallback on SYCL.** Run `llama-bench` and read the `layer %d is assigned to device ... (usually due to missing support)` warnings from §2.5. Converts §2.3's inferred prefill estimate into a real number, and is the main input to question 1.
+3. **Compute-buffer + QSA-scratch size on SYCL/Vulkan is estimated, not measured** (~1.8 GiB assumed in §5.4, plus the scratch term added there). With a 10240-wide residual stream this could be materially larger and eats directly into the slot pool. Measure at the `-c`/`-ub` we actually intend to run.
+4. **Re-run `test-backend-ops -b SYCL0 -o MUL_MAT_ID` on our build.** Issue #25455 was exactly this GPU and exactly the op all 512-expert routing goes through; it is fixed, but it is cheap insurance and a good canary.
+5. **Pin and record the intel-compute-runtime (NEO) version.** Per #22885 and #28515, NEO regressions have broken Arc multi-GPU and device-memory queries independently of llama.cpp version.
+
+**Partially resolved — remaining gaps:**
+
+6. **Disabling QSA:** no dedicated `--no-qsa` flag found in `common/arg.cpp`. The relevant knobs that *do* exist are `-ot/--override-tensor`, `-cmoe/--cpu-moe`, `-ncmoe/--n-cpu-moe` (`common/arg.cpp:2750–2775`). §2.3 mitigation 3 (converting a GGUF without indexer tensors) remains available but is a conversion-time choice, not a runtime one. Lower priority now that we know the fallback is survivable in practice.
+7. **Reddit is genuinely unknown**, not empty — `reddit.com` was blocked for the search tooling. If a release-day r/LocalLLaMA megathread has Arc datapoints, we have not seen them.
+
+**Known, accepted, or deferred:**
+
+8. **`SYCL_SOLVE_TRI_MAX_N/K = 64` exactly matches the GDN chunk size of 64.** Fits today with zero margin. Worth re-checking after any llama.cpp update.
+9. **Long-context decode on B70 has a hardware floor** (~21–25 ns per KV position per attention layer per token, #26581, identical on SYCL and Vulkan). No expert cache can fix this; it caps what long-context decode can ever look like on this card.
+10. **MTP deferred.** Unsloth's `qwen4exp/mtp` branch unverified; adds ~2.6 B params for a claimed 1.3–1.7×. Note #23174 fixed GDN `K>1` on SYCL specifically because *"MTP on SYCL gives garbled output after a few tokens"* — so MTP-on-SYCL has a known-fragile history. Later phase.
+11. **Vision tower untested on non-CUDA.** Not needed for text-only bring-up; `mmproj` is a separate 0.90 GB file and can simply be omitted.
+12. **Watch [#28501](https://github.com/ggml-org/llama.cpp/pull/28501)** (Vulkan >256-expert row-id hoisting). Qwen3.8-Flash-Next's 512 experts trip this; merging it is a free +16–19 % prefill on the Vulkan path.
+13. **Watch [#28213](https://github.com/ggml-org/llama.cpp/pull/28213)** (backend-agnostic compact K/V gather for sparse decode) — the only sparse-attention work that would benefit SYCL/Vulkan rather than CUDA/Metal only.
 
 **Notable for the MoE-cache port specifically:**
 
@@ -656,3 +669,20 @@ That mixing is visible in my parse — at UD-IQ3_XXS: `ffn_down_exps` is IQ4_NL 
 
 **Vendor docs**
 - `https://unsloth.ai/docs/models/qwen3.8-next`
+
+**GitHub issues & PRs cited in §3**
+
+*Architecture / sparse attention:* [#27742](https://github.com/ggml-org/llama.cpp/pull/27742) (qwen4exp support, merged 2026-08-27) · [#27970](https://github.com/ggml-org/llama.cpp/pull/27970) (sparse-FA for DSV4/GLM, merged 2026-09-02) · [#28349](https://github.com/ggml-org/llama.cpp/pull/28349) (enable QSA sparse-FA, closed unmerged) · [#28213](https://github.com/ggml-org/llama.cpp/pull/28213) (compact K/V gather, open) · [#27877](https://github.com/ggml-org/llama.cpp/pull/27877) (disable non-fused GDN/LID, merged 2026-08-28)
+
+*Must-have fixes (both 2026-09-09):* [#28476](https://github.com/ggml-org/llama.cpp/pull/28476) (SYCL IQ MoE) · [#28592](https://github.com/ggml-org/llama.cpp/pull/28592) (Vulkan FILL 2D workgroups), fixing [#28247](https://github.com/ggml-org/llama.cpp/issues/28247)
+
+*SYCL kernels:* [#20455](https://github.com/ggml-org/llama.cpp/pull/20455) (GDN) · [#23174](https://github.com/ggml-org/llama.cpp/pull/23174) (GDN K>1/MTP) · [#22149](https://github.com/ggml-org/llama.cpp/pull/22149) (FILL/CUMSUM/SOLVE_TRI/SSM_SCAN) · [#26568](https://github.com/ggml-org/llama.cpp/pull/26568) (LIGHTNING_INDEXER, DSV4_HC) · [#22066](https://github.com/ggml-org/llama.cpp/pull/22066) (Battlemage AOT, unmerged)
+
+*Intel Arc bugs:* [#25455](https://github.com/ggml-org/llama.cpp/issues/25455) (B70 MUL_MAT_ID prefill, fixed) · [#26581](https://github.com/ggml-org/llama.cpp/issues/26581) (B70 decode latency floor, open) · [#25812](https://github.com/ggml-org/llama.cpp/issues/25812) (expert-offload host OOM, open) · [#28100](https://github.com/ggml-org/llama.cpp/issues/28100) (SYCL tensor-split, open) · [#28515](https://github.com/ggml-org/llama.cpp/issues/28515) (B60 device-memory query, open) · [#22885](https://github.com/ggml-org/llama.cpp/issues/22885) (NEO regression) · [#24168](https://github.com/ggml-org/llama.cpp/issues/24168) (qwen3next/qwen35 on B60, open) · [#20423](https://github.com/ggml-org/llama.cpp/issues/20423) (Qwen3.5 A770 gibberish)
+
+*Vulkan MoE:* [#28501](https://github.com/ggml-org/llama.cpp/pull/28501) (>256 experts row-id hoisting, open) · [#27453](https://github.com/ggml-org/llama.cpp/pull/27453) (Vulkan LIGHTNING_INDEXER)
+
+**Adjacent, lower confidence**
+- `https://github.com/steveseguin/b70-optimization-lab` (4× B70, vLLM XPU, not llama.cpp)
+- `https://github.com/PMZFX/intel-arc-pro-b70-benchmarks` (qwen3next on 2× B70, SYCL)
+- `https://huggingface.co/unsloth/Qwen3.8-Flash-Next-GGUF/discussions/3` (speed thread — no Intel entries)

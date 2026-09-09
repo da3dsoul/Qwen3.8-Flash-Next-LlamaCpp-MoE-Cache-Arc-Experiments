@@ -33,6 +33,23 @@ comfortably-bounded, host-RAM budget. None of these are cache-design
 problems — they're bring-up problems that would exist even without the
 cache, which is exactly why they're front-loaded into Phase 0/1 below.
 
+**Update (post-write, `docs/research/02` §3 landed after this plan's first
+draft):** this model has actually been run end-to-end on Arc hardware,
+including on our exact card class. Two things follow immediately. First,
+**both backends had a model-breaking or performance-destroying bug on this
+exact architecture until fixes that both landed 2026-09-09** — Vulkan
+hard-aborted on Arc Pro B65/B70 (`ggml_vk_fill` workgroup-count overflow,
+fixed by #28592) and SYCL silently host-serialized every IQ-quantized MoE
+weight (fixed by #28476). **Pin the build to ≥ 2026-09-09 — this is now a
+Phase 0 action item, not a nice-to-have.** Second, there is now a real
+published baseline on a near-identical card: **Arc Pro B65 32 GB, Vulkan,
+UD-Q3_K_XL, `--n-cpu-moe 25`, 30.4 t/s decode @ 8k depth falling to 13.3 t/s
+@ 32k** (`docs/research/02` §3.2) — this is a *better* starting baseline
+than "measure it ourselves from nothing" and materially strengthens the
+case for prototyping on Vulkan first (§0.2 below). Full detail, including a
+VRAM-scratch-sizing correction this plan's first draft missed, is in
+`docs/research/02` §3.
+
 ## Ground rules carried from `docs/00-background.md`
 
 - **Never set `GGML_SYCL_USM_SYSTEM=1`.** That's the implicit-migration path
@@ -83,6 +100,21 @@ we can avoid (specific op fusion flags, a specific quant, etc.), proceed and
 document the exact avoidance condition — Phase 1 must not silently drift back
 into it.
 
+### 0.0 Pin the build — non-negotiable, do this before anything else in Phase 0
+
+`docs/research/02` §3.0: **both** SYCL and Vulkan had a bug that breaks this
+exact model on this exact card class, and both fixes landed the same day as
+the research (2026-09-09). Vulkan hard-aborted on Arc Pro B65/B70
+(`ggml_vk_fill` workgroup-count overflow past `n_ubatch × kv_len ≈ 33M`,
+fixed by #28592). SYCL silently fell back to host-serialized execution for
+every IQ-quantized MoE weight — not a crash, a silent 40-60% throughput
+loss (fixed by #28476, measured tg512 11.17 → 17.92 t/s on 3× Arc Pro B60).
+**Any build older than 2026-09-09 will look broken or badly slow for
+reasons that have nothing to do with this project.** Pin to a commit at or
+after that date before running anything else in this phase, and note the
+exact commit hash in every subsequent benchmark record — this is the kind
+of fact that's easy to lose track of and re-debug from scratch later.
+
 ### 0.2 SYCL vs. Vulkan backend decision (`GGML_OP_TOP_K`)
 
 `docs/research/02` §2.3, §6: Qwen Sparse Attention needs `ggml_top_k(width≈2051)`
@@ -123,8 +155,36 @@ If prefill is genuinely crippled and QSA can't be cheaply disabled, this
 decides SYCL vs. Vulkan **before** any cache-porting work starts, since it
 determines which backend that work targets.
 
-**Go/no-go:** pick one of the three options and write down why. Don't let
-this stay open into Phase 1.
+**This decision now has real data behind it, not just architectural
+reasoning** (`docs/research/02` §3.1–§3.2, both post-2026-09-09 fixes):
+Vulkan on an Arc Pro B65 32 GB (near-identical card) gets **30.4 t/s decode
+@ 8k depth** on UD-Q3_K_XL with static `--n-cpu-moe 25`, falling to 13.3 t/s
+@ 32k; SYCL on 3× Arc Pro B60 gets **17.92 t/s tg512** on UD-IQ3_XXS (our
+video-matched quant). These aren't directly comparable (different quants,
+different core counts, different context depths), but they're both real,
+they're both post-fix, and Vulkan avoids the `top_k` problem structurally
+rather than working around it. `docs/research/02`'s own recommended
+posture: **prototype on Vulkan first, benchmark SYCL against it once
+working, and pick the port target from measurement rather than
+architecture alone.** This plan adopts that recommendation as the default
+unless Phase 0/1's own measurements say otherwise — but note
+`docs/research/01` (the SYCL-specific feasibility doc) was written
+assuming a SYCL target, so choosing Vulkan means re-deriving that
+document's §1–§6 against Vulkan's compute-shader model before Phase 2, not
+just swapping a build flag.
+
+**Also note for VRAM budgeting (0.3/0.5 below), from the same B65 report**:
+the QSA top-k scratch buffer (`n_kv × n_ubatch × 4` bytes on Vulkan,
+`ggml_vk_topk_radix_qsa`) scales with **allocated** `-c`, not context
+actually in use — 512 MiB at `-c 32768, -ub 4096` — and overshooting VRAM
+degrades **silently** (driver-level PCIe spill) rather than erroring. The
+B65 reporter's fix was moving more expert layers to CPU
+(`-c 49152 --n-cpu-moe 29`). Size the slot pool against this scratch cost
+explicitly, not just against weights.
+
+**Go/no-go:** pick one of the three options and write down why, backed by
+the real numbers above rather than architecture alone. Don't let this stay
+open into Phase 1.
 
 ### 0.3 Quant choice and expert-residency sizing
 
@@ -175,6 +235,8 @@ rather than living with.
 
 ### Phase 0 exit criteria
 
+- [ ] 0.0: build pinned to a commit ≥ 2026-09-09 (includes both #28592
+      Vulkan fix and #28476 SYCL fix), commit hash recorded.
 - [ ] 0.1: #24168 does not reproduce, or reproduces only under an avoidable
       condition (documented).
 - [ ] 0.2: backend decided (SYCL, or Vulkan, or SYCL+QSA-disabled) with a
@@ -215,6 +277,14 @@ offload at all" (which doesn't fit regardless).
 - If targeting SYCL: capture the `layer %d is assigned to device ...`
   fallback log and get a real number for the `top_k` CPU round-trip cost
   (turns 0.2's estimate into a measurement).
+- **Regression smoke test, SYCL specifically**: issue #25455
+  (`docs/research/02` §3.3) reported `MUL_MAT_ID` producing wrong prefill
+  output on **Arc Pro B70** — literally our card, and literally the op every
+  expert routing decision goes through, both with and without the cache.
+  Closed 2026-08-30, but "closed" isn't the same as "verified on our exact
+  build" — run `test-backend-ops -b SYCL0 -o MUL_MAT_ID` as part of Phase 1
+  bring-up and treat any failure as a hard blocker, not a known issue to
+  route around.
 
 **Go/no-go:** is baseline correctness clean, and is the static-CPU-offload
 baseline already fast enough that the cache's added complexity isn't
@@ -261,6 +331,13 @@ Grounded in `docs/research/01` §1–§2, portable/needs-new-code items 1a–2d:
   reading that source (its author's own open item §8 Q13) — it reasoned from
   `docs/00-background.md`'s secondhand description. Closing that gap first
   will save real time here.
+- **Also read issue #25812 first** (`docs/research/02` §3.3): a still-open
+  `UR_RESULT_ERROR_OUT_OF_HOST_MEMORY` crash specifically when offloading
+  MoE experts to Arc GPUs, which the reporter worked around by keeping all
+  experts on CPU — i.e. by never exercising the exact host↔device staging
+  path this phase is about to build. Whatever oversized allocation pattern
+  triggers that bug is directly adjacent to this phase's pinned-host tier
+  design; understand it before writing the allocator, not after hitting it.
 
 **Validation:** write/read known expert slabs through the new buffer type
 end-to-end (host↔device), confirm eviction/re-admission round-trips
@@ -377,7 +454,18 @@ be silently wrong.
   when it's reached — but treat cache+MTP as a combination to *measure*, not
   assume works, and be prepared for the honest answer to be "pick one, not
   both," same as the sibling project's dense-model analysis flagged as the
-  most load-bearing risk for that (inapplicable) case.
+  most load-bearing risk for that (inapplicable) case. If targeting SYCL:
+  note `docs/research/02` §3.5 — PR #23174 fixed "MTP on SYCL gives garbled
+  output after a few tokens" as recently as 2026-05-22, i.e. SYCL+MTP has a
+  known history of silent correctness bugs on this exact backend
+  independent of the cache. Re-run the Phase 4 correctness battery, not just
+  a speed comparison, whenever MTP is added to the mix.
+- **Track, don't block on**: Vulkan-specific PR #28501 (`docs/research/02`
+  §3.3, open) fixes a `count_experts.comp` shared-array sizing bug that
+  disables an optimization for any model with >256 experts — Qwen3.8-Flash-
+  Next's 512 hits this today. Reports +16-19% free prefill once merged. Not
+  worth blocking Phase 4 on, but worth re-benchmarking against once it
+  lands if Vulkan ends up the chosen backend.
 - **Prefill regression check:** the CUDA fork's own numbers show 14-66%
   prefill regression under the cache (`docs/00-background.md` §1). Confirm
   whether the SYCL port shows the same pattern, and whether it's acceptable
