@@ -81,6 +81,29 @@ run); the fork is **dynamic** residency + GPU compute for hot experts.
   what avoids that specific failure, but that claim is the fork's own and
   wasn't independently re-verified.
 
+**Known numbers for our exact target model, not a proxy.** The wiki's
+headline 111-160+ tok/s figures on its 16GB-VRAM-Setup page are for
+**Qwen3.6-35B-A3B** (35B total, ~3B active/token) — a much cheaper-per-token
+model than ours and not the right comparison. The wiki separately documents
+one run of our actual model
+(`../coding-agent/docs/06-moe-cache-research/03-llamacpp-moe-expert-cache-findings.md`,
+"The run that matches the video's model"):
+
+> `unsloth/Qwen3.8-Flash-Next-GGUF` UD-Q3_K_XL, RTX 5070 Ti 16GB,
+> `--moe-expert-cache-size 80`, `-c 12288`: **decode 47.00 tok/s**, prefill
+> 95.31 tok/s. Self-caveated as "one measured run, not an average," no
+> speculative decoding, and RAM-pressured — the 83.81 GiB model doesn't fit
+> the box's 64GB RAM either, so the run used lazy mmap with free RAM down to
+> ~2.29 GiB by the end.
+
+This is the number this project should target, not the 35B-A3B figures.
+Whether the B70 (32GB VRAM, larger achievable slot pool, but only ~68% of
+the 5070 Ti's memory bandwidth — 608 vs 896 GB/s, per a B70-specific
+upstream issue) beats, matches, or falls short of it is an open empirical
+question this plan (`../PLAN.md`) treats as the primary success metric, not
+an assumption in either direction — see `../PLAN.md`'s "Performance target"
+section for the reasoning both ways.
+
 ## 2. The model: Qwen3.8-Flash-Next
 
 Alibaba, released 2026-08-26, a Qwen4-architecture preview. Two independent

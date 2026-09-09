@@ -42,13 +42,74 @@ hard-aborted on Arc Pro B65/B70 (`ggml_vk_fill` workgroup-count overflow,
 fixed by #28592) and SYCL silently host-serialized every IQ-quantized MoE
 weight (fixed by #28476). **Pin the build to ≥ 2026-09-09 — this is now a
 Phase 0 action item, not a nice-to-have.** Second, there is now a real
-published baseline on a near-identical card: **Arc Pro B65 32 GB, Vulkan,
-UD-Q3_K_XL, `--n-cpu-moe 25`, 30.4 t/s decode @ 8k depth falling to 13.3 t/s
-@ 32k** (`docs/research/02` §3.2) — this is a *better* starting baseline
-than "measure it ourselves from nothing" and materially strengthens the
-case for prototyping on Vulkan first (§0.2 below). Full detail, including a
+published no-cache baseline on a near-identical card: **Arc Pro B65 32 GB,
+Vulkan, UD-Q3_K_XL, `--n-cpu-moe 25` (static placement, no cache), 30.4 t/s
+decode @ 8k depth falling to 13.3 t/s @ 32k** (`docs/research/02` §3.2) — a
+*floor*, not a target; it's the number the cache has to beat, same as the
+sibling project's static-`-ot`-CPU baseline. Full detail, including a
 VRAM-scratch-sizing correction this plan's first draft missed, is in
 `docs/research/02` §3.
+
+### Performance target: correcting an early mis-read against the wrong model
+
+The GenerelSchwerz wiki's 16GB-VRAM-Setup page (an RTX 5070 Ti) reports
+111-160+ tok/s decode with the cache enabled — but **that number is for
+Qwen3.6-35B-A3B (35B total, ~3B active/token), not Qwen3.8-Flash-Next** (180B
+total, ~6B active/token, 512 experts/layer). Roughly double the active
+compute per token means that comparison overstates what our actual target
+model should do, even on identical hardware. **The wiki does have a
+same-model run, and it's the number this plan should actually target**
+(`../coding-agent/docs/06-moe-cache-research/03-llamacpp-moe-expert-cache-findings.md`,
+"The run that matches the video's model" — not yet copied into this
+project's `docs/research/`):
+
+> `unsloth/Qwen3.8-Flash-Next-GGUF` UD-Q3_K_XL (our quant tier, per §0.3),
+> RTX 5070 Ti 16 GB, `--moe-expert-cache-size 80`, `-c 12288`: **decode
+> 47.00 tok/s**, prefill 95.31 tok/s. Explicitly caveated by the wiki itself
+> as "one measured run, not an average," no speculative decoding, and — this
+> matters — **memory-pressured**: the 83.81 GiB model doesn't fit the box's
+> 64 GB RAM either, so the run used lazy mmap with free RAM down to ~2.29
+> GiB by the end.
+
+**Honest math on whether our B70 should beat 47 tok/s, not just assumed:**
+two effects pull in opposite directions, and "more VRAM → faster" alone
+isn't a complete argument.
+
+- *Against us*: raw memory bandwidth. `docs/research/01` §6.3 (issue #26581)
+  puts the B70 at **608 GB/s**; the RTX 5070 Ti is **896 GB/s** — the B70 has
+  only **~68%** of the bandwidth. Decode on this class of workload is
+  bandwidth-bound (issue #26581 shows B70 decode attention is already
+  memory-latency-bound, identically on both SYCL and Vulkan), so *per cache
+  hit*, the B70 is the slower card, not the faster one. This is the flaw in
+  "more VRAM, slower card, therefore ≥50 by basic math" as originally
+  stated — the bandwidth deficit is real and has to be argued past, not
+  asserted away.
+- *For us*: cache hit rate, and avoiding the 5070 Ti run's specific penalty.
+  32 GB vs. 16 GB roughly doubles the achievable slot pool (`docs/research/02`
+  §5.4 projects ~41% residency at UD-Q3_K_XL on our card vs. the 5070 Ti
+  run's much tighter ~14.4 GB total footprint on a 16 GB card at cache-size
+  80). A materially higher hit rate directly reduces how often the (slower)
+  B70 has to pay a PCIe miss at all. Separately — and this may matter more
+  than the slot-pool math — **the 5070 Ti run was RAM-constrained, not just
+  VRAM-constrained**: 64 GB RAM was nearly exhausted, forcing lazy mmap for
+  a model that doesn't fit, which is its own performance tax independent of
+  the GPU. If our box has meaningfully more system RAM (open Phase 0.4
+  question — check this now, it's doing double duty as both a hard
+  requirement and a plausible source of headroom over the reference run),
+  we could avoid that specific penalty entirely, which the 5070 Ti run did
+  not get to do.
+
+**Working target for this plan: high-40s to mid-50s tok/s decode is a
+defensible goal to design and measure against, not a guaranteed floor.**
+Treat 47 tok/s (same model, worse VRAM, better bandwidth, RAM-pressured) as
+the reference point every Phase 1/3/4 benchmark should be reported against,
+replacing the no-cache B65 baseline as the headline comparison (that number
+stays useful as the "did the cache do anything at all" floor, just not as
+the ambition). If Phase 3's actual measurement lands meaningfully under 47,
+that's a real signal worth investigating (host RAM shortfall reproducing
+the 5070 Ti's mmap penalty, a SYCL/Vulkan-vs-CUDA implementation gap, or a
+lower achieved hit rate than projected) rather than something to wave off as
+"expected for a slower card."
 
 ## Ground rules carried from `docs/00-background.md`
 
@@ -475,7 +536,14 @@ be silently wrong.
 - **Final benchmark comparison:** Phase 1 baseline vs. Phase 3a (legacy
   cache) vs. Phase 3b (fast path) vs. Phase 3c (+graph, if pursued), at the
   Phase 0.3 quant and at least one higher-residency quant (e.g. UD-IQ1_S) as
-  a sensitivity check on the doc 02 §5.4 residency-vs-quant table.
+  a sensitivity check on the doc 02 §5.4 residency-vs-quant table. Report
+  every number against the **47 tok/s same-model reference point** from the
+  intro's "Performance target" section (RTX 5070 Ti, UD-Q3_K_XL, cache-80,
+  RAM-pressured), not just against the Phase 1 no-cache floor — that's the
+  comparison that actually answers "did this project succeed," and a result
+  meaningfully below it should be root-caused (host RAM headroom, hit rate,
+  backend overhead) rather than attributed to "slower card" without
+  checking.
 
 **Only after this phase clears** does it make sense to write up results and
 decide whether to invest in upstreaming any of it (the SYCL `top_k` port
