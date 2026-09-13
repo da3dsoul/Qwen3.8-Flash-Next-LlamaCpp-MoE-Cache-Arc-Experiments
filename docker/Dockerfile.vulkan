@@ -1,0 +1,95 @@
+# Vulkan build of llama.cpp, pinned to the same commit as Dockerfile.sycl
+# (see that file's header comment for why pinning matters here -- Phase 0.0
+# needs both the SYCL IQ-quant fix #28476 and the Vulkan ggml_vk_fill
+# workgroup-overflow fix #28592, and this repo's Phase 0.2 explicitly wants
+# a same-commit SYCL-vs-Vulkan comparison, not two builds from different
+# points in history).
+#
+# Follows upstream's own .devops/vulkan.Dockerfile recipe (plain Ubuntu +
+# apt Vulkan SDK packages -- much lighter than the SYCL/oneAPI toolchain).
+
+# 24.04, not upstream's default 26.04: 26.04 ships Python 3.14, which has no
+# wheel for llama.cpp's pinned `numpy~=2.2.6` (requirements/
+# requirements-convert_legacy_llama.txt) -- pip falls back to a source build
+# that fails (no Fortran/meson toolchain in this stage). Upstream's own
+# Dockerfile dodges this by installing Python 3.13 via `uv` instead of using
+# the system interpreter; simpler to just match the SYCL image's Ubuntu
+# 24.04 (Python 3.12), which the system pip/venv already handles fine.
+ARG UBUNTU_VERSION=24.04
+ARG LLAMA_COMMIT=6d9c82ea2bb34e277c0664b8dd3434bfb4dcfb27
+ARG LLAMA_REPO=https://github.com/ggml-org/llama.cpp.git
+
+FROM docker.io/node:24 AS web
+WORKDIR /app/tools/ui
+ARG LLAMA_COMMIT
+ARG LLAMA_REPO
+RUN git init -q . && \
+    git remote add origin ${LLAMA_REPO} && \
+    git fetch -q --depth 1 origin ${LLAMA_COMMIT} && \
+    git checkout -q FETCH_HEAD -- tools/ui && \
+    mv tools/ui/* tools/ui/.[!.]* . 2>/dev/null; \
+    rm -rf tools
+RUN npm ci
+RUN npm run build
+
+FROM docker.io/ubuntu:${UBUNTU_VERSION} AS build
+
+RUN apt-get update && apt-get install -y git build-essential cmake wget xz-utils && \
+    apt-get install -y libssl-dev curl \
+        libxcb-xinput0 libxcb-xinerama0 libxcb-cursor-dev libvulkan-dev glslc spirv-headers
+
+WORKDIR /app
+ARG LLAMA_COMMIT
+ARG LLAMA_REPO
+RUN git init -q . && \
+    git remote add origin ${LLAMA_REPO} && \
+    git fetch -q --depth 1 origin ${LLAMA_COMMIT} && \
+    git checkout -q FETCH_HEAD && \
+    echo "Pinned llama.cpp commit: $(git rev-parse HEAD)" > /app/PINNED_COMMIT.txt
+
+COPY --from=web /app/tools/ui/dist tools/ui/dist
+
+RUN cmake -B build -DGGML_NATIVE=OFF -DGGML_VULKAN=ON -DLLAMA_BUILD_TESTS=ON \
+        -DGGML_BACKEND_DL=ON -DGGML_CPU_ALL_VARIANTS=ON -DLLAMA_CURL=ON && \
+    cmake --build build --config Release -j$(nproc)
+
+RUN mkdir -p /app/lib && find build -name "*.so*" -exec cp -P {} /app/lib \;
+
+RUN mkdir -p /app/full \
+    && cp build/bin/* /app/full \
+    && cp *.py /app/full \
+    && cp -r conversion /app/full \
+    && cp -r gguf-py /app/full \
+    && cp -r requirements /app/full \
+    && cp requirements.txt /app/full \
+    && cp .devops/tools.sh /app/full/tools.sh \
+    && cp /app/PINNED_COMMIT.txt /app/full/PINNED_COMMIT.txt
+
+FROM docker.io/ubuntu:${UBUNTU_VERSION} AS base
+
+RUN apt-get update \
+    && apt-get install -y libgomp1 curl ffmpeg libvulkan1 mesa-vulkan-drivers \
+        libglvnd0 libgl1 libglx0 libegl1 libgles2 python3 python3-pip python3-venv \
+    && apt-get autoremove -y && apt-get clean -y \
+    && rm -rf /tmp/* /var/tmp/* \
+    && find /var/cache/apt/archives /var/lib/apt/lists -not -name lock -type f -delete \
+    && find /var/cache -type f -delete
+
+FROM base AS full
+
+COPY --from=build /app/lib/ /app
+COPY --from=build /app/full /app
+WORKDIR /app
+
+RUN python3 -m venv /opt/venv && \
+    . /opt/venv/bin/activate && \
+    pip install --upgrade pip setuptools wheel && \
+    pip install -r requirements.txt
+
+ENV PATH="/opt/venv/bin:/app:${PATH}"
+# the .so files (libggml.so.0, etc.) live in /app but aren't on the default
+# loader path -- same issue as Dockerfile.sycl, simpler fix here since there's
+# no oneAPI runtime tree to add.
+ENV LD_LIBRARY_PATH="/app"
+
+ENTRYPOINT ["/bin/bash"]

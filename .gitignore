@@ -1,0 +1,28 @@
+# Vendored llama.cpp / CUDA-fork checkouts (~1.2G, full upstream trees).
+# This project's actual code changes are captured as a patch instead --
+# see patches/llama.cpp.patch and README.md for the pinned base commit.
+/src/
+
+# GGUF model weights (~209G).
+/staging/models/
+
+# Compiled binaries and shared libraries from staging/work/devbuild.sh --
+# rebuild against patches/llama.cpp.patch instead of committing these.
+/staging/devbin*/
+
+# Raw debug/profiling logs and build output -- large, not needed to follow
+# the writeups. The .md benchmark reports and a curated set of small,
+# representative/cited logs ARE tracked (added explicitly, not via a
+# blanket rule, since most of logs/ and staging/work/ IS worth keeping).
+# Everything under these two directories is ignored by default; specific
+# files were force-added (`git add -f`) where they earn their place --
+# see the commit that introduced this file for exactly which ones.
+/logs/
+/staging/work/
+
+# Ad-hoc compiled test probes.
+staging/work/probe
+
+# Live, ever-growing production request-metrics log (staging/work/
+# prod_metrics_tail.py's output) -- not a static artifact.
+/logs/prod-metrics/

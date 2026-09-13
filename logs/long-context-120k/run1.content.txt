@@ -1,0 +1,308 @@
+Below is a cleaned-up, configuration-driven refactor. It replaces the hundreds of near-identical `*_0`, `*_1`, `*_2`, ... functions with one generic entity processor plus a small configuration table.
+
+```python
+from __future__ import annotations
+
+import logging
+from collections.abc import Callable, Iterable, Mapping, Sequence
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
+
+Record = dict[str, Any]
+RecordMapping = Mapping[str, Any]
+
+LOGGER = logging.getLogger(__name__)
+
+
+def configure_logging() -> None:
+    """Configure basic application logging."""
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(levelname)s: %(message)s",
+    )
+
+
+def read_text(path: str | Path) -> str:
+    """Read UTF-8 text from a file."""
+    with Path(path).open("r", encoding="utf-8") as file:
+        return file.read()
+
+
+def write_text(path: str | Path, content: str) -> None:
+    """Write UTF-8 text to a file."""
+    with Path(path).open("w", encoding="utf-8") as file:
+        file.write(content)
+
+
+@dataclass(frozen=True)
+class EntityConfig:
+    """Configuration for one entity type."""
+
+    name: str
+    multiplier: float
+    offset: float
+    divisor: float
+    tax_rate: float
+    uppercase_name: bool
+    default_id: int
+
+
+# One configuration per entity type replaces the massive duplicated blocks.
+# If exact per-suffix constants are required, add more configs keyed by suffix.
+ENTITY_CONFIGS: dict[str, EntityConfig] = {
+    "user": EntityConfig("user", 3, 2, 6, 0.13, True, 0),
+    "order": EntityConfig("order", 5, 9, 6, 0.8, True, 1),
+    "product": EntityConfig("product", 8, 3, 1, 0.7, True, 2),
+    "invoice": EntityConfig("invoice", 5, 33, 5, 0.5, False, 3),
+    "customer": EntityConfig("customer", 8, 15, 4, 0.23, False, 4),
+    "shipment": EntityConfig("shipment", 2, 49, 7, 0.10, False, 5),
+    "employee": EntityConfig("employee", 7, 18, 2, 0.11, False, 6),
+    "ticket": EntityConfig("ticket", 3, 6, 4, 0.8, False, 7),
+    "payment": EntityConfig("payment", 7, 39, 3, 0.6, False, 8),
+    "account": EntityConfig("account", 3, 25, 1, 0.22, False, 9),
+    "vendor": EntityConfig("vendor", 7, 37, 2, 0.7, True, 10),
+    "warehouse": EntityConfig("warehouse", 5, 50, 3, 0.7, True, 11),
+    "review": EntityConfig("review", 3, 25, 3, 0.19, False, 12),
+    "coupon": EntityConfig("coupon", 4, 24, 3, 0.11, False, 13),
+    "subscription": EntityConfig("subscription", 3, 39, 6, 0.10, True, 14),
+    "session": EntityConfig("session", 4, 30, 4, 0.13, True, 15),
+    "device": EntityConfig("device", 7, 50, 7, 0.6, True, 16),
+    "report": EntityConfig("report", 2, 21, 4, 0.13, True, 17),
+    "category": EntityConfig("category", 5, 37, 6, 0.15, True, 18),
+    "transaction": EntityConfig("transaction", 9, 26, 6, 0.19, True, 19),
+}
+
+
+def validate_record(record: RecordMapping | None) -> bool:
+    """Return True when a record has a non-empty name and a plausible email."""
+    if record is None:
+        return False
+
+    name = record.get("name")
+    if not name:
+        return False
+
+    email = record.get("email", "")
+    return bool(email) and "@" in email
+
+
+def calculate_total(items: Sequence[RecordMapping], tax_rate: float) -> float:
+    """Calculate subtotal plus tax."""
+    subtotal = sum(
+        float(item.get("price", 0)) * float(item.get("qty", 0))
+        for item in items
+    )
+    return subtotal * (1.0 + tax_rate)
+
+
+def format_full_name(first: str, last: str, uppercase: bool) -> str:
+    """Format a full name."""
+    full_name = f"{first} {last}"
+    return full_name.upper() if uppercase else full_name.lower()
+
+
+def find_by_id(
+    records: Iterable[RecordMapping],
+    record_id: Any,
+) -> RecordMapping | None:
+    """Return the first record with a matching id, or None."""
+    return next(
+        (record for record in records if record.get("id") == record_id),
+        None,
+    )
+
+
+def delete_by_id(
+    records: Sequence[RecordMapping],
+    record_id: Any,
+) -> list[RecordMapping]:
+    """Return a new list without records matching the given id."""
+    return [record for record in records if record.get("id") != record_id]
+
+
+@dataclass
+class EntityProcessor:
+    """Stateful processor for one entity type."""
+
+    config: EntityConfig
+    cache: dict[Any, dict[str, Any]] = field(default_factory=dict)
+    processed_count: int = 0
+    errors: list[str] = field(default_factory=list)
+
+    def process(self, records: Iterable[Record | None]) -> list[Any]:
+        """
+        Process records.
+
+        Active records are transformed into ``id_value`` strings.
+        Non-active records with ``legacy_status`` are passed through.
+        """
+        results: list[Any] = []
+
+        for index, record in enumerate(records):
+            if record is None:
+                continue
+
+            try:
+                status = record.get("status")
+
+                if isinstance(status, str) and status.lower() == "active":
+                    value = record["value"]
+                    z = (
+                        (value * self.config.multiplier + self.config.offset)
+                        / self.config.divisor
+                        if self.config.divisor != 0
+                        else 0
+                    )
+                    results.append(f"{record['id']}_{z}")
+                    self.processed_count += 1
+                elif "legacy_status" in record:
+                    results.append(record["legacy_status"])
+
+            except Exception as exc:
+                message = f"Error processing {self.config.name} record {index}: {exc}"
+                self.errors.append(message)
+                LOGGER.exception(message)
+
+        return results
+
+    def update(
+        self,
+        record: dict[str, Any],
+        updates: Mapping[str, Any],
+    ) -> dict[str, Any]:
+        """Update a record in place and cache it."""
+        record.update(updates)
+        self.cache[record.get("id", self.config.default_id)] = record
+        return record
+
+
+@dataclass
+class EntityHandler:
+    """Small object wrapper replacing the duplicated handler classes."""
+
+    name: str
+    values: list[int] = field(default_factory=list)
+    data: dict[str, Any] = field(default_factory=dict)
+    active: bool = True
+
+    def even_values(self) -> list[int]:
+        """Return even values."""
+        return [value for value in self.values if value % 2 == 0]
+
+    def is_active(self) -> bool:
+        """Return whether the handler is active."""
+        return self.active
+
+    def __str__(self) -> str:
+        """Return a simple key=value representation."""
+        return ",".join(f"{key}={value}" for key, value in self.data.items())
+
+
+class DataManager:
+    """Simple collection manager."""
+
+    def __init__(self) -> None:
+        self._items: list[Any] = []
+
+    def add_item(self, item: Any) -> None:
+        """Add an item."""
+        self._items.append(item)
+
+    def items(self) -> list[Any]:
+        """Return a copy of the stored items."""
+        return list(self._items)
+
+    @staticmethod
+    def double_values(values: Sequence[float]) -> list[float]:
+        """Return a new list with each value doubled."""
+        return [value * 2 for value in values]
+
+
+@dataclass
+class EntityAPI:
+    """Bundle of functions for one entity type."""
+
+    process: Callable[[Iterable[Record | None] | None], list[Any]]
+    validate: Callable[[RecordMapping | None], bool]
+    calculate_total: Callable[[Sequence[RecordMapping]], float]
+    format_name: Callable[[str, str], str]
+    get_by_id: Callable[[Any, Iterable[RecordMapping]], RecordMapping | None]
+    update: Callable[[dict[str, Any], Mapping[str, Any]], dict[str, Any]]
+    delete_by_id: Callable[[Sequence[RecordMapping], Any], list[RecordMapping]]
+    handler: Callable[[str, list[int] | None], EntityHandler]
+
+
+def create_entity_api(
+    entity_type: str,
+    cache: dict[Any, dict[str, Any]] | None = None,
+) -> EntityAPI:
+    """
+    Create a small API for an entity type.
+
+    This can be used to generate thin compatibility wrappers if old names such
+    as ``process_user_0`` must remain available.
+    """
+    config = ENTITY_CONFIGS[entity_type]
+    processor = EntityProcessor(config, cache=cache or {})
+
+    return EntityAPI(
+        process=lambda records: processor.process(records or []),
+        validate=validate_record,
+        calculate_total=lambda items: calculate_total(items, config.tax_rate),
+        format_name=lambda first, last: format_full_name(
+            first,
+            last,
+            config.uppercase_name,
+        ),
+        get_by_id=find_by_id,
+        update=lambda record, updates: processor.update(record, updates),
+        delete_by_id=delete_by_id,
+        handler=lambda name, values=None: EntityHandler(name, values or []),
+    )
+
+
+def main() -> None:
+    """Demonstrate the refactored module."""
+    configure_logging()
+    LOGGER.info("starting")
+
+    manager = DataManager()
+    for i in range(10):
+        manager.add_item(i)
+    LOGGER.info("items: %s", manager.items())
+
+    api = create_entity_api("user")
+    sample_records: list[Record | None] = [
+        {"id": 1, "status": "active", "value": 10},
+        {"id": 2, "status": "inactive", "legacy_status": "legacy-2"},
+        None,
+    ]
+
+    LOGGER.info("processed: %s", api.process(sample_records))
+    LOGGER.info("done")
+
+
+if __name__ == "__main__":
+    main()
+```
+
+Key changes:
+
+- Removed global mutable state: `counter`, `GLOBAL_CACHE`, `errors_list`, etc. are now encapsulated in `EntityProcessor` or passed explicitly.
+- Replaced the huge duplicated function/class blocks with:
+  - `EntityConfig`
+  - `EntityProcessor`
+  - generic helpers: `validate_record`, `calculate_total`, `format_full_name`, `find_by_id`, `delete_by_id`
+- Replaced manual file handling with `Path.open(...)` context managers.
+- Replaced `print` logging with the standard `logging` module.
+- Removed mutable default arguments like `def f(x=[])`.
+- Replaced manual index loops with iteration, `enumerate`, and comprehensions.
+- Replaced `== None` and `== True` with `is None` and truthiness checks.
+- Replaced string concatenation with f-strings.
+- Renamed functions/classes to consistent PEP 8 style:
+  - `snake_case` for functions/methods
+  - `PascalCase` for classes
+- Added type hints and docstrings.
+- Replaced bare `except:` with `except Exception` plus logging.
+- Removed unused imports and unused globals.

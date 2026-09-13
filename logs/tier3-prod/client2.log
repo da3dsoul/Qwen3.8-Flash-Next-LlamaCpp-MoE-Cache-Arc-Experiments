@@ -1,0 +1,7 @@
+--- t1-short: sending 53 chars, history 1 messages
+{"turn": "t1-short", "wall_s": 2.43, "prompt_tokens": 64, "completion_tokens": 42, "prompt_n": 22, "prompt_ms": 468.36400000000003, "prompt_per_second": 46.97201322048663, "predicted_per_second": 21.842680491130007, "finish_reason": "stop"}
+    reply: 'The capital of France is Paris.'
+--- t2-short: sending 56 chars, history 3 messages
+{"turn": "t2-short", "wall_s": 2.55, "prompt_tokens": 98, "completion_tokens": 42, "prompt_n": 38, "prompt_ms": 788.445, "prompt_per_second": 48.19613289449486, "predicted_per_second": 23.287766936028504, "finish_reason": "stop"}
+    reply: 'The capital of Japan is Tokyo.'
+--- t3-cross: sending 1076114 chars, history 5 messages

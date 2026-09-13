@@ -1,0 +1,45 @@
+0.02.448.774 I llama_completion: llama backend init
+0.02.448.782 I llama_completion: load the model and apply lora adapter, if any
+0.03.239.476 W llama_model_loader: tensor overrides to CPU are used with mmap enabled - consider using --load-mode none for better performance
+2.06.283.322 I cmn          init: llama threadpool init, n_threads = 16
+3.05.749.648 I llama_completion: chat template is available, enabling conversation mode (disable it with -no-cnv)
+3.05.749.650 W *** User-specified prompt will pre-start conversation, did you mean to set --system-prompt (-sys) instead?
+3.05.751.200 I llama_completion: chat template example:
+<|im_start|>system
+You are a helpful assistant<|im_end|>
+<|im_start|>user
+Hello<|im_end|>
+<|im_start|>assistant
+Hi there<|im_end|>
+<|im_start|>user
+How are you?<|im_end|>
+<|im_start|>assistant
+
+3.05.751.201 I 
+3.05.751.262 I system_info: n_threads = 16 (n_threads_batch = 16) / 32 | CPU : SSE3 = 1 | SSSE3 = 1 | AVX = 1 | AVX2 = 1 | F16C = 1 | FMA = 1 | BMI2 = 1 | AVX512 = 1 | AVX512_VBMI = 1 | AVX512_VNNI = 1 | AVX512_BF16 = 1 | LLAMAFILE = 1 | OPENMP = 1 | REPACK = 1 | 
+3.05.751.263 I 
+3.05.753.132 I llama_completion: interactive mode on.
+3.05.753.135 I sampler seed: 42
+3.05.753.143 I sampler params: 
+	repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
+	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 64
+	top_k = 20, top_p = 0.950, min_p = 0.050, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.000
+	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+3.05.753.150 I sampler chain: logits -> ?penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> min-p -> ?xtc -> temp-ext -> dist 
+3.05.753.151 I generate: n_ctx = 2048, n_batch = 2048, n_predict = 64, n_keep = 0
+3.05.753.151 I 
+3.05.753.151 I == Running in interactive mode. ==
+3.05.753.151 I  - Press Ctrl+C to interject at any time.
+3.05.753.152 I  - Press Return to return control to the AI.
+ - To return control without starting a new line, end your input with '/'.
+ - If you want to submit another line, end your input with '\'.
+3.05.753.152 I  - Not using system message. To change it, set a different value via -sys PROMPT
+3.05.753.152 I 
+5.12.256.184 I common_perf_print:    sampling time =      17.23 ms
+5.12.256.237 I common_perf_print:    samplers time =       7.24 ms /  1437 tokens
+5.12.256.240 I common_perf_print:        load time =  182728.79 ms
+5.12.256.241 I common_perf_print: prompt eval time =  112774.71 ms /  1373 tokens (   82.14 ms per token,    12.17 tokens per second)
+5.12.256.242 I common_perf_print:        eval time =   13599.59 ms /    63 runs   (  215.87 ms per token,     4.63 tokens per second)
+5.12.256.242 I common_perf_print:       total time =  126506.60 ms /  1436 tokens
+5.12.256.243 I common_perf_print: unaccounted time =     115.06 ms /   0.1 %      (total - sampling - prompt eval - eval) / (total)
+5.12.256.244 I common_perf_print:    graphs reused =         63

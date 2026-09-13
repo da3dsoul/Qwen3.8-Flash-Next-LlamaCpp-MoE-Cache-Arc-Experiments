@@ -1,0 +1,84 @@
+@@@ PROBE ub=2048 ctx=163840 ncmoe=24 extra='-fit off'
+0.02.996.257 I load_tensors:   CPU_Mapped model buffer size = 19240.51 MiB
+0.02.996.257 I load_tensors:   CPU_Mapped model buffer size =  6130.57 MiB
+0.02.996.258 I load_tensors:        SYCL0 model buffer size = 26916.16 MiB
+0.02.996.258 I load_tensors:   CPU_Mapped model buffer size = 27465.95 MiB
+0.10.377.343 I llama_context: n_ctx                 = 163840
+0.10.378.412 I llama_context:  SYCL_Host  output buffer size =     0.95 MiB
+0.10.379.168 I llama_kv_cache:      SYCL0 KV buffer size =  1080.00 MiB
+0.10.393.264 I llama_memory_recurrent:      SYCL0 RS buffer size =   112.57 MiB
+0.10.397.810 I llama_kv_cache:      SYCL0 KV buffer size =   405.01 MiB
+0.10.484.847 I sched_reserve:      SYCL0 compute buffer size =  4972.28 MiB
+0.10.484.851 I sched_reserve:  SYCL_Host compute buffer size =  1022.36 MiB
+0.10.484.851 I sched_reserve: graph splits = 74 (with bs=2048), 50 (with bs=1)
+0.10.487.752 I generate: n_ctx = 163840, n_batch = 2048, n_predict = 1, n_keep = 0
+hellolevel_zero backend failed with error: 40 (UR_RESULT_ERROR_OUT_OF_RESOURCES)Exception caught at file:/app/ggml/src/ggml-sycl/ggml-sycl.cpp, line:5997
+/work/ub_ctx_matrix.sh: line 17:     7 Killed                  timeout -s KILL 240 stdbuf -oL -eL /devbin/llama-completion -m "$M" -p "hello" -no-cnv -ngl 99 -fa 1 -ctk q4_0 -ctv q4_0 -ncmoe "$3" -c "$2" -b 2048 -ub "$1" ${4:-} -n 1 --temp 0 --seed 42 --no-warmup -lv 4 2>&1
+         8 Done                    | grep -E 'buffer size|graph splits|n_ctx |generate:|SYCL error|Exception|abort|error'
+@@@ PROBE_END ub=2048 ctx=163840 ncmoe=24 rc=137
+@@@ SEP
+@@@ PROBE ub=2048 ctx=163840 ncmoe=26 extra='-fit off'
+0.00.884.362 I load_tensors:   CPU_Mapped model buffer size = 19240.51 MiB
+0.00.884.362 I load_tensors:   CPU_Mapped model buffer size =  8183.53 MiB
+0.00.884.363 I load_tensors:        SYCL0 model buffer size = 24991.16 MiB
+0.00.884.363 I load_tensors:   CPU_Mapped model buffer size = 27465.95 MiB
+0.07.723.160 I llama_context: n_ctx                 = 163840
+0.07.724.216 I llama_context:  SYCL_Host  output buffer size =     0.95 MiB
+0.07.724.939 I llama_kv_cache:      SYCL0 KV buffer size =  1080.00 MiB
+0.07.736.159 I llama_memory_recurrent:      SYCL0 RS buffer size =   112.57 MiB
+0.07.739.767 I llama_kv_cache:      SYCL0 KV buffer size =   405.01 MiB
+0.07.811.934 I sched_reserve:      SYCL0 compute buffer size =  4972.28 MiB
+0.07.811.938 I sched_reserve:  SYCL_Host compute buffer size =  1022.36 MiB
+0.07.811.939 I sched_reserve: graph splits = 80 (with bs=2048), 54 (with bs=1)
+0.07.814.810 I generate: n_ctx = 163840, n_batch = 2048, n_predict = 1, n_keep = 0
+@@@ PROBE_END ub=2048 ctx=163840 ncmoe=26 rc=0
+@@@ SEP
+@@@ PROBE ub=2048 ctx=131072 ncmoe=24 extra='-fit off'
+0.00.800.618 I load_tensors:   CPU_Mapped model buffer size = 19240.51 MiB
+0.00.800.618 I load_tensors:   CPU_Mapped model buffer size =  6130.57 MiB
+0.00.800.619 I load_tensors:        SYCL0 model buffer size = 26916.16 MiB
+0.00.800.620 I load_tensors:   CPU_Mapped model buffer size = 27465.95 MiB
+0.07.410.945 I llama_context: n_ctx                 = 131072
+0.07.411.957 I llama_context:  SYCL_Host  output buffer size =     0.95 MiB
+0.07.412.524 I llama_kv_cache:      SYCL0 KV buffer size =   864.00 MiB
+0.07.424.344 I llama_memory_recurrent:      SYCL0 RS buffer size =   112.57 MiB
+0.07.427.812 I llama_kv_cache:      SYCL0 KV buffer size =   324.01 MiB
+0.07.491.809 I sched_reserve:      SYCL0 compute buffer size =  3884.28 MiB
+0.07.491.813 I sched_reserve:  SYCL_Host compute buffer size =   829.98 MiB
+0.07.491.813 I sched_reserve: graph splits = 74 (with bs=2048), 50 (with bs=1)
+0.07.494.638 I generate: n_ctx = 131072, n_batch = 2048, n_predict = 1, n_keep = 0
+hellolevel_zero backend failed with error: 39 (UR_RESULT_ERROR_OUT_OF_DEVICE_MEMORY)Exception caught at file:/app/ggml/src/ggml-sycl/ggml-sycl.cpp, line:5997
+@@@ PROBE_END ub=2048 ctx=131072 ncmoe=24 rc=1
+@@@ SEP
+@@@ PROBE ub=2048 ctx=122880 ncmoe=24 extra='-fit off'
+0.00.812.480 I load_tensors:   CPU_Mapped model buffer size = 19240.51 MiB
+0.00.812.481 I load_tensors:   CPU_Mapped model buffer size =  6130.57 MiB
+0.00.812.481 I load_tensors:        SYCL0 model buffer size = 26916.16 MiB
+0.00.812.482 I load_tensors:   CPU_Mapped model buffer size = 27465.95 MiB
+0.07.441.972 I llama_context: n_ctx                 = 122880
+0.07.442.939 I llama_context:  SYCL_Host  output buffer size =     0.95 MiB
+0.07.443.409 I llama_kv_cache:      SYCL0 KV buffer size =   810.00 MiB
+0.07.454.849 I llama_memory_recurrent:      SYCL0 RS buffer size =   112.57 MiB
+0.07.458.093 I llama_kv_cache:      SYCL0 KV buffer size =   303.76 MiB
+0.07.519.893 I sched_reserve:      SYCL0 compute buffer size =  3692.28 MiB
+0.07.519.898 I sched_reserve:  SYCL_Host compute buffer size =   781.89 MiB
+0.07.519.898 I sched_reserve: graph splits = 74 (with bs=2048), 50 (with bs=1)
+0.07.522.692 I generate: n_ctx = 122880, n_batch = 2048, n_predict = 1, n_keep = 0
+@@@ PROBE_END ub=2048 ctx=122880 ncmoe=24 rc=0
+@@@ SEP
+@@@ PROBE ub=1024 ctx=163840 ncmoe=24 extra='-fit off'
+0.00.800.270 I load_tensors:   CPU_Mapped model buffer size = 19240.51 MiB
+0.00.800.270 I load_tensors:   CPU_Mapped model buffer size =  6130.57 MiB
+0.00.800.271 I load_tensors:        SYCL0 model buffer size = 26916.16 MiB
+0.00.800.271 I load_tensors:   CPU_Mapped model buffer size = 27465.95 MiB
+0.07.434.588 I llama_context: n_ctx                 = 163840
+0.07.435.560 I llama_context:  SYCL_Host  output buffer size =     0.95 MiB
+0.07.436.345 I llama_kv_cache:      SYCL0 KV buffer size =  1080.00 MiB
+0.07.450.469 I llama_memory_recurrent:      SYCL0 RS buffer size =   112.57 MiB
+0.07.455.069 I llama_kv_cache:      SYCL0 KV buffer size =   405.01 MiB
+0.07.494.275 I sched_reserve:      SYCL0 compute buffer size =  2391.14 MiB
+0.07.494.279 I sched_reserve:  SYCL_Host compute buffer size =   512.25 MiB
+0.07.494.279 I sched_reserve: graph splits = 74 (with bs=1024), 50 (with bs=1)
+0.07.497.069 I generate: n_ctx = 163840, n_batch = 2048, n_predict = 1, n_keep = 0
+@@@ PROBE_END ub=1024 ctx=163840 ncmoe=24 rc=0
+@@@ SEP

@@ -1,0 +1,5 @@
+### arm=warm 05:14:12 : 2.23.587.125 I Final estimate: PPL = 2.5424 +/- 0.05785
+### arm=pool 05:16:37 : 1.14.422.372 I Final estimate: PPL = 2.6985 +/- 0.06310
+### arm=plain 05:17:52 : 1.08.060.962 I Final estimate: PPL = 3.5860 +/- 0.10290
+### arm=pool 05:19:01 : 1.07.374.825 I Final estimate: PPL = 2.9168 +/- 0.07220
+### arm=plain 05:20:09 : 1.07.984.498 I Final estimate: PPL = 2.5986 +/- 0.06072

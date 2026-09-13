@@ -1,0 +1,38 @@
+[
+  {
+    "turn": "t1-short",
+    "wall_s": 3.2,
+    "prompt_tokens": 64,
+    "completion_tokens": 43,
+    "prompt_n": 64,
+    "prompt_ms": 1269.443,
+    "prompt_per_second": 50.415812289326894,
+    "predicted_per_second": 22.139416120341433,
+    "finish_reason": "stop",
+    "reply": "The capital of France is Paris."
+  },
+  {
+    "turn": "t3-cross",
+    "wall_s": 71.55,
+    "prompt_tokens": 32019,
+    "completion_tokens": 128,
+    "prompt_n": 31959,
+    "prompt_ms": 66454.482,
+    "prompt_per_second": 480.9156438838843,
+    "predicted_per_second": 25.558621919355907,
+    "finish_reason": "length",
+    "reply": ""
+  },
+  {
+    "turn": "t4-deep",
+    "wall_s": 3.18,
+    "prompt_tokens": 32047,
+    "completion_tokens": 64,
+    "prompt_n": 32,
+    "prompt_ms": 734.876,
+    "prompt_per_second": 43.54476129306169,
+    "predicted_per_second": 26.119392156139238,
+    "finish_reason": "length",
+    "reply": ""
+  }
+]

@@ -1,0 +1,51 @@
+### warm-up (discarded) 07:07:34
+| model                          |       size |     params | backend    | ngl |  n_cpu_moe | n_ubatch | type_k | type_v |  fa |         lm | lazy_mode  |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | ---------: | -------: | -----: | -----: | --: | ---------: | ---------- | --------------: | -------------------: |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |    tg32 @ d2048 |         26.42 ± 0.00 |
+
+build: 6d9c82ea2 (10882)
+### A arm=dense ncmoe=24 07:11:38
+| model                          |       size |     params | backend    | ngl |  n_cpu_moe | n_ubatch | type_k | type_v |  fa |         lm | lazy_mode  |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | ---------: | -------: | -----: | -----: | --: | ---------: | ---------- | --------------: | -------------------: |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |    tg32 @ d8192 |         25.07 ± 0.06 |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |   tg32 @ d32768 |         21.18 ± 0.27 |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |   tg32 @ d65536 |         17.39 ± 0.16 |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |  tg32 @ d118016 |         13.56 ± 0.09 |
+
+build: 6d9c82ea2 (10882)
+### rc=0 07:21:56
+### A arm=sparse ncmoe=24 07:21:56
+| model                          |       size |     params | backend    | ngl |  n_cpu_moe | n_ubatch | type_k | type_v |  fa |         lm | lazy_mode  |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | ---------: | -------: | -----: | -----: | --: | ---------: | ---------- | --------------: | -------------------: |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |    tg32 @ d8192 |         25.36 ± 1.69 |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |   tg32 @ d32768 |         25.43 ± 0.10 |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |   tg32 @ d65536 |         25.49 ± 0.15 |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |  tg32 @ d118016 |         24.56 ± 0.06 |
+
+build: 6d9c82ea2 (10882)
+### rc=0 07:32:08
+### A arm=dense ncmoe=24 07:32:08
+| model                          |       size |     params | backend    | ngl |  n_cpu_moe | n_ubatch | type_k | type_v |  fa |         lm | lazy_mode  |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | ---------: | -------: | -----: | -----: | --: | ---------: | ---------- | --------------: | -------------------: |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |    tg32 @ d8192 |         25.41 ± 0.05 |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |   tg32 @ d32768 |         21.04 ± 0.22 |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |   tg32 @ d65536 |         17.47 ± 0.15 |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |  tg32 @ d118016 |         13.62 ± 0.11 |
+
+build: 6d9c82ea2 (10882)
+### rc=0 07:42:26
+### B arm=dense ncmoe=32 d=307200 07:42:26
+| model                          |       size |     params | backend    | ngl |  n_cpu_moe | n_ubatch | type_k | type_v |  fa |         lm | lazy_mode  |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | ---------: | -------: | -----: | -----: | --: | ---------: | ---------- | --------------: | -------------------: |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         32 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |  tg32 @ d307200 |          7.38 ± 0.00 |
+
+build: 6d9c82ea2 (10882)
+### rc=0 07:59:18
+### B arm=sparse ncmoe=32 d=307200 07:59:18
+| model                          |       size |     params | backend    | ngl |  n_cpu_moe | n_ubatch | type_k | type_v |  fa |         lm | lazy_mode  |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | ---------: | -------: | -----: | -----: | --: | ---------: | ---------- | --------------: | -------------------: |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         32 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |  tg32 @ d307200 |         21.08 ± 0.00 |
+
+build: 6d9c82ea2 (10882)
+### rc=0 08:16:02
+### done 08:16:02

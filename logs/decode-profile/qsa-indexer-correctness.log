@@ -1,0 +1,12 @@
+  QSA_INDEXER(type_k=q4_0,n_kv=2048,idx_dim=128,r=4,n_tps=1,width=259): [1;32mOK[0m
+  QSA_INDEXER(type_k=f16,n_kv=2048,idx_dim=128,r=4,n_tps=1,width=259): [1;32mOK[0m
+  2/2 tests passed
+  Backend SYCL0: [1;32mOK[0m
+Backend 2/2: CPU
+  Skipping
+2/2 backends passed
+[1;32mOK[0m
+--- topk regression ---
+  Skipping
+2/2 backends passed
+[1;32mOK[0m

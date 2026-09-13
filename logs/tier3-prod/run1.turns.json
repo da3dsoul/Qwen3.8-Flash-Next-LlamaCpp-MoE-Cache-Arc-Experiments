@@ -1,0 +1,74 @@
+[
+  {
+    "turn": "t1-short",
+    "wall_s": 40.33,
+    "prompt_tokens": 64,
+    "completion_tokens": 37,
+    "prompt_n": 64,
+    "prompt_ms": 30140.325,
+    "prompt_per_second": 2.1234011245731423,
+    "predicted_per_second": 3.535054335258072,
+    "finish_reason": "stop",
+    "reply": "The capital of France is Paris."
+  },
+  {
+    "turn": "t2-short",
+    "wall_s": 7.52,
+    "prompt_tokens": 98,
+    "completion_tokens": 42,
+    "prompt_n": 38,
+    "prompt_ms": 3245.851,
+    "prompt_per_second": 11.707253352048507,
+    "predicted_per_second": 9.596167524743484,
+    "finish_reason": "stop",
+    "reply": "The capital of Japan is Tokyo."
+  },
+  {
+    "turn": "t3-cross",
+    "wall_s": 694.13,
+    "prompt_tokens": 149549,
+    "completion_tokens": 127,
+    "prompt_n": 149549,
+    "prompt_ms": 533385.425,
+    "prompt_per_second": 280.3769900536746,
+    "predicted_per_second": 14.41883511833172,
+    "finish_reason": "stop",
+    "reply": "This module is mostly made of highly repetitive, near-identical functions and classes for many entity types like users, orders, products, invoices, and shipments. Each entity has duplicated processing, validation, total calculation, lookup, update, delete, and handler-class logic."
+  },
+  {
+    "turn": "t4-deep",
+    "wall_s": 5.93,
+    "prompt_tokens": 149631,
+    "completion_tokens": 64,
+    "prompt_n": 86,
+    "prompt_ms": 2177.262,
+    "prompt_per_second": 39.49915076825848,
+    "predicted_per_second": 17.541807975675358,
+    "finish_reason": "length",
+    "reply": ""
+  },
+  {
+    "turn": "t5-new-chat",
+    "wall_s": 3.16,
+    "prompt_tokens": 61,
+    "completion_tokens": 41,
+    "prompt_n": 19,
+    "prompt_ms": 600.291,
+    "prompt_per_second": 31.651315778514086,
+    "predicted_per_second": 20.07502035105188,
+    "finish_reason": "stop",
+    "reply": "Red."
+  },
+  {
+    "turn": "t6-new-chat",
+    "wall_s": 2.63,
+    "prompt_tokens": 64,
+    "completion_tokens": 48,
+    "prompt_n": 22,
+    "prompt_ms": 502.396,
+    "prompt_per_second": 43.790157564948764,
+    "predicted_per_second": 23.124834251520458,
+    "finish_reason": "length",
+    "reply": "2 + 2"
+  }
+]

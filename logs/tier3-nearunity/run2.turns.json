@@ -1,0 +1,74 @@
+[
+  {
+    "turn": "t1-short",
+    "wall_s": 3.71,
+    "prompt_tokens": 22,
+    "completion_tokens": 48,
+    "prompt_n": 22,
+    "prompt_ms": 432.076,
+    "prompt_per_second": 50.91696831113045,
+    "predicted_per_second": 14.500569533007615,
+    "finish_reason": "length",
+    "reply": ""
+  },
+  {
+    "turn": "t2-short",
+    "wall_s": 4.0,
+    "prompt_tokens": 49,
+    "completion_tokens": 48,
+    "prompt_n": 31,
+    "prompt_ms": 613.3290000000001,
+    "prompt_per_second": 50.543835364054196,
+    "predicted_per_second": 13.989315139683312,
+    "finish_reason": "length",
+    "reply": ""
+  },
+  {
+    "turn": "t3-cross",
+    "wall_s": 278.3,
+    "prompt_tokens": 17959,
+    "completion_tokens": 128,
+    "prompt_n": 17959,
+    "prompt_ms": 258774.362,
+    "prompt_per_second": 69.40022906906056,
+    "predicted_per_second": 9.711742483130436,
+    "finish_reason": "length",
+    "reply": ""
+  },
+  {
+    "turn": "t4-deep",
+    "wall_s": 7.61,
+    "prompt_tokens": 17987,
+    "completion_tokens": 50,
+    "prompt_n": 32,
+    "prompt_ms": 2651.509,
+    "prompt_per_second": 12.0685994277221,
+    "predicted_per_second": 9.907412200108698,
+    "finish_reason": "stop",
+    "reply": "There are approximately 24 distinct entity types (e.g., user, order, product, invoice, etc.), each with 6-7 nearly identical functions, totaling roughly 150-170 similar function definitions."
+  },
+  {
+    "turn": "t5-new-chat",
+    "wall_s": 3.86,
+    "prompt_tokens": 19,
+    "completion_tokens": 48,
+    "prompt_n": 19,
+    "prompt_ms": 393.64,
+    "prompt_per_second": 48.26745249466518,
+    "predicted_per_second": 14.325931398905864,
+    "finish_reason": "length",
+    "reply": ""
+  },
+  {
+    "turn": "t6-new-chat",
+    "wall_s": 3.71,
+    "prompt_tokens": 22,
+    "completion_tokens": 48,
+    "prompt_n": 22,
+    "prompt_ms": 432.721,
+    "prompt_per_second": 50.84107311639602,
+    "predicted_per_second": 14.45340453018901,
+    "finish_reason": "length",
+    "reply": ""
+  }
+]

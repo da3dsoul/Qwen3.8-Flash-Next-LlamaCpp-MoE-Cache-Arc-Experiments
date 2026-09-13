@@ -1,0 +1,106 @@
+=== A. isolated indexer chain, decode shape, all depths ===
+load_backend: loaded SYCL backend from /devbin/libggml-sycl.so
+load_backend: loaded CPU backend from /devbin/libggml-cpu-zen4.so
+Build with Macros:
+  GGML_SYCL_DNNL: yes
+  GGML_SYCL_F16: yes
+  GGML_SYCL_FORCE_MMQ: no
+  GGML_SYCL_GRAPH: yes
+  GGML_SYCL_SUPPORT_LEVEL_ZERO_API: yes
+  GGML_SYCL_SUPPORT_VMM: yes
+Running with Environment Variables:
+  GGML_SYCL_DEBUG: 0
+  GGML_SYCL_DEV2DEV_MEMCPY: 0 (SYCL API)
+  GGML_SYCL_GET_MEM_API: 0 (Level Zero API)
+  GGML_SYCL_ENABLE_DNN: 1
+  GGML_SYCL_FA_ONEDNN: 1
+  GGML_SYCL_FA_ONEDNN_MAX_KV: 0
+  GGML_SYCL_FA_ONEDNN_MIN_Q: 32
+  GGML_SYCL_ENABLE_MKL_FA: 1
+  GGML_SYCL_MEMTRACE: 0
+  GGML_SYCL_MEMTRACE_STEP: 64
+  GGML_SYCL_ENABLE_FLASH_ATTN: 1
+  GGML_SYCL_ENABLE_GRAPH: 0
+  GGML_SYCL_ENABLE_OPT: 1
+  GGML_SYCL_ENABLE_VMM: 1
+  GGML_SYCL_ENABLE_FUSION: 1
+  GGML_SYCL_ENABLE_ESIMD: 1
+  GGML_SYCL_PRIORITIZE_DMMV: 0
+  GGML_SYCL_USE_ASYNC_MEM_OP: 1
+  GGML_SYCL_USE_LEVEL_ZERO_API: 1
+  GGML_SYCL_USM_SYSTEM: 0
+  GGML_SYCL_ENABLE_HOST_PINNED_MEM: 1
+  GGML_SYCL_HOST_PINNED_MEM_2G: 0
+Found 1 SYCL devices:
+|  |                   |                                       |       |Max    |        |Max  |Global |                     |
+|  |                   |                                       |       |compute|Max work|sub  |mem    |                     |
+|ID|        Device Type|                                   Name|Version|units  |group   |group|size   |       Driver version|
+|--|-------------------|---------------------------------------|-------|-------|--------|-----|-------|---------------------|
+| 0| [level_zero:gpu:0]|             Intel Arc Pro B70 Graphics|   20.2|    256|    1024|   32| 34242M|         1.15.38308+1|
+SYCL Optimization Feature:
+|ID|        Device Type|Reorder|
+|--|-------------------|-------|
+| 0| [level_zero:gpu:0]|      Y|
+Testing 2 devices
+
+Backend 1/2: SYCL0
+  Device description: Intel(R) Arc(TM) Pro B70 Graphics
+  Device memory: 32656 MB (32580 MB free)
+
+  QSA_INDEXER(type_k=q4_0,n_kv=4096,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=0):                   9245 runs -   108.18 us/run - 67108864 kB/run - [1;34m591844.48 GB/s[0m
+  QSA_INDEXER(type_k=f16,n_kv=4096,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=0):                    8945 runs -   111.81 us/run - 67108864 kB/run - [1;34m572637.41 GB/s[0m
+  QSA_INDEXER_CACHED(type_k=q4_0,n_kv=4096,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1,block_topk=0):                   18275 runs -    54.72 us/run - 67108864 kB/run - [1;34m1169657.92 GB/s[0m
+  QSA_INDEXER_BLK(type_k=q4_0,n_kv=4096,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=1):              11029 runs -    90.68 us/run - 67108864 kB/run - [1;34m706068.23 GB/s[0m
+  QSA_INDEXER_CACHED_BLK(type_k=q4_0,n_kv=4096,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1,block_topk=1):               23541 runs -    42.48 us/run - 67108864 kB/run - [1;34m1506692.10 GB/s[0m
+  QSA_INDEXER(type_k=q4_0,n_kv=8192,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=0):                   6582 runs -   151.93 us/run - 67108864 kB/run - [1;34m421528.73 GB/s[0m
+  QSA_INDEXER(type_k=f16,n_kv=8192,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=0):                    5959 runs -   167.83 us/run - 67108864 kB/run - [1;34m381621.35 GB/s[0m
+  QSA_INDEXER_CACHED(type_k=q4_0,n_kv=8192,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1,block_topk=0):                   15629 runs -    63.99 us/run - 67108864 kB/run - [1;34m1000278.39 GB/s[0m
+  QSA_INDEXER_BLK(type_k=q4_0,n_kv=8192,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=1):               7660 runs -   130.56 us/run - 67108864 kB/run - [1;34m490519.28 GB/s[0m
+  QSA_INDEXER_CACHED_BLK(type_k=q4_0,n_kv=8192,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1,block_topk=1):               21918 runs -    45.63 us/run - 67108864 kB/run - [1;34m1402797.83 GB/s[0m
+  QSA_INDEXER(type_k=q4_0,n_kv=16384,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=0):                  4114 runs -   243.10 us/run - 67108864 kB/run - [1;34m263622.27 GB/s[0m
+  QSA_INDEXER(type_k=f16,n_kv=16384,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=0):                   3730 runs -   268.14 us/run - 67108864 kB/run - [1;34m239013.86 GB/s[0m
+  QSA_INDEXER_CACHED(type_k=q4_0,n_kv=16384,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1,block_topk=0):                  13039 runs -    76.69 us/run - 67108864 kB/run - [1;34m834549.50 GB/s[0m
+  QSA_INDEXER_BLK(type_k=q4_0,n_kv=16384,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=1):              4781 runs -   209.20 us/run - 67108864 kB/run - [1;34m306343.42 GB/s[0m
+  QSA_INDEXER_CACHED_BLK(type_k=q4_0,n_kv=16384,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1,block_topk=1):              21406 runs -    46.72 us/run - 67108864 kB/run - [1;34m1370079.39 GB/s[0m
+  QSA_INDEXER(type_k=q4_0,n_kv=32768,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=0):                  2315 runs -   432.12 us/run - 67108864 kB/run - [1;34m148503.77 GB/s[0m
+  QSA_INDEXER(type_k=f16,n_kv=32768,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=0):                   2093 runs -   477.79 us/run - 67108864 kB/run - [1;34m134320.60 GB/s[0m
+  QSA_INDEXER_CACHED(type_k=q4_0,n_kv=32768,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1,block_topk=0):                   8817 runs -   113.42 us/run - 67108864 kB/run - [1;34m564352.07 GB/s[0m
+  QSA_INDEXER_BLK(type_k=q4_0,n_kv=32768,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=1):              2710 runs -   369.10 us/run - 67108864 kB/run - [1;34m173856.33 GB/s[0m
+  QSA_INDEXER_CACHED_BLK(type_k=q4_0,n_kv=32768,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1,block_topk=1):              19079 runs -    52.41 us/run - 67108864 kB/run - [1;34m1221187.31 GB/s[0m
+  QSA_INDEXER(type_k=q4_0,n_kv=65536,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=0):                  1211 runs -   825.88 us/run - 67108864 kB/run - [1;34m77904.76 GB/s[0m
+  QSA_INDEXER(type_k=f16,n_kv=65536,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=0):                   1078 runs -   928.01 us/run - 67108864 kB/run - [1;34m69343.24 GB/s[0m
+  QSA_INDEXER_CACHED(type_k=q4_0,n_kv=65536,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1,block_topk=0):                   6892 runs -   145.10 us/run - 67108864 kB/run - [1;34m441172.00 GB/s[0m
+  QSA_INDEXER_BLK(type_k=q4_0,n_kv=65536,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=1):              1368 runs -   731.05 us/run - 67108864 kB/run - [1;34m88006.31 GB/s[0m
+  QSA_INDEXER_CACHED_BLK(type_k=q4_0,n_kv=65536,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1,block_topk=1):              16547 runs -    60.44 us/run - 67108864 kB/run - [1;34m1059185.23 GB/s[0m
+  QSA_INDEXER(type_k=q4_0,n_kv=118016,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=0):                  651 runs -  1536.17 us/run - 67108864 kB/run - [1;34m42059.18 GB/s[0m
+  QSA_INDEXER(type_k=f16,n_kv=118016,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=0):                   581 runs -  1721.62 us/run - 67108864 kB/run - [1;34m37540.26 GB/s[0m
+  QSA_INDEXER_CACHED(type_k=q4_0,n_kv=118016,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1,block_topk=0):                  4725 runs -   211.67 us/run - 67108864 kB/run - [1;34m302467.85 GB/s[0m
+  QSA_INDEXER_BLK(type_k=q4_0,n_kv=118016,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=1):                      722 runs -  1385.75 us/run - 67108864 kB/run - [1;34m46621.53 GB/s[0m
+  QSA_INDEXER_CACHED_BLK(type_k=q4_0,n_kv=118016,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1,block_topk=1):             12747 runs -    78.45 us/run - 67108864 kB/run - [1;34m816049.30 GB/s[0m
+  QSA_INDEXER(type_k=q4_0,n_kv=200704,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=0):                  377 runs -  2653.70 us/run - 67108864 kB/run - [1;34m24507.51 GB/s[0m
+  QSA_INDEXER(type_k=f16,n_kv=200704,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=0):                   339 runs -  2955.07 us/run - 67108864 kB/run - [1;34m22019.74 GB/s[0m
+  QSA_INDEXER_CACHED(type_k=q4_0,n_kv=200704,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1,block_topk=0):                  2794 runs -   358.01 us/run - 67108864 kB/run - [1;34m178876.40 GB/s[0m
+  QSA_INDEXER_BLK(type_k=q4_0,n_kv=200704,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=1):                      412 runs -  2430.65 us/run - 67108864 kB/run - [1;34m26753.35 GB/s[0m
+  QSA_INDEXER_CACHED_BLK(type_k=q4_0,n_kv=200704,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1,block_topk=1):              8462 runs -   118.19 us/run - 67108864 kB/run - [1;34m541777.62 GB/s[0m
+  QSA_INDEXER(type_k=q4_0,n_kv=307200,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=0):                  247 runs -  4060.84 us/run - 67108864 kB/run - [1;34m16150.30 GB/s[0m
+  QSA_INDEXER(type_k=f16,n_kv=307200,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=0):                   222 runs -  4510.66 us/run - 67108864 kB/run - [1;34m14551.40 GB/s[0m
+  QSA_INDEXER_CACHED(type_k=q4_0,n_kv=307200,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1,block_topk=0):                  1873 runs -   534.11 us/run - 67108864 kB/run - [1;34m119937.10 GB/s[0m
+  QSA_INDEXER_BLK(type_k=q4_0,n_kv=307200,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=1):                      272 runs -  3677.91 us/run - 67108864 kB/run - [1;34m17828.70 GB/s[0m
+  QSA_INDEXER_CACHED_BLK(type_k=q4_0,n_kv=307200,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1,block_topk=1):              6733 runs -   148.53 us/run - 67108864 kB/run - [1;34m431218.15 GB/s[0m
+  QSA_INDEXER(type_k=q4_0,n_kv=614400,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=0):                  125 runs -  8014.61 us/run - 67108864 kB/run - [1;34m8380.33 GB/s[0m
+  QSA_INDEXER(type_k=f16,n_kv=614400,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=0):                   112 runs -  8957.63 us/run - 67108864 kB/run - [1;34m7509.83 GB/s[0m
+  QSA_INDEXER_CACHED(type_k=q4_0,n_kv=614400,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1,block_topk=0):                   998 runs -  1002.94 us/run - 67108864 kB/run - [1;34m63928.59 GB/s[0m
+  QSA_INDEXER_BLK(type_k=q4_0,n_kv=614400,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=1):                      138 runs -  7277.08 us/run - 67108864 kB/run - [1;34m9226.53 GB/s[0m
+  QSA_INDEXER_CACHED_BLK(type_k=q4_0,n_kv=614400,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1,block_topk=1):              4233 runs -   236.26 us/run - 67108864 kB/run - [1;34m271284.82 GB/s[0m
+  QSA_INDEXER(type_k=q4_0,n_kv=8192,idx_dim=128,r=4,n_tps=512,width=2051,pooled_cached=0,block_topk=0):                  924 runs -  1083.40 us/run - 67108864 kB/run - [1;34m59414.23 GB/s[0m
+  QSA_INDEXER_BLK(type_k=q4_0,n_kv=8192,idx_dim=128,r=4,n_tps=512,width=2051,pooled_cached=0,block_topk=1):                     1351 runs -   740.27 us/run - 67108864 kB/run - [1;34m86744.81 GB/s[0m
+  QSA_INDEXER(type_k=q4_0,n_kv=32768,idx_dim=128,r=4,n_tps=512,width=2051,pooled_cached=0,block_topk=0):                 233 runs -  4299.76 us/run - 67108864 kB/run - [1;34m15214.73 GB/s[0m
+  QSA_INDEXER_BLK(type_k=q4_0,n_kv=32768,idx_dim=128,r=4,n_tps=512,width=2051,pooled_cached=0,block_topk=1):                     538 runs -  1861.75 us/run - 67108864 kB/run - [1;34m34804.25 GB/s[0m
+  QSA_INDEXER(type_k=q4_0,n_kv=65536,idx_dim=128,r=4,n_tps=512,width=2051,pooled_cached=0,block_topk=0):                 118 runs -  8489.00 us/run - 67108864 kB/run - [1;34m7871.40 GB/s[0m
+  QSA_INDEXER_BLK(type_k=q4_0,n_kv=65536,idx_dim=128,r=4,n_tps=512,width=2051,pooled_cached=0,block_topk=1):                     297 runs -  3368.07 us/run - 67108864 kB/run - [1;34m19468.81 GB/s[0m
+  Backend SYCL0: [1;32mOK[0m
+Backend 2/2: CPU
+  Skipping
+2/2 backends passed
+[1;32mOK[0m
+@@@ perf exit=0

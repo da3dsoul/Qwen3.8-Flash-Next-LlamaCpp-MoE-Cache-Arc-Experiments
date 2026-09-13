@@ -1,0 +1,39 @@
+########## ARM A :  ##########
+0.00.356.288 I print_info: rope scaling          = linear
+0.00.356.290 I print_info: freq_base_train       = 10000000.0
+0.00.356.290 I print_info: freq_scale_train      = 1
+0.00.356.291 I print_info: n_ctx_orig_yarn       = 262144
+0.00.356.291 I print_info: rope_yarn_log_mul     = 0.0000
+0.07.930.438 I llama_context: n_ctx_seq             = 8192
+0.07.930.444 I llama_context: freq_base             = 10000000.0
+0.07.930.444 I llama_context: freq_scale            = 1
+0.07.930.445 I llama_context: n_ctx_seq (8192) < n_ctx_train (262144) -- the full capacity of the model will not be utilized
+data: {"choices":[{"finish_reason":null,"index":0,"delta":{"reasoning_content":"We"}}],"created":1789173989,"id":"chatcmpl-EQh69VKkR7WpHt9TbmFlfbznYIbva8L5","model":"/models/Qwen3.8-Flash-Next-GGUF/UD-IQ3_XXS/Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf","system_fingerprint":"b10882-6d9c82ea2","object":"chat.completion.chunk","timings":{"cache_n":0,"prompt_n":75,"prompt_ms":9011.993,"prompt_per_token_ms":120.15990666666667,"prompt_per_second":8.32224348154731,"predicted_n":1,"predicted_ms":0.001,"predicted_per_token_ms":0.0,"predicted_per_second":0.0}}
+1.05.914.615 D Parsed message: {"role":"assistant","content":"","reasoning_content":"We need answer user's request: \"Recite the alphabet backwards from Z to A, then count from 100 down to 90.\" Need produce final with alphabet backwards and numbers 100 to 90 inclusive. Ensure no extra? Could be simple. Need maybe line breaks. Let's"}
+
+########## ARM B : --rope-scaling linear --rope-scale 1.1875 --yarn-orig-ctx 262144 ##########
+0.00.676.659 I print_info: rope scaling          = linear
+0.00.676.660 I print_info: freq_base_train       = 10000000.0
+0.00.676.661 I print_info: freq_scale_train      = 1
+0.00.676.661 I print_info: n_ctx_orig_yarn       = 262144
+0.00.676.661 I print_info: rope_yarn_log_mul     = 0.0000
+0.08.771.479 I llama_context: n_ctx_seq             = 8192
+0.08.771.485 I llama_context: freq_base             = 10000000.0
+0.08.771.486 I llama_context: freq_scale            = 0.842105
+0.08.771.487 I llama_context: n_ctx_seq (8192) < n_ctx_train (262144) -- the full capacity of the model will not be utilized
+data: {"choices":[{"finish_reason":null,"index":0,"delta":{"reasoning_content":"We"}}],"created":1789174050,"id":"chatcmpl-L7gco6MYO0iToiZHI3Hoasb9IrhhLgDn","model":"/models/Qwen3.8-Flash-Next-GGUF/UD-IQ3_XXS/Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf","system_fingerprint":"b10882-6d9c82ea2","object":"chat.completion.chunk","timings":{"cache_n":0,"prompt_n":75,"prompt_ms":19454.251,"prompt_per_token_ms":259.39001333333334,"prompt_per_second":3.8551985373273943,"predicted_n":1,"predicted_ms":0.001,"predicted_per_token_ms":0.0,"predicted_per_second":0.0}}
+0.59.233.487 D Parsed message: {"role":"assistant","content":"","reasoning_content":"We need answer user: \"Recite the alphabet backwards from Z to A, then count from 100 down to 90.\" Need produce final likely just sequence. Need ensure backwards alphabet Z to A then numbers 100 down to 90 inclusive. Could format maybe line. Need be careful"}
+
+########## ARM C : --rope-scaling yarn --rope-scale 1.1875 --yarn-orig-ctx 262144 ##########
+0.00.346.563 I print_info: rope scaling          = linear
+0.00.346.564 I print_info: freq_base_train       = 10000000.0
+0.00.346.564 I print_info: freq_scale_train      = 1
+0.00.346.565 I print_info: n_ctx_orig_yarn       = 262144
+0.00.346.565 I print_info: rope_yarn_log_mul     = 0.0000
+0.07.404.001 I llama_context: n_ctx_seq             = 8192
+0.07.404.006 I llama_context: freq_base             = 10000000.0
+0.07.404.006 I llama_context: freq_scale            = 0.842105
+0.07.404.007 I llama_context: n_ctx_seq (8192) < n_ctx_train (262144) -- the full capacity of the model will not be utilized
+data: {"choices":[{"finish_reason":null,"index":0,"delta":{"reasoning_content":"We"}}],"created":1789174081,"id":"chatcmpl-WRPTrwMVw5axMASuknmGkikVQCPT2eIA","model":"/models/Qwen3.8-Flash-Next-GGUF/UD-IQ3_XXS/Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf","system_fingerprint":"b10882-6d9c82ea2","object":"chat.completion.chunk","timings":{"cache_n":0,"prompt_n":75,"prompt_ms":9745.155,"prompt_per_token_ms":129.93540000000002,"prompt_per_second":7.696132077940268,"predicted_n":1,"predicted_ms":0.001,"predicted_per_token_ms":0.0,"predicted_per_second":0.0}}
+0.29.760.814 D Parsed message: {"role":"assistant","content":"","reasoning_content":"We need answer user's request: \"Recite the alphabet backwards from Z to A, then count from 100 down to 90.\" Need produce final with alphabet backwards and numbers 100 to 90 inclusive likely. Ensure no extra? Could be simple. Need maybe line breaks. Let"}
+

@@ -1,0 +1,40 @@
+waiting for server health...
+server up after 78s
+{"status":"ok"}prompt chars: 411558
+  [  1094.0s] 250 chunks (966 reasoning chars, 0 content chars)
+  [  1146.1s] 500 chunks (1982 reasoning chars, 0 content chars)
+  [  1207.6s] 750 chunks (3115 reasoning chars, 0 content chars)
+  [  1269.4s] 1000 chunks (4211 reasoning chars, 0 content chars)
+  [  1330.0s] 1250 chunks (5098 reasoning chars, 0 content chars)
+  [  1382.6s] 1500 chunks (5956 reasoning chars, 0 content chars)
+  [  1444.6s] 1750 chunks (6874 reasoning chars, 0 content chars)
+  [  1504.7s] 2000 chunks (7865 reasoning chars, 0 content chars)
+{
+  "server_timings": {
+    "cache_n": 0,
+    "prompt_n": 116277,
+    "prompt_ms": 1031450.547,
+    "prompt_per_token_ms": 8.870632601460306,
+    "prompt_per_second": 112.7315316649883,
+    "predicted_n": 2000,
+    "predicted_ms": 473204.39400000003,
+    "predicted_per_token_ms": 236.72055727863935,
+    "predicted_per_second": 4.224390190256771
+  },
+  "usage": {
+    "completion_tokens": 2000,
+    "prompt_tokens": 116277,
+    "total_tokens": 118277,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "finish_reason": "length",
+  "client_wall_s": 1504.7364102050196,
+  "client_ttft_s": 1031.5302841879893,
+  "content_chars": 0,
+  "reasoning_chars": 7865,
+  "n_stream_chunks": 2000,
+  "max_tokens_requested": 2000
+}
+done

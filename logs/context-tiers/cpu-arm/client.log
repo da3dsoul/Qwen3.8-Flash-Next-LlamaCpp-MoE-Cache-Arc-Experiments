@@ -1,0 +1,19 @@
+--- t1-short: sending 53 chars, history 1 messages
+{"turn": "t1-short", "wall_s": 3.67, "prompt_tokens": 22, "completion_tokens": 48, "prompt_n": 22, "prompt_ms": 415.758, "prompt_per_second": 52.91539789973975, "predicted_per_second": 14.472350420560344, "finish_reason": "length"}
+    reply: ''
+--- t2-short: sending 56 chars, history 3 messages
+{"turn": "t2-short", "wall_s": 3.91, "prompt_tokens": 49, "completion_tokens": 48, "prompt_n": 31, "prompt_ms": 621.4350000000001, "prompt_per_second": 49.88454142428411, "predicted_per_second": 14.43403828766854, "finish_reason": "length"}
+    reply: ''
+--- t3-cross: sending 5395 chars, history 5 messages
+{"turn": "t3-cross", "wall_s": 32.8, "prompt_tokens": 1539, "completion_tokens": 128, "prompt_n": 1539, "prompt_ms": 18129.047, "prompt_per_second": 84.89139004383408, "predicted_per_second": 13.762220472505792, "finish_reason": "length"}
+    reply: ''
+--- t4-deep: sending 75 chars, history 7 messages
+{"turn": "t4-deep", "wall_s": 2.59, "prompt_tokens": 1567, "completion_tokens": 27, "prompt_n": 32, "prompt_ms": 680.445, "prompt_per_second": 47.028047821646126, "predicted_per_second": 13.657176504823873, "finish_reason": "stop"}
+    reply: 'There were roughly two sets of similar function definitions: one for "user" operations and one for "order" operations.'
+--- t5-new-chat: sending 41 chars, history 1 messages
+{"turn": "t5-new-chat", "wall_s": 3.8, "prompt_tokens": 19, "completion_tokens": 48, "prompt_n": 19, "prompt_ms": 397.723, "prompt_per_second": 47.771941778574536, "predicted_per_second": 14.217491931573328, "finish_reason": "length"}
+    reply: ''
+--- t6-new-chat: sending 34 chars, history 1 messages
+{"turn": "t6-new-chat", "wall_s": 8.9, "prompt_tokens": 22, "completion_tokens": 48, "prompt_n": 22, "prompt_ms": 418.72200000000004, "prompt_per_second": 52.54082661049574, "predicted_per_second": 14.614223370630697, "finish_reason": "length"}
+    reply: ''
+done

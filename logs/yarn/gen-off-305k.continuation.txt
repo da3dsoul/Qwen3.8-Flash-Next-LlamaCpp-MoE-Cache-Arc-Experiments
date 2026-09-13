@@ -1,0 +1,12 @@
+<think>
+The user wants me to refactor a massive legacy Python codebase that has 400+ near-identical function groups (process_X_N, validate_X_N, calculate_X_total_N, format_X_name_N, get_X_by_id_N, update_X_N, delete_X_N, and XHandlerN classes) for entity types like user, order, product, invoice, customer, shipment, employee, ticket, payment, account, vendor, warehouse, review, coupon, subscription, session, device, report, category, transaction.
+
+The key differences between the groups are:
+1. The entity name (user, order, product, etc.)
+2. The multiplier for `x = item['value'] * N` (varies: 2-9)
+3. The addend for `y = x + N` (varies: 1-50)
+4. The divisor for `z = y / N` (varies: 1-7)
+5. The tax rate (varies: 0.10-0.9)
+6. The cache key default (varies: 0-399)
+7. Whether `format_X_name
+

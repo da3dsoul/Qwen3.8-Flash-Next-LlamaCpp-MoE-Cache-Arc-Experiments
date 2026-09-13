@@ -1,0 +1,44 @@
+0.01.753.915 I llama_completion: llama backend init
+0.01.753.926 I llama_completion: load the model and apply lora adapter, if any
+0.33.066.185 I cmn          init: llama threadpool init, n_threads = 16
+0.43.268.829 I llama_completion: chat template is available, enabling conversation mode (disable it with -no-cnv)
+0.43.268.833 W *** User-specified prompt will pre-start conversation, did you mean to set --system-prompt (-sys) instead?
+0.43.269.165 I llama_completion: chat template example:
+<|im_start|>system
+You are a helpful assistant<|im_end|>
+<|im_start|>user
+Hello<|im_end|>
+<|im_start|>assistant
+Hi there<|im_end|>
+<|im_start|>user
+How are you?<|im_end|>
+<|im_start|>assistant
+
+0.43.269.305 I 
+0.43.269.357 I system_info: n_threads = 16 (n_threads_batch = 16) / 32 | CPU : SSE3 = 1 | SSSE3 = 1 | AVX = 1 | AVX2 = 1 | F16C = 1 | FMA = 1 | BMI2 = 1 | AVX512 = 1 | AVX512_VBMI = 1 | AVX512_VNNI = 1 | AVX512_BF16 = 1 | LLAMAFILE = 1 | OPENMP = 1 | REPACK = 1 | 
+0.43.269.358 I 
+0.43.271.582 I llama_completion: interactive mode on.
+0.43.271.587 I sampler seed: 42
+0.43.271.599 I sampler params: 
+	repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
+	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 64
+	top_k = 20, top_p = 0.950, min_p = 0.050, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.000
+	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+0.43.271.608 I sampler chain: logits -> ?penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> min-p -> ?xtc -> temp-ext -> dist 
+0.43.271.610 I generate: n_ctx = 2048, n_batch = 2048, n_predict = 64, n_keep = 0
+0.43.271.610 I 
+0.43.271.610 I == Running in interactive mode. ==
+0.43.271.611 I  - Press Ctrl+C to interject at any time.
+0.43.271.611 I  - Press Return to return control to the AI.
+ - To return control without starting a new line, end your input with '/'.
+ - If you want to submit another line, end your input with '\'.
+0.43.271.611 I  - Not using system message. To change it, set a different value via -sys PROMPT
+0.43.271.611 I 
+5.17.327.181 I common_perf_print:    sampling time =      18.01 ms
+5.17.327.272 I common_perf_print:    samplers time =       7.67 ms /  1437 tokens
+5.17.327.275 I common_perf_print:        load time =   40861.90 ms
+5.17.327.276 I common_perf_print: prompt eval time =  239436.11 ms /  1373 tokens (  174.39 ms per token,     5.73 tokens per second)
+5.17.327.277 I common_perf_print:        eval time =   33618.52 ms /    63 runs   (  533.63 ms per token,     1.87 tokens per second)
+5.17.327.277 I common_perf_print:       total time =  274058.45 ms /  1436 tokens
+5.17.327.278 I common_perf_print: unaccounted time =     985.81 ms /   0.4 %      (total - sampling - prompt eval - eval) / (total)
+5.17.327.278 I common_perf_print:    graphs reused =         63

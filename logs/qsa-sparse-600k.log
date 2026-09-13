@@ -1,0 +1,9 @@
+### sparse ncmoe=38 ub=1024 d=614400 08:28:49
+load_backend: loaded SYCL backend from /devbin/libggml-sycl.so
+load_backend: loaded CPU backend from /devbin/libggml-cpu-zen4.so
+| model                          |       size |     params | backend    | ngl |  n_cpu_moe | n_ubatch | type_k | type_v |  fa |         lm | lazy_mode  |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | ---------: | -------: | -----: | -----: | --: | ---------: | ---------- | --------------: | -------------------: |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         38 |     1024 |   q4_0 |   q4_0 |   1 |       none | off        |  tg32 @ d614400 |         12.42 ± 0.00 |
+
+build: 6d9c82ea2 (10882)
+### rc=0 09:17:42

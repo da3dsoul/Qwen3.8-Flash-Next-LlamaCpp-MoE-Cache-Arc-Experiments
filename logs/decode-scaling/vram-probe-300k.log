@@ -1,0 +1,75 @@
+######## -c 311296 -ub 2048 -ncmoe 32 (yarn x1.1875) ########
+0.00.239.217 I llama_prepare_model_devices: using device SYCL0 (Intel(R) Arc(TM) Pro B70 Graphics) (unknown id) - 32580 MiB free
+0.00.657.459 I load_tensors:   CPU_Mapped model buffer size = 19240.51 MiB
+0.00.657.460 I load_tensors:   CPU_Mapped model buffer size = 14375.27 MiB
+0.00.657.460 I load_tensors:        SYCL0 model buffer size = 19216.16 MiB
+0.00.657.460 I load_tensors:   CPU_Mapped model buffer size = 27465.95 MiB
+0.06.090.117 I llama_context: n_ctx_seq             = 311296
+0.06.090.124 I llama_context: freq_scale            = 0.842105
+0.06.090.127 W llama_context: n_ctx_seq (311296) > n_ctx_train (262144) -- possible training context overflow
+0.06.109.360 I llama_kv_cache: size = 2052.00 MiB (311296 cells,  12 layers,  1/1 seqs), K (q4_0): 1026.00 MiB, V (q4_0): 1026.00 MiB
+0.06.110.519 I llama_memory_recurrent:      SYCL0 RS buffer size =   112.57 MiB
+0.06.117.592 I llama_kv_cache: size =  769.50 MiB (311296 cells,  12 layers,  1/1 seqs), K (q4_0):  256.50 MiB, V (q4_0):  513.00 MiB
+0.06.117.629 I sched_reserve: reserving ...
+0.06.117.634 D sched_reserve: max_nodes = 81920
+0.06.132.284 D sched_reserve: reserving full memory module
+0.06.132.301 D sched_reserve: worst-case: n_tokens = 2048, n_seqs = 1, n_outputs = 1
+0.06.288.987 I sched_reserve:      SYCL0 compute buffer size =  8716.28 MiB
+0.06.288.990 I sched_reserve:  SYCL_Host compute buffer size =  1888.04 MiB
+0.06.288.991 I sched_reserve: graph nodes  = 8166
+0.06.288.991 I sched_reserve: graph splits = 98 (with bs=2048), 66 (with bs=1)
+0.06.288.993 I sched_reserve: reserve took 171.36 ms, sched copies = 1
+1.06.274.515 I common_memory_breakdown_print: | memory breakdown [MiB]                        | total   free     self   model   context   compute    unaccounted |
+1.06.274.532 I common_memory_breakdown_print: |   - SYCL0 (Intel(R) Arc(TM) Pro B70 Graphics) | 32656 = 1472 + (30866 = 19216 +    2934 +    8716) +         317 |
+1.06.274.537 I common_memory_breakdown_print: |   - Host                                      |                 62969 = 61081 +       0 +    1888                |
+
+######## -c 311296 -ub 2048 -ncmoe 33 (yarn x1.1875) ########
+0.01.683.425 I llama_prepare_model_devices: using device SYCL0 (Intel(R) Arc(TM) Pro B70 Graphics) (unknown id) - 32580 MiB free
+0.04.105.362 I load_tensors:   CPU_Mapped model buffer size = 19240.51 MiB
+0.04.105.364 I load_tensors:   CPU_Mapped model buffer size = 15396.61 MiB
+0.04.105.366 I load_tensors:        SYCL0 model buffer size = 18253.66 MiB
+0.04.105.368 I load_tensors:   CPU_Mapped model buffer size = 27465.95 MiB
+0.29.126.988 I llama_context: n_ctx_seq             = 311296
+0.29.126.995 I llama_context: freq_scale            = 0.842105
+0.29.126.995 W llama_context: n_ctx_seq (311296) > n_ctx_train (262144) -- possible training context overflow
+0.29.180.749 I llama_kv_cache: size = 2052.00 MiB (311296 cells,  12 layers,  1/1 seqs), K (q4_0): 1026.00 MiB, V (q4_0): 1026.00 MiB
+0.29.181.971 I llama_memory_recurrent:      SYCL0 RS buffer size =   112.57 MiB
+0.29.189.406 I llama_kv_cache: size =  769.50 MiB (311296 cells,  12 layers,  1/1 seqs), K (q4_0):  256.50 MiB, V (q4_0):  513.00 MiB
+0.29.189.455 I sched_reserve: reserving ...
+0.29.189.460 D sched_reserve: max_nodes = 81920
+/0.29.209.113 D sched_reserve: reserving full memory module
+0.29.209.140 D sched_reserve: worst-case: n_tokens = 2048, n_seqs = 1, n_outputs = 1
+0.29.338.544 I sched_reserve:      SYCL0 compute buffer size =  8716.28 MiB
+0.29.338.547 I sched_reserve:  SYCL_Host compute buffer size =  1888.04 MiB
+0.29.338.547 I sched_reserve: graph nodes  = 8166
+0.29.338.548 I sched_reserve: graph splits = 101 (with bs=2048), 68 (with bs=1)
+0.29.338.550 I sched_reserve: reserve took 149.09 ms, sched copies = 1
+1.01.938.089 I common_memory_breakdown_print: | memory breakdown [MiB]                        | total   free     self   model   context   compute    unaccounted |
+1.01.938.090 I common_memory_breakdown_print: |   - SYCL0 (Intel(R) Arc(TM) Pro B70 Graphics) | 32656 = 2434 + (29904 = 18253 +    2934 +    8716) +         317 |
+1.01.938.090 I common_memory_breakdown_print: |   - Host                                      |                 63991 = 62103 +       0 +    1888                |
+
+######## -c 311296 -ub 1024 -ncmoe 28 (yarn x1.1875) ########
+0.00.294.492 I llama_prepare_model_devices: using device SYCL0 (Intel(R) Arc(TM) Pro B70 Graphics) (unknown id) - 32580 MiB free
+0.00.801.411 I load_tensors:   CPU_Mapped model buffer size = 19240.51 MiB
+0.00.801.412 I load_tensors:   CPU_Mapped model buffer size = 10252.92 MiB
+0.00.801.412 I load_tensors:        SYCL0 model buffer size = 23066.16 MiB
+0.00.801.413 I load_tensors:   CPU_Mapped model buffer size = 27465.95 MiB
+0.06.974.871 I llama_context: n_ctx_seq             = 311296
+0.06.974.877 I llama_context: freq_scale            = 0.842105
+0.06.974.877 W llama_context: n_ctx_seq (311296) > n_ctx_train (262144) -- possible training context overflow
+0.06.994.360 I llama_kv_cache: size = 2052.00 MiB (311296 cells,  12 layers,  1/1 seqs), K (q4_0): 1026.00 MiB, V (q4_0): 1026.00 MiB
+0.06.995.556 I llama_memory_recurrent:      SYCL0 RS buffer size =   112.57 MiB
+0.07.002.535 I llama_kv_cache: size =  769.50 MiB (311296 cells,  12 layers,  1/1 seqs), K (q4_0):  256.50 MiB, V (q4_0):  513.00 MiB
+0.07.002.574 I sched_reserve: reserving ...
+0.07.002.579 D sched_reserve: max_nodes = 40960
+0.07.008.917 D sched_reserve: reserving full memory module
+0.07.008.936 D sched_reserve: worst-case: n_tokens = 1024, n_seqs = 1, n_outputs = 1
+0.07.067.067 I sched_reserve:      SYCL0 compute buffer size =  4279.14 MiB
+0.07.067.070 I sched_reserve:  SYCL_Host compute buffer size =   945.93 MiB
+0.07.067.070 I sched_reserve: graph nodes  = 8166
+0.07.067.070 I sched_reserve: graph splits = 86 (with bs=1024), 58 (with bs=1)
+0.07.067.072 I sched_reserve: reserve took 64.49 ms, sched copies = 1
+0.20.556.701 I common_memory_breakdown_print: | memory breakdown [MiB]                        | total   free     self   model   context   compute    unaccounted |
+0.20.556.702 I common_memory_breakdown_print: |   - SYCL0 (Intel(R) Arc(TM) Pro B70 Graphics) | 32656 = 2059 + (30279 = 23066 +    2934 +    4279) +         317 |
+0.20.556.702 I common_memory_breakdown_print: |   - Host                                      |                 57905 = 56959 +       0 +     945                |
+

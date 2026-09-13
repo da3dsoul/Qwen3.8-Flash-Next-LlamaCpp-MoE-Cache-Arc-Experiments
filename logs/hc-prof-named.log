@@ -1,0 +1,376 @@
+@@@ OP_PROFILE MODE 1
+
+
+Loading model... |-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/- 
+
+▄▄ ▄▄
+██ ██
+██ ██  ▀▀█▄ ███▄███▄  ▀▀█▄    ▄████ ████▄ ████▄
+██ ██ ▄█▀██ ██ ██ ██ ▄█▀██    ██    ██ ██ ██ ██
+██ ██ ▀█▄██ ██ ██ ██ ▀█▄██ ██ ▀████ ████▀ ████▀
+                                    ██    ██
+                                    ▀▀    ▀▀
+
+build      : b10882-6d9c82ea2
+model      : /models/Qwen3.8-Flash-Next-GGUF/UD-IQ3_XXS/Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf
+ftype      : IQ3_XXS - 3.0625 bpw
+modalities : text
+
+available commands:
+  /exit or Ctrl+C     stop or exit
+  /regen              regenerate the last response
+  /clear              clear the chat history
+  /read <file>        add a text file
+  /glob <pattern>     add text files using globbing pattern
+
+
+
+> Count from one to fifty.
+
+[Start thinking]
+
+We need answer user: "Count from one to fifty." Simple. Need final likely list 1 to 50. Could be concise. Ensure maybe numbers separated by spaces or lines. No need complex.
+[End thinking]
+
+1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,OP_PROFILE(mode 1) window ending at split 100, over 100 splits
+  by op (31 buckets, 420052 calls, 61542.6 ms):
+    FLASH_ATTN_EXT                           24534.63 ms  (39.9%)  1200 calls
+    MUL_MAT_ID iq4_nl                        13928.91 ms  (22.6%)  4798 calls
+    MUL_MAT q8_0                              6466.37 ms  (10.5%)  24790 calls
+    MUL_MAT_ID iq2_s                          2969.65 ms  (4.8%)  9396 calls
+    MUL_MAT f32                               1718.18 ms  (2.8%)  27594 calls
+    MUL_MAT q6_K                              1676.99 ms  (2.7%)  24894 calls
+    CPY                                       1490.43 ms  (2.4%)  4900 calls
+    REPEAT                                    1313.36 ms  (2.1%)  9796 calls
+    ROPE                                       942.43 ms  (1.5%)  4800 calls
+    ADD                                        874.50 ms  (1.4%)  81172 calls
+    UNARY                                      821.44 ms  (1.3%)  50986 calls
+    SOFT_MAX                                   785.89 ms  (1.3%)  4798 calls
+    MUL_MAT bf16                               711.76 ms  (1.2%)  2400 calls
+    CONT                                       638.59 ms  (1.0%)  25096 calls
+    SCALE                                      546.82 ms  (0.9%)  47303 calls
+    GET_ROWS                                   444.96 ms  (0.7%)  10209 calls
+    RMS_NORM                                   361.41 ms  (0.6%)  25596 calls
+    MUL_MAT_ID iq3_s                           324.70 ms  (0.5%)  200 calls
+    GATED_DELTA_NET                            223.67 ms  (0.4%)  3600 calls
+    MUL                                        220.60 ms  (0.4%)  30068 calls
+    CONCAT                                     183.75 ms  (0.3%)  3700 calls
+    SET_ROWS                                   177.44 ms  (0.3%)  4800 calls
+    GLU                                         54.47 ms  (0.1%)  9596 calls
+    SSM_CONV                                    47.05 ms  (0.1%)  3600 calls
+    FILL                                        33.20 ms  (0.1%)  2400 calls
+  by call site (1041 buckets, 420052 calls, 61542.6 ms):
+    node_660 [FLASH_ATTN_EXT]                24497.01 ms  (39.8%)  100 calls
+    ffn_moe_down [MUL_MAT_ID]                13928.91 ms  (22.6%)  4798 calls
+    hc_down [MUL_MAT]                         6170.00 ms  (10.0%)  9696 calls
+    ffn_moe_gate [MUL_MAT_ID]                 1708.20 ms  (2.8%)  4798 calls
+    ffn_moe_up [MUL_MAT_ID]                   1586.15 ms  (2.6%)  4798 calls
+    attn_inp_kq_mask [CPY]                    1469.87 ms  (2.4%)  1200 calls
+    hc_init [REPEAT]                          1245.09 ms  (2.0%)  100 calls
+    node_58 [MUL_MAT]                         1168.47 ms  (1.9%)  100 calls
+    Qcur [ROPE]                                914.85 ms  (1.5%)  1200 calls
+    ffn_moe_probs [SOFT_MAX]                   785.89 ms  (1.3%)  4798 calls
+    node_576 [MUL_MAT]                         663.67 ms  (1.1%)  100 calls
+    hc_down_silu [UNARY]                       572.47 ms  (0.9%)  9696 calls
+    hc_cont [CONT]                             531.59 ms  (0.9%)  9696 calls
+    node_34 [MUL_MAT]                          457.20 ms  (0.7%)  100 calls
+    hc_down_scale [SCALE]                      328.28 ms  (0.5%)  9696 calls
+    ffn_gate [MUL_MAT]                         306.29 ms  (0.5%)  4798 calls
+    node_659 [ADD]                             267.93 ms  (0.4%)  100 calls
+    node_605 [GET_ROWS]                        261.58 ms  (0.4%)  100 calls
+    hc_inject [MUL_MAT]                        234.84 ms  (0.4%)  9598 calls
+    hc_rms [RMS_NORM]                          221.87 ms  (0.4%)  9696 calls
+    hc_sum [ADD]                               204.49 ms  (0.3%)  29088 calls
+    hc_up [MUL_MAT]                            189.74 ms  (0.3%)  9696 calls
+    node_68 [GATED_DELTA_NET]                  176.18 ms  (0.3%)  100 calls
+    linear_attn_out [MUL_MAT]                  172.35 ms  (0.3%)  3600 calls
+    z [MUL_MAT]                                158.58 ms  (0.3%)  3600 calls
+    cache_idx_k_l3 [SET_ROWS]                  139.46 ms  (0.2%)  100 calls
+    node_37 [CONCAT]                           132.33 ms  (0.2%)  100 calls
+    result_output [MUL_MAT]                    114.75 ms  (0.2%)  98 calls
+    Qcur_full [MUL_MAT]                         99.80 ms  (0.2%)  1200 calls
+    ffn_moe_logits [MUL_MAT]                    98.74 ms  (0.2%)  4798 calls
+    <unnamed> [CONT]                            92.82 ms  (0.2%)  13400 calls
+    norm [RMS_NORM]                             81.90 ms  (0.1%)  8400 calls
+    shared_expert_gate [MUL_MAT]                78.29 ms  (0.1%)  4798 calls
+    hc_norm [MUL]                               73.20 ms  (0.1%)  9696 calls
+    ffn_shexp [MUL_MAT]                         70.98 ms  (0.1%)  4798 calls
+    hcc_scale [SCALE]                           69.01 ms  (0.1%)  9596 calls
+    hcc_mul [MUL]                               68.18 ms  (0.1%)  9596 calls
+    hcc_repeat [REPEAT]                         67.49 ms  (0.1%)  9596 calls
+    ffn_up [MUL_MAT]                            56.75 ms  (0.1%)  4798 calls
+    hc_gate [UNARY]                             55.42 ms  (0.1%)  9696 calls
+    hcc_sigmoid [UNARY]                         54.37 ms  (0.1%)  9596 calls
+    attn_output [MUL_MAT]                       51.61 ms  (0.1%)  1200 calls
+    hc_mixed [SCALE]                            50.74 ms  (0.1%)  9598 calls
+    hcc_scale2 [SCALE]                          50.63 ms  (0.1%)  9596 calls
+    conv_output_raw [SSM_CONV]                  47.05 ms  (0.1%)  3600 calls
+ 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,OP_PROFILE(mode 1) window ending at split 200, over 100 splits
+  by op (29 buckets, 418700 calls, 7563.1 ms):
+    MUL_MAT_ID iq2_s                          1773.39 ms  (23.4%)  9400 calls
+    MUL_MAT_ID iq4_nl                         1512.63 ms  (20.0%)  4800 calls
+    MUL_MAT q6_K                               809.53 ms  (10.7%)  24900 calls
+    ADD                                        593.48 ms  (7.8%)  81200 calls
+    MUL_MAT q8_0                               509.44 ms  (6.7%)  24800 calls
+    MUL_MAT f32                                468.36 ms  (6.2%)  27600 calls
+    UNARY                                      295.31 ms  (3.9%)  51000 calls
+    SCALE                                      263.81 ms  (3.5%)  47100 calls
+    MUL                                        209.88 ms  (2.8%)  29900 calls
+    RMS_NORM                                   205.19 ms  (2.7%)  25600 calls
+    CONT                                       160.17 ms  (2.1%)  25100 calls
+    GET_ROWS                                   140.03 ms  (1.9%)  10000 calls
+    SOFT_MAX                                    95.14 ms  (1.3%)  4800 calls
+    REPEAT                                      66.80 ms  (0.9%)  9800 calls
+    MUL_MAT_ID iq3_s                            54.29 ms  (0.7%)  200 calls
+    GLU                                         52.38 ms  (0.7%)  9600 calls
+    CONCAT                                      51.25 ms  (0.7%)  3700 calls
+    GATED_DELTA_NET                             45.14 ms  (0.6%)  3600 calls
+    MUL_MAT bf16                                44.86 ms  (0.6%)  2400 calls
+    FLASH_ATTN_EXT                              41.37 ms  (0.5%)  1200 calls
+    ROPE                                        41.01 ms  (0.5%)  4800 calls
+    SET_ROWS                                    37.38 ms  (0.5%)  4800 calls
+    CPY                                         28.43 ms  (0.4%)  4900 calls
+    SSM_CONV                                    27.57 ms  (0.4%)  3600 calls
+    TOP_K                                       18.54 ms  (0.2%)  1200 calls
+  by call site (962 buckets, 418700 calls, 7563.1 ms):
+    ffn_moe_down [MUL_MAT_ID]                 1512.63 ms  (20.0%)  4800 calls
+    ffn_moe_gate [MUL_MAT_ID]                  918.57 ms  (12.1%)  4800 calls
+    ffn_moe_up [MUL_MAT_ID]                    909.12 ms  (12.0%)  4800 calls
+    hc_down [MUL_MAT]                          242.61 ms  (3.2%)  9700 calls
+    hc_inject [MUL_MAT]                        216.45 ms  (2.9%)  9600 calls
+    hc_sum [ADD]                               201.29 ms  (2.7%)  29100 calls
+    hc_up [MUL_MAT]                            172.54 ms  (2.3%)  9700 calls
+    linear_attn_out [MUL_MAT]                  139.09 ms  (1.8%)  3600 calls
+    z [MUL_MAT]                                127.37 ms  (1.7%)  3600 calls
+    ffn_moe_probs [SOFT_MAX]                    95.14 ms  (1.3%)  4800 calls
+    <unnamed> [CONT]                            92.83 ms  (1.2%)  13400 calls
+    result_output [MUL_MAT]                     89.88 ms  (1.2%)  100 calls
+    ffn_moe_logits [MUL_MAT]                    88.47 ms  (1.2%)  4800 calls
+    Qcur_full [MUL_MAT]                         84.79 ms  (1.1%)  1200 calls
+    norm [RMS_NORM]                             79.43 ms  (1.1%)  8400 calls
+    hc_norm [MUL]                               70.62 ms  (0.9%)  9700 calls
+    hc_rms [RMS_NORM]                           69.75 ms  (0.9%)  9700 calls
+    hcc_scale [SCALE]                           67.58 ms  (0.9%)  9600 calls
+    ffn_shexp [MUL_MAT]                         66.54 ms  (0.9%)  4800 calls
+    hcc_mul [MUL]                               66.16 ms  (0.9%)  9600 calls
+    hcc_repeat [REPEAT]                         64.73 ms  (0.9%)  9600 calls
+    hc_down_silu [UNARY]                        54.11 ms  (0.7%)  9700 calls
+    hc_cont [CONT]                              53.64 ms  (0.7%)  9700 calls
+    hcc_sigmoid [UNARY]                         53.58 ms  (0.7%)  9600 calls
+    hc_gate [UNARY]                             52.98 ms  (0.7%)  9700 calls
+    ffn_gate [MUL_MAT]                          52.19 ms  (0.7%)  4800 calls
+    ffn_up [MUL_MAT]                            51.27 ms  (0.7%)  4800 calls
+    hc_down_scale [SCALE]                       50.75 ms  (0.7%)  9700 calls
+    hc_mixed [SCALE]                            50.05 ms  (0.7%)  9600 calls
+    hcc_scale2 [SCALE]                          49.89 ms  (0.7%)  9600 calls
+    attn_output [MUL_MAT]                       38.72 ms  (0.5%)  1200 calls
+    hc_combine [ADD]                            35.80 ms  (0.5%)  4800 calls
+    shared_expert_gate [MUL_MAT]                35.42 ms  (0.5%)  4800 calls
+    l_last [ADD]                                34.39 ms  (0.5%)  4800 calls
+    ffn_moe_out [ADD]                           33.75 ms  (0.4%)  4800 calls
+    ffn_out [ADD]                               33.36 ms  (0.4%)  4800 calls
+    ffn_moe_weighted [MUL]                      33.15 ms  (0.4%)  4800 calls
+    ffn_shexp_gated [MUL]                       33.00 ms  (0.4%)  4800 calls
+    conv_output_raw [SSM_CONV]                  27.57 ms  (0.4%)  3600 calls
+    shared_expert_gate_sigmoid [UNARY]          26.88 ms  (0.4%)  4800 calls
+    ffn_moe_swiglu [GLU]                        26.43 ms  (0.3%)  4800 calls
+    ffn_swiglu [GLU]                            25.94 ms  (0.3%)  4800 calls
+    beta_sigmoid [UNARY]                        25.83 ms  (0.3%)  3600 calls
+    a_softplus [UNARY]                          23.39 ms  (0.3%)  3600 calls
+    conv_output_silu [UNARY]                    20.26 ms  (0.3%)  3600 calls
+ 41, 42, 43, 44, 45, 46, 47, 48, 49, 50
+
+[ Prompt: 3.9 t/s | Generation: 10.2 t/s ]
+
+
+Exiting...
+@@@ END MODE 1
+@@@ OP_PROFILE MODE 2
+
+
+Loading model... |-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/- 
+
+▄▄ ▄▄
+██ ██
+██ ██  ▀▀█▄ ███▄███▄  ▀▀█▄    ▄████ ████▄ ████▄
+██ ██ ▄█▀██ ██ ██ ██ ▄█▀██    ██    ██ ██ ██ ██
+██ ██ ▀█▄██ ██ ██ ██ ▀█▄██ ██ ▀████ ████▀ ████▀
+                                    ██    ██
+                                    ▀▀    ▀▀
+
+build      : b10882-6d9c82ea2
+model      : /models/Qwen3.8-Flash-Next-GGUF/UD-IQ3_XXS/Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf
+ftype      : IQ3_XXS - 3.0625 bpw
+modalities : text
+
+available commands:
+  /exit or Ctrl+C     stop or exit
+  /regen              regenerate the last response
+  /clear              clear the chat history
+  /read <file>        add a text file
+  /glob <pattern>     add text files using globbing pattern
+
+
+
+> Count from one to fifty.
+
+[Start thinking]
+
+We need answer user: "Count from one to fifty." Simple. Need final likely list 1 to 50. Could be just numbers. Ensure maybe one to fifty. Final concise.
+[End thinking]
+
+1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16OP_PROFILE(mode 2) window ending at split 100, over 100 splits
+  host dispatch loop 27870.3 ms, tail wait 3477.5 ms
+  by op (31 buckets, 420052 calls, 27713.9 ms):
+    MUL_MAT_ID iq2_s                         14110.48 ms  (50.9%)  9396 calls
+    MUL_MAT bf16                              3209.91 ms  (11.6%)  2400 calls
+    CPY                                       1923.88 ms  (6.9%)  4900 calls
+    MUL_MAT_ID iq4_nl                         1243.02 ms  (4.5%)  4798 calls
+    UNARY                                     1101.87 ms  (4.0%)  50986 calls
+    REPEAT                                    1079.68 ms  (3.9%)  9796 calls
+    MUL_MAT q8_0                               827.80 ms  (3.0%)  24790 calls
+    CONT                                       610.52 ms  (2.2%)  25096 calls
+    MUL_MAT f32                                581.59 ms  (2.1%)  27594 calls
+    FLASH_ATTN_EXT                             556.26 ms  (2.0%)  1200 calls
+    MUL_MAT_ID iq3_s                           495.95 ms  (1.8%)  200 calls
+    SET_ROWS                                   390.86 ms  (1.4%)  4800 calls
+    ADD                                        321.70 ms  (1.2%)  81172 calls
+    MUL                                        226.89 ms  (0.8%)  30068 calls
+    RMS_NORM                                   171.22 ms  (0.6%)  25596 calls
+    MUL_MAT q6_K                               167.94 ms  (0.6%)  24894 calls
+    SOFT_MAX                                   161.33 ms  (0.6%)  4798 calls
+    GET_ROWS                                   150.94 ms  (0.5%)  10209 calls
+    SCALE                                      104.05 ms  (0.4%)  47303 calls
+    ROPE                                        49.25 ms  (0.2%)  4800 calls
+    CONCAT                                      46.57 ms  (0.2%)  3700 calls
+    GATED_DELTA_NET                             46.25 ms  (0.2%)  3600 calls
+    SSM_CONV                                    42.62 ms  (0.2%)  3600 calls
+    FILL                                        36.21 ms  (0.1%)  2400 calls
+    TOP_K                                       28.67 ms  (0.1%)  1200 calls
+  by call site (1041 buckets, 420052 calls, 27713.9 ms):
+    ffn_moe_gate [MUL_MAT_ID]                13185.80 ms  (47.6%)  4798 calls
+    node_576 [MUL_MAT]                        3131.84 ms  (11.3%)  100 calls
+    attn_inp_kq_mask [CPY]                    1916.49 ms  (6.9%)  1200 calls
+    ffn_moe_up [MUL_MAT_ID]                   1420.64 ms  (5.1%)  4798 calls
+    ffn_moe_down [MUL_MAT_ID]                 1243.02 ms  (4.5%)  4798 calls
+    hc_init [REPEAT]                          1056.03 ms  (3.8%)  100 calls
+    hc_down_silu [UNARY]                       866.38 ms  (3.1%)  9696 calls
+    hc_down [MUL_MAT]                          688.87 ms  (2.5%)  9696 calls
+    hc_cont [CONT]                             574.44 ms  (2.1%)  9696 calls
+    node_660 [FLASH_ATTN_EXT]                  538.50 ms  (1.9%)  100 calls
+    node_58 [MUL_MAT]                          221.77 ms  (0.8%)  100 calls
+    shared_expert_gate [MUL_MAT]               204.20 ms  (0.7%)  4798 calls
+    cache_idx_k_l31 [SET_ROWS]                 177.61 ms  (0.6%)  100 calls
+    cache_idx_k_l3 [SET_ROWS]                  162.93 ms  (0.6%)  100 calls
+    ffn_shexp_gated [MUL]                      161.88 ms  (0.6%)  4798 calls
+    ffn_moe_probs [SOFT_MAX]                   161.33 ms  (0.6%)  4798 calls
+    a_softplus [UNARY]                         117.90 ms  (0.4%)  3600 calls
+    hc_up [MUL_MAT]                            109.86 ms  (0.4%)  9696 calls
+    hc_rms [RMS_NORM]                          104.32 ms  (0.4%)  9696 calls
+    hc_sum [ADD]                                94.39 ms  (0.3%)  29088 calls
+    node_28 [GET_ROWS]                          86.33 ms  (0.3%)  100 calls
+    node_659 [ADD]                              68.27 ms  (0.2%)  100 calls
+    node_34 [MUL_MAT]                           67.37 ms  (0.2%)  100 calls
+    hc_inject [MUL_MAT]                         64.21 ms  (0.2%)  9598 calls
+    node_1235 [MUL_MAT]                         49.83 ms  (0.2%)  100 calls
+    norm [RMS_NORM]                             46.82 ms  (0.2%)  8400 calls
+    conv_output_raw [SSM_CONV]                  42.62 ms  (0.2%)  3600 calls
+    hc_gate [UNARY]                             41.37 ms  (0.1%)  9696 calls
+    <unnamed> [SET_ROWS]                        41.05 ms  (0.1%)  1200 calls
+    Qcur [ROPE]                                 40.46 ms  (0.1%)  1200 calls
+    node_605 [GET_ROWS]                         39.75 ms  (0.1%)  100 calls
+    node_37 [CONCAT]                            38.12 ms  (0.1%)  100 calls
+    ffn_moe_logits [MUL_MAT]                    34.78 ms  (0.1%)  4798 calls
+    node_68 [GATED_DELTA_NET]                   34.66 ms  (0.1%)  100 calls
+    <unnamed> [CONT]                            30.97 ms  (0.1%)  13400 calls
+    node_655 [FILL]                             29.39 ms  (0.1%)  100 calls
+    ffn_gate [MUL_MAT]                          28.32 ms  (0.1%)  4798 calls
+    hc_mixed [SCALE]                            25.22 ms  (0.1%)  9598 calls
+    hc_norm [MUL]                               24.89 ms  (0.1%)  9696 calls
+    ffn_shexp [MUL_MAT]                         24.40 ms  (0.1%)  4798 calls
+    hcc_mul [MUL]                               23.82 ms  (0.1%)  9596 calls
+    hcc_repeat [REPEAT]                         23.35 ms  (0.1%)  9596 calls
+    hcc_scale [SCALE]                           22.17 ms  (0.1%)  9596 calls
+    hcc_sigmoid [UNARY]                         21.20 ms  (0.1%)  9596 calls
+    hc_down_scale [SCALE]                       20.98 ms  (0.1%)  9696 calls
+, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41OP_PROFILE(mode 2) window ending at split 200, over 100 splits
+  host dispatch loop 1437.0 ms, tail wait 4230.0 ms
+  by op (29 buckets, 418700 calls, 1299.3 ms):
+    ADD                                        212.91 ms  (16.4%)  81200 calls
+    MUL_MAT f32                                149.93 ms  (11.5%)  27600 calls
+    UNARY                                      114.51 ms  (8.8%)  51000 calls
+    MUL_MAT q8_0                               112.85 ms  (8.7%)  24800 calls
+    MUL_MAT_ID iq2_s                           104.49 ms  (8.0%)  9400 calls
+    SCALE                                       92.72 ms  (7.1%)  47100 calls
+    MUL                                         73.67 ms  (5.7%)  29900 calls
+    MUL_MAT q6_K                                71.55 ms  (5.5%)  24900 calls
+    RMS_NORM                                    70.59 ms  (5.4%)  25600 calls
+    CONT                                        53.46 ms  (4.1%)  25100 calls
+    MUL_MAT_ID iq4_nl                           51.44 ms  (4.0%)  4800 calls
+    REPEAT                                      25.55 ms  (2.0%)  9800 calls
+    GET_ROWS                                    24.23 ms  (1.9%)  10000 calls
+    GLU                                         20.61 ms  (1.6%)  9600 calls
+    SOFT_MAX                                    16.52 ms  (1.3%)  4800 calls
+    SET_ROWS                                    13.65 ms  (1.1%)  4800 calls
+    ROPE                                        13.10 ms  (1.0%)  4800 calls
+    MUL_MAT bf16                                12.36 ms  (1.0%)  2400 calls
+    GATED_DELTA_NET                             11.35 ms  (0.9%)  3600 calls
+    CPY                                         11.14 ms  (0.9%)  4900 calls
+    FLASH_ATTN_EXT                               9.57 ms  (0.7%)  1200 calls
+    SSM_CONV                                     8.57 ms  (0.7%)  3600 calls
+    CONCAT                                       8.07 ms  (0.6%)  3700 calls
+    TOP_K                                        6.42 ms  (0.5%)  1200 calls
+    FILL                                         5.83 ms  (0.4%)  2400 calls
+  by call site (962 buckets, 418700 calls, 1299.3 ms):
+    hc_sum [ADD]                                72.60 ms  (5.6%)  29100 calls
+    ffn_moe_gate [MUL_MAT_ID]                   55.93 ms  (4.3%)  4800 calls
+    hc_inject [MUL_MAT]                         55.82 ms  (4.3%)  9600 calls
+    ffn_moe_down [MUL_MAT_ID]                   51.44 ms  (4.0%)  4800 calls
+    ffn_moe_up [MUL_MAT_ID]                     51.20 ms  (3.9%)  4800 calls
+    hc_down [MUL_MAT]                           45.36 ms  (3.5%)  9700 calls
+    hc_up [MUL_MAT]                             42.60 ms  (3.3%)  9700 calls
+    <unnamed> [CONT]                            29.26 ms  (2.3%)  13400 calls
+    ffn_moe_logits [MUL_MAT]                    27.36 ms  (2.1%)  4800 calls
+    hc_rms [RMS_NORM]                           27.08 ms  (2.1%)  9700 calls
+    hc_norm [MUL]                               24.38 ms  (1.9%)  9700 calls
+    norm [RMS_NORM]                             24.15 ms  (1.9%)  8400 calls
+    hcc_mul [MUL]                               23.39 ms  (1.8%)  9600 calls
+    ffn_shexp [MUL_MAT]                         22.14 ms  (1.7%)  4800 calls
+    hcc_repeat [REPEAT]                         21.74 ms  (1.7%)  9600 calls
+    hcc_scale [SCALE]                           21.70 ms  (1.7%)  9600 calls
+    hc_down_silu [UNARY]                        21.21 ms  (1.6%)  9700 calls
+    hcc_sigmoid [UNARY]                         20.91 ms  (1.6%)  9600 calls
+    hc_gate [UNARY]                             20.89 ms  (1.6%)  9700 calls
+    hc_cont [CONT]                              19.25 ms  (1.5%)  9700 calls
+    hc_down_scale [SCALE]                       18.37 ms  (1.4%)  9700 calls
+    hcc_scale2 [SCALE]                          17.78 ms  (1.4%)  9600 calls
+    hc_mixed [SCALE]                            17.73 ms  (1.4%)  9600 calls
+    ffn_moe_probs [SOFT_MAX]                    16.52 ms  (1.3%)  4800 calls
+    ffn_gate [MUL_MAT]                          14.94 ms  (1.1%)  4800 calls
+    shared_expert_gate [MUL_MAT]                14.26 ms  (1.1%)  4800 calls
+    ffn_up [MUL_MAT]                            12.96 ms  (1.0%)  4800 calls
+    ffn_moe_out [ADD]                           12.37 ms  (1.0%)  4800 calls
+    hc_combine [ADD]                            12.19 ms  (0.9%)  4800 calls
+    l_last [ADD]                                11.98 ms  (0.9%)  4800 calls
+    ffn_moe_weighted [MUL]                      11.87 ms  (0.9%)  4800 calls
+    ffn_out [ADD]                               11.82 ms  (0.9%)  4800 calls
+    ffn_shexp_gated [MUL]                       11.57 ms  (0.9%)  4800 calls
+    ffn_moe_swiglu [GLU]                        10.62 ms  (0.8%)  4800 calls
+    shared_expert_gate_sigmoid [UNARY]          10.45 ms  (0.8%)  4800 calls
+    linear_attn_out [MUL_MAT]                   10.40 ms  (0.8%)  3600 calls
+    z [MUL_MAT]                                 10.13 ms  (0.8%)  3600 calls
+    ffn_swiglu [GLU]                             9.99 ms  (0.8%)  4800 calls
+    beta_sigmoid [UNARY]                         8.82 ms  (0.7%)  3600 calls
+    a_softplus [UNARY]                           8.73 ms  (0.7%)  3600 calls
+    conv_output_raw [SSM_CONV]                   8.57 ms  (0.7%)  3600 calls
+    conv_output_silu [UNARY]                     7.98 ms  (0.6%)  3600 calls
+    q_conv_predelta [SCALE]                      7.50 ms  (0.6%)  3600 calls
+    k_conv_predelta [SCALE]                      6.91 ms  (0.5%)  3600 calls
+    attn_inp_kq_mask [CPY]                       4.49 ms  (0.3%)  1200 calls
+, 42, 43, 44, 45, 46, 47, 48, 49, 50
+
+[ Prompt: 3.4 t/s | Generation: 9.6 t/s ]
+
+
+Exiting...
+@@@ END MODE 2

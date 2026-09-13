@@ -1,0 +1,3 @@
+/work/yarn_deep.sh: line 71:  1004 Aborted                 timeout 7200 "$B/llama-perplexity" -m "$M" -f /work/bench600k/full_prompt.txt $CFG --chunks 1 "$@" > "/work/yarn-$tag.out" 2>&1
+/work/yarn_deep.sh: line 71:  1031 Aborted                 timeout 7200 "$B/llama-perplexity" -m "$M" -f /work/bench600k/full_prompt.txt $CFG --chunks 1 "$@" > "/work/yarn-$tag.out" 2>&1
+/work/yarn_deep.sh: line 71:  1058 Aborted                 timeout 7200 "$B/llama-perplexity" -m "$M" -f /work/bench600k/full_prompt.txt $CFG --chunks 1 "$@" > "/work/yarn-$tag.out" 2>&1

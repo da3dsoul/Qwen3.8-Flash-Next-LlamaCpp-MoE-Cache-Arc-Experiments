@@ -1,0 +1,66 @@
+### corpus tokenization 22:18:48
+'
+Total number of tokens: 612680
+### slotcap/plain  ''  22:18:51
+3.58.739.690 W srv    load_model: the slot context (311296) exceeds the training context of the model (262144) - capping
+4.06.112.758 I srv    load_model: initializing, n_slots = 1, n_ctx_slot = 262144, kv_unified = 'false'
+### slotcap/plain done 22:23:00
+### slotcap/nearunity  '--rope-scaling yarn --rope-scale 1.0001 --yarn-orig-ctx 311296'  22:23:00
+2.52.233.473 I srv    load_model: initializing, n_slots = 1, n_ctx_slot = 311296, kv_unified = 'false'
+### slotcap/nearunity done 22:25:55
+### gen-off-305k 22:25:55
+###   rc=0 22:49:08
+2.26.876.916 W llama_context: n_ctx_seq (311296) > n_ctx_train (262144) -- possible training context overflow
+2.27.326.986 I generate: n_ctx = 311296, n_batch = 2048, n_predict = 250, n_keep = 0
+23.11.237.778 I common_perf_print: prompt eval time = 1205923.88 ms / 305759 tokens (    3.94 ms per token,   253.55 tokens per second)
+23.11.237.779 I common_perf_print:        eval time =   37914.83 ms /   249 runs   (  152.27 ms per token,     6.57 tokens per second)
+--- continuation, first 1200 chars ---
+user
+You are reviewing a legacy Python codebase full of common beginner mistakes.
+Refactor the following script to use modern, idiomatic Python practices. Specifically fix:
+- Global mutable state and bare `except` clauses
+- Mutable default arguments (e.g. `def f(x=[])`)
+- Manual index loops (`for i in range(len(x))`) instead of iteration/enumerate
+- `== None` / `== True` comparisons instead of `is None` / truthiness
+- String concatenation instead of f-strings
+- Inconsistent naming conventions (mixed camelCase/snake_case/PascalCase)
+- Missing type hints and docstrings
+- Massive code duplication (near-identical functions that should be parameterized)
+- Manual file open/close instead of context managers
+
+Produce a cleaned-up, well-structured version. Explain your key changes briefly at the end.
+
+```python
+import os,sys,json,time,random,math,re,datetime
+data = []
+DATA2 = {}
+temp = None
+counter = 0
+GLOBAL_CACHE = {}
+errors_list = []
+
+def log(msg):
+    print("LOG: " + str(msg))
+
+def readFile(fn):
+    f = open(fn, "r")
+    d = f.read()
+    return d
+
+def writeFile(fn, content):
+    f = open(fn, "w")
+    f.write(content)
+    f.close()
+
+class dataManager:
+    def __init__(self):
+        self
+### ppl-262144-off 22:49:08
+###   rc=134 22:50:41
+### ppl-294912-off 22:50:41
+###   rc=134 22:53:03
+2.12.959.713 W llama_context: n_ctx_seq (294912) > n_ctx_train (262144) -- possible training context overflow
+### ppl-294912-yarn 22:53:03
+###   rc=134 22:56:16
+3.03.373.842 W llama_context: n_ctx_seq (294912) > n_ctx_train (262144) -- possible training context overflow
+### done 22:56:16

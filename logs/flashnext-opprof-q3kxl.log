@@ -1,0 +1,484 @@
+
+
+Loading model... |-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/OP_PROFILE after 20 graphs: total SYCL op time 2122.5 ms/graph
+  FLASH_ATTN_EXT            1242.32 ms/graph  (58.5%)  0.9 calls/graph
+  MUL_MAT q8_0               291.77 ms/graph  (13.7%)  39.0 calls/graph
+  CPY                         76.50 ms/graph  (3.6%)  3.9 calls/graph
+  REPEAT                      66.08 ms/graph  (3.1%)  7.7 calls/graph
+  MUL_MAT_ID iq3_xxs          61.37 ms/graph  (2.9%)  7.3 calls/graph
+  MUL_MAT f32                 47.19 ms/graph  (2.2%)  21.7 calls/graph
+  ROPE                        46.40 ms/graph  (2.2%)  3.8 calls/graph
+  MUL_MAT_ID iq4_nl           39.31 ms/graph  (1.9%)  3.4 calls/graph
+  MUL_MAT q6_K                37.78 ms/graph  (1.8%)  0.1 calls/graph
+  MUL_MAT_ID q8_0             34.18 ms/graph  (1.6%)  0.4 calls/graph
+  SOFT_MAX                    31.58 ms/graph  (1.5%)  3.8 calls/graph
+  UNARY                       26.65 ms/graph  (1.3%)  40.1 calls/graph
+  CONT                        24.14 ms/graph  (1.1%)  19.9 calls/graph
+  ADD                         17.07 ms/graph  (0.8%)  63.7 calls/graph
+  GET_ROWS                    15.47 ms/graph  (0.7%)  11.4 calls/graph
+-\|/-\| 
+
+▄▄ ▄▄
+██ ██
+██ ██  ▀▀█▄ ███▄███▄  ▀▀█▄    ▄████ ████▄ ████▄
+██ ██ ▄█▀██ ██ ██ ██ ▄█▀██    ██    ██ ██ ██ ██
+██ ██ ▀█▄██ ██ ██ ██ ▀█▄██ ██ ▀████ ████▀ ████▀
+                                    ██    ██
+                                    ▀▀    ▀▀
+
+build      : b10882-6d9c82ea2
+model      : /models/Qwen3.8-Flash-Next-GGUF/UD-Q3_K_XL/Qwen3.8-Flash-Next-UD-Q3_K_XL-00001-of-00003.gguf
+ftype      : Q3_K - Medium
+modalities : text
+
+available commands:
+  /exit or Ctrl+C     stop or exit
+  /regen              regenerate the last response
+  /clear              clear the chat history
+  /read <file>        add a text file
+  /glob <pattern>     add text files using globbing pattern
+
+
+
+> Write a short story about a robot who discovers music for the first time.
+OP_PROFILE after 40 graphs: total SYCL op time 1549.9 ms/graph
+  FLASH_ATTN_EXT             634.56 ms/graph  (40.9%)  0.9 calls/graph
+  MUL_MAT_ID iq3_xxs         297.75 ms/graph  (19.2%)  7.1 calls/graph
+  MUL_MAT_ID iq4_nl          205.47 ms/graph  (13.3%)  3.3 calls/graph
+  MUL_MAT q8_0               150.01 ms/graph  (9.7%)  38.0 calls/graph
+  CPY                         38.27 ms/graph  (2.5%)  3.8 calls/graph
+  REPEAT                      33.10 ms/graph  (2.1%)  7.5 calls/graph
+  MUL_MAT_ID q8_0             32.18 ms/graph  (2.1%)  0.4 calls/graph
+  MUL_MAT f32                 24.48 ms/graph  (1.6%)  21.1 calls/graph
+  ROPE                        23.22 ms/graph  (1.5%)  3.7 calls/graph
+  MUL_MAT q6_K                18.92 ms/graph  (1.2%)  0.1 calls/graph
+  SOFT_MAX                    15.83 ms/graph  (1.0%)  3.7 calls/graph
+  UNARY                       13.50 ms/graph  (0.9%)  39.1 calls/graph
+  CONT                        12.17 ms/graph  (0.8%)  19.5 calls/graph
+  ADD                          8.83 ms/graph  (0.6%)  62.1 calls/graph
+  GET_ROWS                     7.81 ms/graph  (0.5%)  11.0 calls/graph
+OP_PROFILE after 60 graphs: total SYCL op time 1233.1 ms/graph
+  FLASH_ATTN_EXT             423.08 ms/graph  (34.3%)  0.9 calls/graph
+  MUL_MAT_ID iq3_xxs         311.59 ms/graph  (25.3%)  7.2 calls/graph
+  MUL_MAT_ID iq4_nl          215.38 ms/graph  (17.5%)  3.3 calls/graph
+  MUL_MAT q8_0               101.70 ms/graph  (8.2%)  38.2 calls/graph
+  MUL_MAT_ID q8_0             26.84 ms/graph  (2.2%)  0.3 calls/graph
+  CPY                         25.53 ms/graph  (2.1%)  3.8 calls/graph
+  REPEAT                      22.10 ms/graph  (1.8%)  7.5 calls/graph
+  MUL_MAT f32                 16.61 ms/graph  (1.3%)  21.3 calls/graph
+  ROPE                        15.49 ms/graph  (1.3%)  3.7 calls/graph
+  MUL_MAT q6_K                12.61 ms/graph  (1.0%)  0.0 calls/graph
+  SOFT_MAX                    10.57 ms/graph  (0.9%)  3.7 calls/graph
+  UNARY                        9.11 ms/graph  (0.7%)  39.3 calls/graph
+  CONT                         8.17 ms/graph  (0.7%)  19.4 calls/graph
+  ADD                          6.08 ms/graph  (0.5%)  62.5 calls/graph
+  GET_ROWS                     5.26 ms/graph  (0.4%)  11.0 calls/graph
+
+[Start thinking]
+
+We needOP_PROFILE after 80 graphs: total SYCL op time 944.4 ms/graph
+  FLASH_ATTN_EXT             317.32 ms/graph  (33.6%)  0.9 calls/graph
+  MUL_MAT_ID iq3_xxs         244.79 ms/graph  (25.9%)  7.2 calls/graph
+  MUL_MAT_ID iq4_nl          168.17 ms/graph  (17.8%)  3.3 calls/graph
+  MUL_MAT q8_0                76.59 ms/graph  (8.1%)  38.0 calls/graph
+  MUL_MAT_ID q8_0             20.76 ms/graph  (2.2%)  0.4 calls/graph
+  CPY                         19.16 ms/graph  (2.0%)  3.8 calls/graph
+  REPEAT                      16.59 ms/graph  (1.8%)  7.5 calls/graph
+  MUL_MAT f32                 12.60 ms/graph  (1.3%)  21.2 calls/graph
+  ROPE                        11.63 ms/graph  (1.2%)  3.7 calls/graph
+  MUL_MAT q6_K                 9.48 ms/graph  (1.0%)  0.1 calls/graph
+  SOFT_MAX                     7.95 ms/graph  (0.8%)  3.7 calls/graph
+  UNARY                        6.90 ms/graph  (0.7%)  39.1 calls/graph
+  CONT                         6.18 ms/graph  (0.7%)  19.4 calls/graph
+  ADD                          4.70 ms/graph  (0.5%)  62.1 calls/graph
+  GET_ROWS                     3.98 ms/graph  (0.4%)  10.3 calls/graph
+ toOP_PROFILE after 100 graphs: total SYCL op time 756.8 ms/graph
+  FLASH_ATTN_EXT             253.86 ms/graph  (33.5%)  0.9 calls/graph
+  MUL_MAT_ID iq3_xxs         196.10 ms/graph  (25.9%)  7.2 calls/graph
+  MUL_MAT_ID iq4_nl          134.71 ms/graph  (17.8%)  3.3 calls/graph
+  MUL_MAT q8_0                61.51 ms/graph  (8.1%)  38.2 calls/graph
+  MUL_MAT_ID q8_0             16.64 ms/graph  (2.2%)  0.4 calls/graph
+  CPY                         15.33 ms/graph  (2.0%)  3.8 calls/graph
+  REPEAT                      13.29 ms/graph  (1.8%)  7.5 calls/graph
+  MUL_MAT f32                 10.16 ms/graph  (1.3%)  21.3 calls/graph
+  ROPE                         9.31 ms/graph  (1.2%)  3.7 calls/graph
+  MUL_MAT q6_K                 7.59 ms/graph  (1.0%)  0.1 calls/graph
+  SOFT_MAX                     6.38 ms/graph  (0.8%)  3.7 calls/graph
+  UNARY                        5.58 ms/graph  (0.7%)  39.3 calls/graph
+  CONT                         4.97 ms/graph  (0.7%)  19.4 calls/graph
+  ADD                          3.87 ms/graph  (0.5%)  62.5 calls/graph
+  GET_ROWS                     3.21 ms/graph  (0.4%)  9.8 calls/graph
+ respond toOP_PROFILE after 120 graphs: total SYCL op time 631.7 ms/graph
+  FLASH_ATTN_EXT             211.56 ms/graph  (33.5%)  0.9 calls/graph
+  MUL_MAT_ID iq3_xxs         163.63 ms/graph  (25.9%)  7.2 calls/graph
+  MUL_MAT_ID iq4_nl          112.39 ms/graph  (17.8%)  3.3 calls/graph
+  MUL_MAT q8_0                51.46 ms/graph  (8.1%)  38.1 calls/graph
+  MUL_MAT_ID q8_0             13.90 ms/graph  (2.2%)  0.4 calls/graph
+  CPY                         12.78 ms/graph  (2.0%)  3.8 calls/graph
+  REPEAT                      11.09 ms/graph  (1.8%)  7.5 calls/graph
+  MUL_MAT f32                  8.54 ms/graph  (1.4%)  21.2 calls/graph
+  ROPE                         7.77 ms/graph  (1.2%)  3.7 calls/graph
+  MUL_MAT q6_K                 6.34 ms/graph  (1.0%)  0.1 calls/graph
+  SOFT_MAX                     5.33 ms/graph  (0.8%)  3.7 calls/graph
+  UNARY                        4.69 ms/graph  (0.7%)  39.2 calls/graph
+  CONT                         4.17 ms/graph  (0.7%)  19.4 calls/graph
+  ADD                          3.32 ms/graph  (0.5%)  62.3 calls/graph
+  GET_ROWS                     2.69 ms/graph  (0.4%)  9.4 calls/graph
+ userOP_PROFILE after 140 graphs: total SYCL op time 542.3 ms/graph
+  FLASH_ATTN_EXT             181.34 ms/graph  (33.4%)  0.9 calls/graph
+  MUL_MAT_ID iq3_xxs         140.44 ms/graph  (25.9%)  7.2 calls/graph
+  MUL_MAT_ID iq4_nl           96.45 ms/graph  (17.8%)  3.3 calls/graph
+  MUL_MAT q8_0                44.28 ms/graph  (8.2%)  38.2 calls/graph
+  MUL_MAT_ID q8_0             11.93 ms/graph  (2.2%)  0.4 calls/graph
+  CPY                         10.96 ms/graph  (2.0%)  3.8 calls/graph
+  REPEAT                       9.51 ms/graph  (1.8%)  7.5 calls/graph
+  MUL_MAT f32                  7.38 ms/graph  (1.4%)  21.3 calls/graph
+  ROPE                         6.66 ms/graph  (1.2%)  3.7 calls/graph
+  MUL_MAT q6_K                 5.44 ms/graph  (1.0%)  0.1 calls/graph
+  SOFT_MAX                     4.58 ms/graph  (0.8%)  3.7 calls/graph
+  UNARY                        4.06 ms/graph  (0.7%)  39.3 calls/graph
+  CONT                         3.59 ms/graph  (0.7%)  19.4 calls/graph
+  ADD                          2.92 ms/graph  (0.5%)  62.5 calls/graph
+  GET_ROWS                     2.33 ms/graph  (0.4%)  9.2 calls/graph
+: "OP_PROFILE after 160 graphs: total SYCL op time 475.2 ms/graph
+  FLASH_ATTN_EXT             158.68 ms/graph  (33.4%)  0.9 calls/graph
+  MUL_MAT_ID iq3_xxs         123.02 ms/graph  (25.9%)  7.2 calls/graph
+  MUL_MAT_ID iq4_nl           84.47 ms/graph  (17.8%)  3.3 calls/graph
+  MUL_MAT q8_0                38.89 ms/graph  (8.2%)  38.1 calls/graph
+  MUL_MAT_ID q8_0             10.46 ms/graph  (2.2%)  0.4 calls/graph
+  CPY                          9.59 ms/graph  (2.0%)  3.8 calls/graph
+  REPEAT                       8.33 ms/graph  (1.8%)  7.5 calls/graph
+  MUL_MAT f32                  6.51 ms/graph  (1.4%)  21.2 calls/graph
+  ROPE                         5.83 ms/graph  (1.2%)  3.7 calls/graph
+  MUL_MAT q6_K                 4.77 ms/graph  (1.0%)  0.1 calls/graph
+  SOFT_MAX                     4.02 ms/graph  (0.8%)  3.7 calls/graph
+  UNARY                        3.58 ms/graph  (0.8%)  39.2 calls/graph
+  CONT                         3.16 ms/graph  (0.7%)  19.3 calls/graph
+  ADD                          2.62 ms/graph  (0.6%)  62.4 calls/graph
+  GET_ROWS                     2.05 ms/graph  (0.4%)  9.0 calls/graph
+WriteOP_PROFILE after 180 graphs: total SYCL op time 423.1 ms/graph
+  FLASH_ATTN_EXT             141.05 ms/graph  (33.3%)  0.9 calls/graph
+  MUL_MAT_ID iq3_xxs         109.50 ms/graph  (25.9%)  7.2 calls/graph
+  MUL_MAT_ID iq4_nl           75.19 ms/graph  (17.8%)  3.3 calls/graph
+  MUL_MAT q8_0                34.70 ms/graph  (8.2%)  38.2 calls/graph
+  MUL_MAT_ID q8_0              9.31 ms/graph  (2.2%)  0.4 calls/graph
+  CPY                          8.53 ms/graph  (2.0%)  3.8 calls/graph
+  REPEAT                       7.41 ms/graph  (1.8%)  7.5 calls/graph
+  MUL_MAT f32                  5.83 ms/graph  (1.4%)  21.3 calls/graph
+  ROPE                         5.19 ms/graph  (1.2%)  3.7 calls/graph
+  MUL_MAT q6_K                 4.25 ms/graph  (1.0%)  0.1 calls/graph
+  SOFT_MAX                     3.58 ms/graph  (0.8%)  3.7 calls/graph
+  UNARY                        3.22 ms/graph  (0.8%)  39.3 calls/graph
+  CONT                         2.83 ms/graph  (0.7%)  19.4 calls/graph
+  ADD                          2.39 ms/graph  (0.6%)  62.5 calls/graph
+  GET_ROWS                     1.84 ms/graph  (0.4%)  8.9 calls/graph
+ a shortOP_PROFILE after 200 graphs: total SYCL op time 381.5 ms/graph
+  FLASH_ATTN_EXT             126.95 ms/graph  (33.3%)  0.9 calls/graph
+  MUL_MAT_ID iq3_xxs          98.71 ms/graph  (25.9%)  7.2 calls/graph
+  MUL_MAT_ID iq4_nl           67.77 ms/graph  (17.8%)  3.3 calls/graph
+  MUL_MAT q8_0                31.35 ms/graph  (8.2%)  38.1 calls/graph
+  MUL_MAT_ID q8_0              8.40 ms/graph  (2.2%)  0.4 calls/graph
+  CPY                          7.68 ms/graph  (2.0%)  3.8 calls/graph
+  REPEAT                       6.68 ms/graph  (1.8%)  7.5 calls/graph
+  MUL_MAT f32                  5.29 ms/graph  (1.4%)  21.2 calls/graph
+  ROPE                         4.67 ms/graph  (1.2%)  3.7 calls/graph
+  MUL_MAT q6_K                 3.83 ms/graph  (1.0%)  0.1 calls/graph
+  SOFT_MAX                     3.23 ms/graph  (0.8%)  3.7 calls/graph
+  UNARY                        2.92 ms/graph  (0.8%)  39.2 calls/graph
+  CONT                         2.56 ms/graph  (0.7%)  19.3 calls/graph
+  ADD                          2.20 ms/graph  (0.6%)  62.4 calls/graph
+  GET_ROWS                     1.67 ms/graph  (0.4%)  8.8 calls/graph
+ storyOP_PROFILE after 220 graphs: total SYCL op time 347.4 ms/graph
+  FLASH_ATTN_EXT             115.41 ms/graph  (33.2%)  0.9 calls/graph
+  MUL_MAT_ID iq3_xxs          89.84 ms/graph  (25.9%)  7.2 calls/graph
+  MUL_MAT_ID iq4_nl           61.67 ms/graph  (17.8%)  3.3 calls/graph
+  MUL_MAT q8_0                28.61 ms/graph  (8.2%)  38.2 calls/graph
+  MUL_MAT_ID q8_0              7.65 ms/graph  (2.2%)  0.4 calls/graph
+  CPY                          6.98 ms/graph  (2.0%)  3.8 calls/graph
+  REPEAT                       6.08 ms/graph  (1.7%)  7.5 calls/graph
+  MUL_MAT f32                  4.85 ms/graph  (1.4%)  21.3 calls/graph
+  ROPE                         4.25 ms/graph  (1.2%)  3.7 calls/graph
+  MUL_MAT q6_K                 3.49 ms/graph  (1.0%)  0.1 calls/graph
+  SOFT_MAX                     2.94 ms/graph  (0.8%)  3.7 calls/graph
+  UNARY                        2.68 ms/graph  (0.8%)  39.3 calls/graph
+  CONT                         2.34 ms/graph  (0.7%)  19.4 calls/graph
+  ADD                          2.05 ms/graph  (0.6%)  62.5 calls/graph
+  GET_ROWS                     1.52 ms/graph  (0.4%)  8.7 calls/graph
+ about aOP_PROFILE after 240 graphs: total SYCL op time 318.9 ms/graph
+  FLASH_ATTN_EXT             105.80 ms/graph  (33.2%)  0.9 calls/graph
+  MUL_MAT_ID iq3_xxs          82.46 ms/graph  (25.9%)  7.2 calls/graph
+  MUL_MAT_ID iq4_nl           56.60 ms/graph  (17.7%)  3.3 calls/graph
+  MUL_MAT q8_0                26.33 ms/graph  (8.3%)  38.1 calls/graph
+  MUL_MAT_ID q8_0              7.03 ms/graph  (2.2%)  0.4 calls/graph
+  CPY                          6.40 ms/graph  (2.0%)  3.8 calls/graph
+  REPEAT                       5.58 ms/graph  (1.7%)  7.5 calls/graph
+  MUL_MAT f32                  4.48 ms/graph  (1.4%)  21.2 calls/graph
+  ROPE                         3.90 ms/graph  (1.2%)  3.7 calls/graph
+  MUL_MAT q6_K                 3.21 ms/graph  (1.0%)  0.1 calls/graph
+  SOFT_MAX                     2.70 ms/graph  (0.8%)  3.7 calls/graph
+  UNARY                        2.48 ms/graph  (0.8%)  39.2 calls/graph
+  CONT                         2.16 ms/graph  (0.7%)  19.3 calls/graph
+  ADD                          1.92 ms/graph  (0.6%)  62.4 calls/graph
+  SCALE                        1.41 ms/graph  (0.4%)  37.1 calls/graph
+ robotOP_PROFILE after 260 graphs: total SYCL op time 294.9 ms/graph
+  FLASH_ATTN_EXT              97.66 ms/graph  (33.1%)  0.9 calls/graph
+  MUL_MAT_ID iq3_xxs          76.22 ms/graph  (25.8%)  7.2 calls/graph
+  MUL_MAT_ID iq4_nl           52.31 ms/graph  (17.7%)  3.3 calls/graph
+  MUL_MAT q8_0                24.39 ms/graph  (8.3%)  38.1 calls/graph
+  MUL_MAT_ID q8_0              6.50 ms/graph  (2.2%)  0.4 calls/graph
+  CPY                          5.91 ms/graph  (2.0%)  3.8 calls/graph
+  REPEAT                       5.15 ms/graph  (1.7%)  7.5 calls/graph
+  MUL_MAT f32                  4.17 ms/graph  (1.4%)  21.2 calls/graph
+  ROPE                         3.60 ms/graph  (1.2%)  3.7 calls/graph
+  MUL_MAT q6_K                 2.97 ms/graph  (1.0%)  0.1 calls/graph
+  SOFT_MAX                     2.50 ms/graph  (0.8%)  3.7 calls/graph
+  UNARY                        2.31 ms/graph  (0.8%)  39.2 calls/graph
+  CONT                         2.00 ms/graph  (0.7%)  19.3 calls/graph
+  ADD                          1.82 ms/graph  (0.6%)  62.4 calls/graph
+  SCALE                        1.32 ms/graph  (0.4%)  37.0 calls/graph
+ who discoversOP_PROFILE after 280 graphs: total SYCL op time 274.2 ms/graph
+  FLASH_ATTN_EXT              90.69 ms/graph  (33.1%)  0.9 calls/graph
+  MUL_MAT_ID iq3_xxs          70.86 ms/graph  (25.8%)  7.2 calls/graph
+  MUL_MAT_ID iq4_nl           48.63 ms/graph  (17.7%)  3.3 calls/graph
+  MUL_MAT q8_0                22.73 ms/graph  (8.3%)  38.2 calls/graph
+  MUL_MAT_ID q8_0              6.04 ms/graph  (2.2%)  0.4 calls/graph
+  CPY                          5.49 ms/graph  (2.0%)  3.8 calls/graph
+  REPEAT                       4.79 ms/graph  (1.7%)  7.5 calls/graph
+  MUL_MAT f32                  3.90 ms/graph  (1.4%)  21.2 calls/graph
+  ROPE                         3.35 ms/graph  (1.2%)  3.7 calls/graph
+  MUL_MAT q6_K                 2.76 ms/graph  (1.0%)  0.1 calls/graph
+  SOFT_MAX                     2.33 ms/graph  (0.8%)  3.7 calls/graph
+  UNARY                        2.16 ms/graph  (0.8%)  39.2 calls/graph
+  CONT                         1.87 ms/graph  (0.7%)  19.3 calls/graph
+  ADD                          1.72 ms/graph  (0.6%)  62.4 calls/graph
+  SCALE                        1.24 ms/graph  (0.5%)  37.0 calls/graph
+ music forOP_PROFILE after 300 graphs: total SYCL op time 256.3 ms/graph
+  FLASH_ATTN_EXT              84.64 ms/graph  (33.0%)  0.9 calls/graph
+  MUL_MAT_ID iq3_xxs          66.21 ms/graph  (25.8%)  7.2 calls/graph
+  MUL_MAT_ID iq4_nl           45.44 ms/graph  (17.7%)  3.3 calls/graph
+  MUL_MAT q8_0                21.30 ms/graph  (8.3%)  38.1 calls/graph
+  MUL_MAT_ID q8_0              5.65 ms/graph  (2.2%)  0.4 calls/graph
+  CPY                          5.13 ms/graph  (2.0%)  3.8 calls/graph
+  REPEAT                       4.47 ms/graph  (1.7%)  7.5 calls/graph
+  MUL_MAT f32                  3.67 ms/graph  (1.4%)  21.2 calls/graph
+  ROPE                         3.13 ms/graph  (1.2%)  3.7 calls/graph
+  MUL_MAT q6_K                 2.58 ms/graph  (1.0%)  0.1 calls/graph
+  SOFT_MAX                     2.18 ms/graph  (0.9%)  3.7 calls/graph
+  UNARY                        2.03 ms/graph  (0.8%)  39.2 calls/graph
+  CONT                         1.75 ms/graph  (0.7%)  19.3 calls/graph
+  ADD                          1.64 ms/graph  (0.6%)  62.4 calls/graph
+  SCALE                        1.18 ms/graph  (0.5%)  36.9 calls/graph
+ theOP_PROFILE after 320 graphs: total SYCL op time 240.7 ms/graph
+  FLASH_ATTN_EXT              79.36 ms/graph  (33.0%)  0.9 calls/graph
+  MUL_MAT_ID iq3_xxs          62.14 ms/graph  (25.8%)  7.2 calls/graph
+  MUL_MAT_ID iq4_nl           42.64 ms/graph  (17.7%)  3.3 calls/graph
+  MUL_MAT q8_0                20.04 ms/graph  (8.3%)  38.2 calls/graph
+  MUL_MAT_ID q8_0              5.30 ms/graph  (2.2%)  0.4 calls/graph
+  CPY                          4.81 ms/graph  (2.0%)  3.8 calls/graph
+  REPEAT                       4.20 ms/graph  (1.7%)  7.5 calls/graph
+  MUL_MAT f32                  3.46 ms/graph  (1.4%)  21.2 calls/graph
+  ROPE                         2.94 ms/graph  (1.2%)  3.7 calls/graph
+  MUL_MAT q6_K                 2.42 ms/graph  (1.0%)  0.1 calls/graph
+  SOFT_MAX                     2.05 ms/graph  (0.9%)  3.7 calls/graph
+  UNARY                        1.92 ms/graph  (0.8%)  39.2 calls/graph
+  CONT                         1.65 ms/graph  (0.7%)  19.3 calls/graph
+  ADD                          1.58 ms/graph  (0.7%)  62.5 calls/graph
+  SCALE                        1.12 ms/graph  (0.5%)  36.9 calls/graph
+ first timeOP_PROFILE after 340 graphs: total SYCL op time 226.8 ms/graph
+  FLASH_ATTN_EXT              74.69 ms/graph  (32.9%)  0.9 calls/graph
+  MUL_MAT_ID iq3_xxs          58.55 ms/graph  (25.8%)  7.2 calls/graph
+  MUL_MAT_ID iq4_nl           40.17 ms/graph  (17.7%)  3.3 calls/graph
+  MUL_MAT q8_0                18.93 ms/graph  (8.3%)  38.1 calls/graph
+  MUL_MAT_ID q8_0              5.00 ms/graph  (2.2%)  0.4 calls/graph
+  CPY                          4.53 ms/graph  (2.0%)  3.8 calls/graph
+  REPEAT                       3.95 ms/graph  (1.7%)  7.5 calls/graph
+  MUL_MAT f32                  3.28 ms/graph  (1.4%)  21.2 calls/graph
+  ROPE                         2.76 ms/graph  (1.2%)  3.7 calls/graph
+  MUL_MAT q6_K                 2.28 ms/graph  (1.0%)  0.1 calls/graph
+  SOFT_MAX                     1.93 ms/graph  (0.9%)  3.7 calls/graph
+  UNARY                        1.83 ms/graph  (0.8%)  39.2 calls/graph
+  CONT                         1.56 ms/graph  (0.7%)  19.3 calls/graph
+  ADD                          1.51 ms/graph  (0.7%)  62.4 calls/graph
+  SCALE                        1.07 ms/graph  (0.5%)  36.8 calls/graph
+."OP_PROFILE after 360 graphs: total SYCL op time 214.6 ms/graph
+  FLASH_ATTN_EXT              70.54 ms/graph  (32.9%)  0.9 calls/graph
+  MUL_MAT_ID iq3_xxs          55.36 ms/graph  (25.8%)  7.2 calls/graph
+  MUL_MAT_ID iq4_nl           37.98 ms/graph  (17.7%)  3.3 calls/graph
+  MUL_MAT q8_0                17.95 ms/graph  (8.4%)  38.2 calls/graph
+  MUL_MAT_ID q8_0              4.73 ms/graph  (2.2%)  0.4 calls/graph
+  CPY                          4.28 ms/graph  (2.0%)  3.8 calls/graph
+  REPEAT                       3.74 ms/graph  (1.7%)  7.5 calls/graph
+  MUL_MAT f32                  3.12 ms/graph  (1.5%)  21.2 calls/graph
+  ROPE                         2.61 ms/graph  (1.2%)  3.7 calls/graph
+  MUL_MAT q6_K                 2.16 ms/graph  (1.0%)  0.1 calls/graph
+  SOFT_MAX                     1.83 ms/graph  (0.9%)  3.7 calls/graph
+  UNARY                        1.74 ms/graph  (0.8%)  39.3 calls/graph
+  CONT                         1.48 ms/graph  (0.7%)  19.3 calls/graph
+  ADD                          1.46 ms/graph  (0.7%)  62.5 calls/graph
+  SCALE                        1.02 ms/graph  (0.5%)  36.9 calls/graph
+ Need produceOP_PROFILE after 380 graphs: total SYCL op time 203.6 ms/graph
+  FLASH_ATTN_EXT              66.83 ms/graph  (32.8%)  0.9 calls/graph
+  MUL_MAT_ID iq3_xxs          52.50 ms/graph  (25.8%)  7.2 calls/graph
+  MUL_MAT_ID iq4_nl           36.01 ms/graph  (17.7%)  3.3 calls/graph
+  MUL_MAT q8_0                17.06 ms/graph  (8.4%)  38.1 calls/graph
+  MUL_MAT_ID q8_0              4.49 ms/graph  (2.2%)  0.4 calls/graph
+  CPY                          4.05 ms/graph  (2.0%)  3.8 calls/graph
+  REPEAT                       3.55 ms/graph  (1.7%)  7.5 calls/graph
+  MUL_MAT f32                  2.98 ms/graph  (1.5%)  21.2 calls/graph
+  ROPE                         2.48 ms/graph  (1.2%)  3.7 calls/graph
+  MUL_MAT q6_K                 2.05 ms/graph  (1.0%)  0.1 calls/graph
+  SOFT_MAX                     1.74 ms/graph  (0.9%)  3.7 calls/graph
+  UNARY                        1.66 ms/graph  (0.8%)  39.2 calls/graph
+  CONT                         1.41 ms/graph  (0.7%)  19.3 calls/graph
+  ADD                          1.41 ms/graph  (0.7%)  62.4 calls/graph
+  SCALE                        0.98 ms/graph  (0.5%)  36.8 calls/graph
+ creativeOP_PROFILE after 400 graphs: total SYCL op time 193.7 ms/graph
+  FLASH_ATTN_EXT              63.49 ms/graph  (32.8%)  0.9 calls/graph
+  MUL_MAT_ID iq3_xxs          49.93 ms/graph  (25.8%)  7.2 calls/graph
+  MUL_MAT_ID iq4_nl           34.25 ms/graph  (17.7%)  3.3 calls/graph
+  MUL_MAT q8_0                16.27 ms/graph  (8.4%)  38.2 calls/graph
+  MUL_MAT_ID q8_0              4.27 ms/graph  (2.2%)  0.4 calls/graph
+  CPY                          3.85 ms/graph  (2.0%)  3.8 calls/graph
+  REPEAT                       3.37 ms/graph  (1.7%)  7.5 calls/graph
+  MUL_MAT f32                  2.86 ms/graph  (1.5%)  21.2 calls/graph
+  ROPE                         2.36 ms/graph  (1.2%)  3.7 calls/graph
+  MUL_MAT q6_K                 1.95 ms/graph  (1.0%)  0.1 calls/graph
+  SOFT_MAX                     1.66 ms/graph  (0.9%)  3.7 calls/graph
+  UNARY                        1.59 ms/graph  (0.8%)  39.3 calls/graph
+  ADD                          1.37 ms/graph  (0.7%)  62.5 calls/graph
+  CONT                         1.35 ms/graph  (0.7%)  19.3 calls/graph
+  SCALE                        0.94 ms/graph  (0.5%)  36.8 calls/graph
+ short storyOP_PROFILE after 420 graphs: total SYCL op time 184.7 ms/graph
+  FLASH_ATTN_EXT              60.47 ms/graph  (32.7%)  0.9 calls/graph
+  MUL_MAT_ID iq3_xxs          47.59 ms/graph  (25.8%)  7.2 calls/graph
+  MUL_MAT_ID iq4_nl           32.64 ms/graph  (17.7%)  3.3 calls/graph
+  MUL_MAT q8_0                15.55 ms/graph  (8.4%)  38.1 calls/graph
+  MUL_MAT_ID q8_0              4.07 ms/graph  (2.2%)  0.4 calls/graph
+  CPY                          3.67 ms/graph  (2.0%)  3.8 calls/graph
+  REPEAT                       3.21 ms/graph  (1.7%)  7.5 calls/graph
+  MUL_MAT f32                  2.74 ms/graph  (1.5%)  21.2 calls/graph
+  ROPE                         2.25 ms/graph  (1.2%)  3.7 calls/graph
+  MUL_MAT q6_K                 1.86 ms/graph  (1.0%)  0.1 calls/graph
+  SOFT_MAX                     1.58 ms/graph  (0.9%)  3.7 calls/graph
+  UNARY                        1.53 ms/graph  (0.8%)  39.2 calls/graph
+  ADD                          1.33 ms/graph  (0.7%)  62.4 calls/graph
+  CONT                         1.29 ms/graph  (0.7%)  19.3 calls/graph
+  SCALE                        0.91 ms/graph  (0.5%)  36.7 calls/graph
+.OP_PROFILE after 440 graphs: total SYCL op time 176.6 ms/graph
+  FLASH_ATTN_EXT              57.72 ms/graph  (32.7%)  0.9 calls/graph
+  MUL_MAT_ID iq3_xxs          45.47 ms/graph  (25.8%)  7.2 calls/graph
+  MUL_MAT_ID iq4_nl           31.19 ms/graph  (17.7%)  3.3 calls/graph
+  MUL_MAT q8_0                14.90 ms/graph  (8.4%)  38.2 calls/graph
+  MUL_MAT_ID q8_0              3.89 ms/graph  (2.2%)  0.4 calls/graph
+  CPY                          3.51 ms/graph  (2.0%)  3.8 calls/graph
+  REPEAT                       3.07 ms/graph  (1.7%)  7.5 calls/graph
+  MUL_MAT f32                  2.64 ms/graph  (1.5%)  21.3 calls/graph
+  ROPE                         2.15 ms/graph  (1.2%)  3.7 calls/graph
+  MUL_MAT q6_K                 1.78 ms/graph  (1.0%)  0.1 calls/graph
+  SOFT_MAX                     1.51 ms/graph  (0.9%)  3.7 calls/graph
+  UNARY                        1.47 ms/graph  (0.8%)  39.3 calls/graph
+  ADD                          1.29 ms/graph  (0.7%)  62.5 calls/graph
+  CONT                         1.24 ms/graph  (0.7%)  19.3 calls/graph
+  SCALE                        0.88 ms/graph  (0.5%)  36.8 calls/graph
+ Need finalOP_PROFILE after 460 graphs: total SYCL op time 169.2 ms/graph
+  FLASH_ATTN_EXT              55.21 ms/graph  (32.6%)  0.9 calls/graph
+  MUL_MAT_ID iq3_xxs          43.54 ms/graph  (25.7%)  7.2 calls/graph
+  MUL_MAT_ID iq4_nl           29.86 ms/graph  (17.7%)  3.3 calls/graph
+  MUL_MAT q8_0                14.30 ms/graph  (8.5%)  38.1 calls/graph
+  MUL_MAT_ID q8_0              3.73 ms/graph  (2.2%)  0.4 calls/graph
+  CPY                          3.35 ms/graph  (2.0%)  3.8 calls/graph
+  REPEAT                       2.94 ms/graph  (1.7%)  7.5 calls/graph
+  MUL_MAT f32                  2.54 ms/graph  (1.5%)  21.2 calls/graph
+  ROPE                         2.05 ms/graph  (1.2%)  3.7 calls/graph
+  MUL_MAT q6_K                 1.71 ms/graph  (1.0%)  0.1 calls/graph
+  SOFT_MAX                     1.45 ms/graph  (0.9%)  3.7 calls/graph
+  UNARY                        1.42 ms/graph  (0.8%)  39.2 calls/graph
+  ADD                          1.26 ms/graph  (0.7%)  62.4 calls/graph
+  CONT                         1.19 ms/graph  (0.7%)  19.3 calls/graph
+  SCALE                        0.85 ms/graph  (0.5%)  36.7 calls/graph
+ onlyOP_PROFILE after 480 graphs: total SYCL op time 162.4 ms/graph
+  FLASH_ATTN_EXT              52.92 ms/graph  (32.6%)  0.9 calls/graph
+  MUL_MAT_ID iq3_xxs          41.78 ms/graph  (25.7%)  7.2 calls/graph
+  MUL_MAT_ID iq4_nl           28.65 ms/graph  (17.6%)  3.3 calls/graph
+  MUL_MAT q8_0                13.76 ms/graph  (8.5%)  38.2 calls/graph
+  MUL_MAT_ID q8_0              3.58 ms/graph  (2.2%)  0.4 calls/graph
+  CPY                          3.22 ms/graph  (2.0%)  3.8 calls/graph
+  REPEAT                       2.82 ms/graph  (1.7%)  7.5 calls/graph
+  MUL_MAT f32                  2.45 ms/graph  (1.5%)  21.3 calls/graph
+  ROPE                         1.97 ms/graph  (1.2%)  3.7 calls/graph
+  MUL_MAT q6_K                 1.64 ms/graph  (1.0%)  0.1 calls/graph
+  SOFT_MAX                     1.39 ms/graph  (0.9%)  3.7 calls/graph
+  UNARY                        1.37 ms/graph  (0.8%)  39.3 calls/graph
+  ADD                          1.23 ms/graph  (0.8%)  62.5 calls/graph
+  CONT                         1.15 ms/graph  (0.7%)  19.3 calls/graph
+  SCALE                        0.83 ms/graph  (0.5%)  36.7 calls/graph
+ story likelyOP_PROFILE after 500 graphs: total SYCL op time 156.1 ms/graph
+  FLASH_ATTN_EXT              50.80 ms/graph  (32.5%)  0.9 calls/graph
+  MUL_MAT_ID iq3_xxs          40.15 ms/graph  (25.7%)  7.2 calls/graph
+  MUL_MAT_ID iq4_nl           27.53 ms/graph  (17.6%)  3.3 calls/graph
+  MUL_MAT q8_0                13.26 ms/graph  (8.5%)  38.2 calls/graph
+  MUL_MAT_ID q8_0              3.44 ms/graph  (2.2%)  0.4 calls/graph
+  CPY                          3.09 ms/graph  (2.0%)  3.8 calls/graph
+  REPEAT                       2.71 ms/graph  (1.7%)  7.5 calls/graph
+  MUL_MAT f32                  2.37 ms/graph  (1.5%)  21.2 calls/graph
+  ROPE                         1.89 ms/graph  (1.2%)  3.7 calls/graph
+  MUL_MAT q6_K                 1.57 ms/graph  (1.0%)  0.1 calls/graph
+  SOFT_MAX                     1.34 ms/graph  (0.9%)  3.7 calls/graph
+  UNARY                        1.33 ms/graph  (0.9%)  39.2 calls/graph
+  ADD                          1.20 ms/graph  (0.8%)  62.4 calls/graph
+  CONT                         1.11 ms/graph  (0.7%)  19.3 calls/graph
+  SCALE                        0.80 ms/graph  (0.5%)  36.7 calls/graph
+.OP_PROFILE after 520 graphs: total SYCL op time 150.3 ms/graph
+  FLASH_ATTN_EXT              48.85 ms/graph  (32.5%)  0.9 calls/graph
+  MUL_MAT_ID iq3_xxs          38.65 ms/graph  (25.7%)  7.2 calls/graph
+  MUL_MAT_ID iq4_nl           26.50 ms/graph  (17.6%)  3.3 calls/graph
+  MUL_MAT q8_0                12.79 ms/graph  (8.5%)  38.1 calls/graph
+  MUL_MAT_ID q8_0              3.31 ms/graph  (2.2%)  0.4 calls/graph
+  CPY                          2.97 ms/graph  (2.0%)  3.8 calls/graph
+  REPEAT                       2.61 ms/graph  (1.7%)  7.5 calls/graph
+  MUL_MAT f32                  2.29 ms/graph  (1.5%)  21.2 calls/graph
+  ROPE                         1.82 ms/graph  (1.2%)  3.7 calls/graph
+  MUL_MAT q6_K                 1.52 ms/graph  (1.0%)  0.1 calls/graph
+  SOFT_MAX                     1.29 ms/graph  (0.9%)  3.7 calls/graph
+  UNARY                        1.29 ms/graph  (0.9%)  39.2 calls/graph
+  ADD                          1.18 ms/graph  (0.8%)  62.4 calls/graph
+  CONT                         1.07 ms/graph  (0.7%)  19.3 calls/graph
+  SCALE                        0.78 ms/graph  (0.5%)  36.6 calls/graph
+ Keep conciseOP_PROFILE after 540 graphs: total SYCL op time 145.0 ms/graph
+  FLASH_ATTN_EXT              47.04 ms/graph  (32.4%)  0.9 calls/graph
+  MUL_MAT_ID iq3_xxs          37.25 ms/graph  (25.7%)  7.2 calls/graph
+  MUL_MAT_ID iq4_nl           25.54 ms/graph  (17.6%)  3.3 calls/graph
+  MUL_MAT q8_0                12.36 ms/graph  (8.5%)  38.2 calls/graph
+  MUL_MAT_ID q8_0              3.19 ms/graph  (2.2%)  0.4 calls/graph
+  CPY                          2.86 ms/graph  (2.0%)  3.8 calls/graph
+  REPEAT                       2.51 ms/graph  (1.7%)  7.5 calls/graph
+  MUL_MAT f32                  2.23 ms/graph  (1.5%)  21.2 calls/graph
+  ROPE                         1.75 ms/graph  (1.2%)  3.7 calls/graph
+  MUL_MAT q6_K                 1.46 ms/graph  (1.0%)  0.1 calls/graph
+  UNARY                        1.25 ms/graph  (0.9%)  39.2 calls/graph
+  SOFT_MAX                     1.25 ms/graph  (0.9%)  3.7 calls/graph
+  ADD                          1.15 ms/graph  (0.8%)  62.5 calls/graph
+  CONT                         1.04 ms/graph  (0.7%)  19.3 calls/graph
+  SCALE                        0.76 ms/graph  (0.5%)  36.6 calls/graph
+ but evOP_PROFILE after 560 graphs: total SYCL op time 140.0 ms/graph
+  FLASH_ATTN_EXT              45.36 ms/graph  (32.4%)  0.9 calls/graph
+  MUL_MAT_ID iq3_xxs          35.97 ms/graph  (25.7%)  7.2 calls/graph
+  MUL_MAT_ID iq4_nl           24.66 ms/graph  (17.6%)  3.3 calls/graph
+  MUL_MAT q8_0                11.96 ms/graph  (8.5%)  38.1 calls/graph
+  MUL_MAT_ID q8_0              3.09 ms/graph  (2.2%)  0.4 calls/graph
+  CPY                          2.76 ms/graph  (2.0%)  3.8 calls/graph
+  REPEAT                       2.43 ms/graph  (1.7%)  7.5 calls/graph
+  MUL_MAT f32                  2.16 ms/graph  (1.5%)  21.2 calls/graph
+  ROPE                         1.69 ms/graph  (1.2%)  3.7 calls/graph
+  MUL_MAT q6_K                 1.41 ms/graph  (1.0%)  0.1 calls/graph
+  UNARY                        1.21 ms/graph  (0.9%)  39.2 calls/graph
+  SOFT_MAX                     1.21 ms/graph  (0.9%)  3.7 calls/graph
+  ADD                          1.13 ms/graph  (0.8%)  62.4 calls/graph
+  CONT                         1.01 ms/graph  (0.7%)  19.3 calls/graph
+  SCALE                        0.74 ms/graph  (0.5%)  36.6 calls/graph
+oc
+
+[ Prompt: 1.7 t/s | Generation: 4.7 t/s ]
+
+
+Exiting...

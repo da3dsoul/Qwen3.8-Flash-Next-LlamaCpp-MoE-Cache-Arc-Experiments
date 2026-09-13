@@ -1,0 +1,267 @@
+1789157553 pid=3625550 stat=R read_bytes= minflt_majflt=4895822 46
+1789157553 iowait=2
+1789157558 pid=3625550 stat=R read_bytes= minflt_majflt=6393723 66
+1789157558 iowait=2
+1789157563 pid=3625550 stat=R read_bytes= minflt_majflt=6398130 67
+1789157563 iowait=21
+1789157568 pid=3625550 stat=R read_bytes= minflt_majflt=6399990 194
+1789157568 iowait=2
+1789157573 pid=3625550 stat=R read_bytes= minflt_majflt=6402829 194
+1789157573 iowait=2
+1789157578 pid=3625550 stat=R read_bytes= minflt_majflt=6413577 194
+1789157578 iowait=2
+1789157583 pid=3625550 stat=R read_bytes= minflt_majflt=6429412 194
+1789157583 iowait=2
+1789157588 pid=3625550 stat=R read_bytes= minflt_majflt=6429412 194
+1789157588 iowait=2
+1789157593 pid=3625550 stat=R read_bytes= minflt_majflt=6448738 194
+1789157593 iowait=39
+1789157598 pid=3625550 stat=D read_bytes= minflt_majflt=6456052 1993
+1789157598 iowait=5
+1789157603 pid=3625550 stat=D read_bytes= minflt_majflt=6458263 11864
+1789157603 iowait=5
+1789157608 pid=3625550 stat=D read_bytes= minflt_majflt=6458463 32653
+1789157608 iowait=4
+1789157613 pid=3625550 stat=D read_bytes= minflt_majflt=6473747 35423
+1789157613 iowait=5
+1789157618 pid=3625550 stat=D read_bytes= minflt_majflt=6493901 35488
+1789157618 iowait=4
+1789157623 pid=3625550 stat=D read_bytes= minflt_majflt=6509217 35580
+1789157623 iowait=5
+1789157628 pid=3625550 stat=D read_bytes= minflt_majflt=6522032 35699
+1789157628 iowait=5
+1789157633 pid=3625550 stat=D read_bytes= minflt_majflt=6534277 35847
+1789157633 iowait=5
+1789157638 pid=3625550 stat=D read_bytes= minflt_majflt=6550330 35943
+1789157638 iowait=5
+1789157643 pid=3625550 stat=D read_bytes= minflt_majflt=6564549 36053
+1789157643 iowait=9
+1789157648 pid=3625550 stat=D read_bytes= minflt_majflt=6614311 39081
+1789157648 iowait=5
+1789157653 pid=3625550 stat=R read_bytes= minflt_majflt=6614529 61807
+1789157653 iowait=5
+1789157658 pid=3625550 stat=D read_bytes= minflt_majflt=6636692 70533
+1789157658 iowait=5
+1789157663 pid=3625550 stat=D read_bytes= minflt_majflt=6636825 96925
+1789157663 iowait=5
+1789157669 pid=3625550 stat=D read_bytes= minflt_majflt=6646347 106215
+1789157669 iowait=5
+1789157674 pid=3625550 stat=D read_bytes= minflt_majflt=6646509 132835
+1789157674 iowait=4
+1789157679 pid=3625550 stat=D read_bytes= minflt_majflt=6655049 140343
+1789157679 iowait=5
+1789157684 pid=3625550 stat=D read_bytes= minflt_majflt=6655212 165701
+1789157684 iowait=4
+1789157689 pid=3625550 stat=R read_bytes= minflt_majflt=6715459 169039
+1789157689 iowait=3
+1789157694 pid=3625550 stat=D read_bytes= minflt_majflt=6716982 187675
+1789157694 iowait=5
+1789157699 pid=3625550 stat=R read_bytes= minflt_majflt=6723919 201905
+1789157699 iowait=25
+1789157704 pid=3625550 stat=D read_bytes= minflt_majflt=6724299 213736
+1789157704 iowait=28
+1789157709 pid=3625550 stat=D read_bytes= minflt_majflt=6724299 214208
+1789157709 iowait=34
+1789157714 pid=3625550 stat=D read_bytes= minflt_majflt=6724299 214648
+1789157714 iowait=29
+1789157719 pid=3625550 stat=D read_bytes= minflt_majflt=6724301 215150
+1789157719 iowait=5
+1789157724 pid=3625550 stat=D read_bytes= minflt_majflt=6724306 215628
+1789157724 iowait=5
+1789157729 pid=3625550 stat=D read_bytes= minflt_majflt=6724310 216059
+1789157729 iowait=5
+1789157734 pid=3625550 stat=D read_bytes= minflt_majflt=6724315 216508
+1789157734 iowait=5
+1789157739 pid=3625550 stat=D read_bytes= minflt_majflt=6724319 216981
+1789157739 iowait=5
+1789157744 pid=3625550 stat=D read_bytes= minflt_majflt=6724323 217383
+1789157744 iowait=5
+1789157749 pid=3625550 stat=D read_bytes= minflt_majflt=6724328 217821
+1789157749 iowait=5
+1789157754 pid=3625550 stat=D read_bytes= minflt_majflt=6724332 218282
+1789157754 iowait=5
+1789157759 pid=3625550 stat=D read_bytes= minflt_majflt=6724336 218683
+1789157759 iowait=5
+1789157764 pid=3625550 stat=D read_bytes= minflt_majflt=6724340 219077
+1789157764 iowait=5
+1789157769 pid=3625550 stat=D read_bytes= minflt_majflt=6724344 219466
+1789157769 iowait=5
+1789157774 pid=3625550 stat=D read_bytes= minflt_majflt=6724349 219902
+1789157774 iowait=5
+1789157779 pid=3625550 stat=D read_bytes= minflt_majflt=6724352 220297
+1789157779 iowait=5
+1789157784 pid=3625550 stat=D read_bytes= minflt_majflt=6724356 220648
+1789157784 iowait=5
+1789157789 pid=3625550 stat=D read_bytes= minflt_majflt=6724360 221065
+1789157789 iowait=5
+1789157794 pid=3625550 stat=D read_bytes= minflt_majflt=6724364 221483
+1789157794 iowait=5
+1789157799 pid=3625550 stat=D read_bytes= minflt_majflt=6724368 221873
+1789157799 iowait=5
+1789157804 pid=3625550 stat=D read_bytes= minflt_majflt=6724372 222305
+1789157804 iowait=5
+1789157809 pid=3625550 stat=D read_bytes= minflt_majflt=6724376 222741
+1789157809 iowait=5
+1789157814 pid=3625550 stat=D read_bytes= minflt_majflt=6724381 223167
+1789157814 iowait=5
+1789157819 pid=3625550 stat=D read_bytes= minflt_majflt=6724385 223617
+1789157819 iowait=5
+1789157824 pid=3625550 stat=D read_bytes= minflt_majflt=6724389 224040
+1789157824 iowait=5
+1789157829 pid=3625550 stat=D read_bytes= minflt_majflt=6724394 224493
+1789157829 iowait=5
+1789157834 pid=3625550 stat=D read_bytes= minflt_majflt=6724398 224919
+1789157834 iowait=5
+1789157839 pid=3625550 stat=D read_bytes= minflt_majflt=6724402 225330
+1789157839 iowait=5
+1789157844 pid=3625550 stat=D read_bytes= minflt_majflt=6724406 225769
+1789157844 iowait=5
+1789157849 pid=3625550 stat=D read_bytes= minflt_majflt=6724410 226188
+1789157849 iowait=5
+1789157854 pid=3625550 stat=D read_bytes= minflt_majflt=6724415 226692
+1789157854 iowait=5
+1789157859 pid=3625550 stat=D read_bytes= minflt_majflt=6724419 227089
+1789157859 iowait=5
+1789157864 pid=3625550 stat=D read_bytes= minflt_majflt=6724424 227553
+1789157864 iowait=5
+1789157870 pid=3625550 stat=D read_bytes= minflt_majflt=6724428 227993
+1789157870 iowait=5
+1789157875 pid=3625550 stat=D read_bytes= minflt_majflt=6724433 228460
+1789157875 iowait=5
+1789157880 pid=3625550 stat=D read_bytes= minflt_majflt=6724437 228876
+1789157880 iowait=5
+1789157885 pid=3625550 stat=D read_bytes= minflt_majflt=6724441 229280
+1789157885 iowait=5
+1789157890 pid=3625550 stat=D read_bytes= minflt_majflt=6724445 229703
+1789157890 iowait=5
+1789157895 pid=3625550 stat=D read_bytes= minflt_majflt=6724450 230180
+1789157895 iowait=5
+1789157900 pid=3625550 stat=D read_bytes= minflt_majflt=6724454 230595
+1789157900 iowait=5
+1789157905 pid=3625550 stat=D read_bytes= minflt_majflt=6724459 231083
+1789157905 iowait=5
+1789157910 pid=3625550 stat=D read_bytes= minflt_majflt=6724464 231547
+1789157910 iowait=5
+1789157915 pid=3625550 stat=D read_bytes= minflt_majflt=6724468 232019
+1789157915 iowait=5
+1789157920 pid=3625550 stat=D read_bytes= minflt_majflt=6724473 232515
+1789157920 iowait=5
+1789157925 pid=3625550 stat=D read_bytes= minflt_majflt=6724478 233004
+1789157925 iowait=5
+1789157930 pid=3625550 stat=D read_bytes= minflt_majflt=6724483 233467
+1789157930 iowait=5
+1789157935 pid=3625550 stat=D read_bytes= minflt_majflt=6724487 233957
+1789157935 iowait=5
+1789157940 pid=3625550 stat=R read_bytes= minflt_majflt=6725429 234316
+1789157940 iowait=2
+1789157945 pid=3625550 stat=D read_bytes= minflt_majflt=6727812 234577
+1789157945 iowait=5
+1789157950 pid=3625550 stat=D read_bytes= minflt_majflt=6727812 235074
+1789157950 iowait=5
+1789157955 pid=3625550 stat=D read_bytes= minflt_majflt=6727812 235577
+1789157955 iowait=5
+1789157960 pid=3625550 stat=D read_bytes= minflt_majflt=6727812 236021
+1789157960 iowait=5
+1789157965 pid=3625550 stat=D read_bytes= minflt_majflt=6727812 236480
+1789157965 iowait=5
+1789157970 pid=3625550 stat=D read_bytes= minflt_majflt=6727812 236941
+1789157970 iowait=5
+1789157975 pid=3625550 stat=D read_bytes= minflt_majflt=6727812 237407
+1789157975 iowait=5
+1789157980 pid=3625550 stat=D read_bytes= minflt_majflt=6727812 237877
+1789157980 iowait=5
+1789157985 pid=3625550 stat=D read_bytes= minflt_majflt=6727812 238371
+1789157985 iowait=5
+1789157990 pid=3625550 stat=D read_bytes= minflt_majflt=6727812 238874
+1789157990 iowait=5
+1789157995 pid=3625550 stat=D read_bytes= minflt_majflt=6727812 239365
+1789157995 iowait=5
+1789158000 pid=3625550 stat=D read_bytes= minflt_majflt=6727812 239850
+1789158000 iowait=5
+1789158005 pid=3625550 stat=D read_bytes= minflt_majflt=6727812 240361
+1789158005 iowait=5
+1789158010 pid=3625550 stat=D read_bytes= minflt_majflt=6727812 240868
+1789158010 iowait=5
+1789158015 pid=3625550 stat=D read_bytes= minflt_majflt=6727812 241408
+1789158015 iowait=6
+1789158020 pid=3625550 stat=D read_bytes= minflt_majflt=6727812 241913
+1789158020 iowait=5
+1789158025 pid=3625550 stat=D read_bytes= minflt_majflt=6727812 242438
+1789158025 iowait=5
+1789158030 pid=3625550 stat=D read_bytes= minflt_majflt=6727812 243636
+1789158030 iowait=5
+1789158035 pid=3625550 stat=D read_bytes= minflt_majflt=6727812 244071
+1789158035 iowait=5
+1789158040 pid=3625550 stat=D read_bytes= minflt_majflt=6727812 244545
+1789158040 iowait=5
+1789158045 pid=3625550 stat=D read_bytes= minflt_majflt=6727812 244955
+1789158045 iowait=5
+1789158050 pid=3625550 stat=D read_bytes= minflt_majflt=6727812 245424
+1789158050 iowait=5
+1789158055 pid=3625550 stat=D read_bytes= minflt_majflt=6727812 245893
+1789158055 iowait=5
+1789158060 pid=3625550 stat=D read_bytes= minflt_majflt=6727812 246256
+1789158060 iowait=5
+1789158065 pid=3625550 stat=D read_bytes= minflt_majflt=6727812 246724
+1789158065 iowait=5
+1789158071 pid=3625550 stat=D read_bytes= minflt_majflt=6727812 247126
+1789158071 iowait=5
+1789158076 pid=3625550 stat=D read_bytes= minflt_majflt=6727815 247571
+1789158076 iowait=5
+1789158081 pid=3625550 stat=D read_bytes= minflt_majflt=6727820 247995
+1789158081 iowait=5
+1789158086 pid=3625550 stat=D read_bytes= minflt_majflt=6727824 248401
+1789158086 iowait=5
+1789158091 pid=3625550 stat=D read_bytes= minflt_majflt=6727827 248793
+1789158091 iowait=5
+1789158096 pid=3625550 stat=D read_bytes= minflt_majflt=6727832 249201
+1789158096 iowait=5
+1789158101 pid=3625550 stat=D read_bytes= minflt_majflt=6727835 249592
+1789158101 iowait=5
+1789158106 pid=3625550 stat=D read_bytes= minflt_majflt=6727839 249989
+1789158106 iowait=5
+1789158111 pid=3625550 stat=D read_bytes= minflt_majflt=6727844 250448
+1789158111 iowait=5
+1789158116 pid=3625550 stat=D read_bytes= minflt_majflt=6727848 250889
+1789158116 iowait=5
+1789158121 pid=3625550 stat=D read_bytes= minflt_majflt=6727853 251321
+1789158121 iowait=5
+1789158126 pid=3625550 stat=D read_bytes= minflt_majflt=6727857 251739
+1789158126 iowait=5
+1789158131 pid=3625550 stat=D read_bytes= minflt_majflt=6727860 252124
+1789158131 iowait=5
+1789158136 pid=3625550 stat=D read_bytes= minflt_majflt=6727865 252610
+1789158136 iowait=5
+1789158141 pid=3625550 stat=D read_bytes= minflt_majflt=6727870 253062
+1789158141 iowait=5
+1789158146 pid=3625550 stat=D read_bytes= minflt_majflt=6727874 253466
+1789158146 iowait=5
+1789158151 pid=3625550 stat=D read_bytes= minflt_majflt=6727878 253890
+1789158151 iowait=5
+1789158156 pid=3625550 stat=D read_bytes= minflt_majflt=6727882 254284
+1789158156 iowait=5
+1789158161 pid=3625550 stat=D read_bytes= minflt_majflt=6727887 254756
+1789158161 iowait=5
+1789158166 pid=3625550 stat=D read_bytes= minflt_majflt=6727891 255163
+1789158166 iowait=5
+1789158171 pid=3625550 stat=D read_bytes= minflt_majflt=6727895 255595
+1789158171 iowait=5
+1789158176 pid=3625550 stat=D read_bytes= minflt_majflt=6727899 255971
+1789158176 iowait=5
+1789158181 pid=3625550 stat=D read_bytes= minflt_majflt=6727902 256364
+1789158181 iowait=5
+1789158186 pid=3625550 stat=D read_bytes= minflt_majflt=6727907 256784
+1789158186 iowait=5
+1789158191 pid=3625550 stat=D read_bytes= minflt_majflt=6727912 257270
+1789158191 iowait=5
+1789158196 pid=3625550 stat=D read_bytes= minflt_majflt=6727916 257746
+1789158196 iowait=5
+1789158201 pid=3625550 stat=D read_bytes= minflt_majflt=6727921 258224
+1789158201 iowait=5
+1789158206 pid=3625550 stat=D read_bytes= minflt_majflt=6727925 258650
+1789158206 iowait=5
+1789158211 pid=3625550 stat=D read_bytes= minflt_majflt=6727929 259066
+1789158211 iowait=5
+1789158216 pid=3625550 stat=D read_bytes= minflt_majflt=6727934 259518
+1789158216 iowait=5
+1789158221 pid=3625550 stat=D read_bytes= minflt_majflt=6727939 260022

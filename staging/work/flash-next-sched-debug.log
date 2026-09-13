@@ -1,0 +1,21 @@
+0.00.205.228 I cmn  common_param: common_params_print_info: verbosity = 3 (adjust with the `-lv N` CLI arg)
+0.00.205.547 W srv  llama_server: -----------------
+0.00.205.548 W srv  llama_server: CORS is set to allow all origins ('*') and no API key is set
+0.00.205.548 W srv  llama_server: this can be a security risk (cross-origin attacks)
+0.00.205.548 W srv  llama_server: more info: https://github.com/ggml-org/llama.cpp/pull/25655
+0.00.205.548 W srv  llama_server: -----------------
+0.00.206.735 I srv    load_model: loading model '/models/Qwen3.8-Flash-Next-GGUF/UD-IQ3_XXS/Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf'
+0.00.797.783 W llama_model_loader: tensor overrides to CPU are used with mmap enabled - consider using --load-mode none for better performance
+0.01.660.747 I cmn          init: llama threadpool init, n_threads = 32
+0.38.395.323 I srv    load_model: initializing, n_slots = 1, n_ctx_slot = 4096, kv_unified = 'false'
+0.38.398.415 W srv          init: chat template supports preserving reasoning, it is enabled by default (may use more tokens, disable via --no-reasoning-preserve)
+0.38.398.441 I srv  llama_server: model loaded
+0.38.398.442 I srv  llama_server: listening on http://127.0.0.1:40689
+0.38.472.630 I slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = -1
+0.38.472.745 I slot launch_slot_: id  0 | task 0 | processing task, is_child = 0
+0.42.545.137 I slot print_timing: id  0 | task 0 | prompt eval time =    2842.91 ms /    57 tokens (   49.88 ms per token,    20.05 tokens per second)
+0.42.545.143 I slot print_timing: id  0 | task 0 |        eval time =    1229.44 ms /     4 tokens (  409.81 ms per token,     2.44 tokens per second)
+0.42.545.144 I slot print_timing: id  0 | task 0 |       total time =    4072.35 ms /    61 tokens
+0.42.545.146 I slot print_timing: id  0 | task 0 |    graphs reused =          2
+0.42.545.178 I slot      release: id  0 | task 0 | stop processing: n_tokens = 60, truncated = 0
+0.42.545.470 I srv    operator(): operator(): cleaning up before exit...

@@ -1,0 +1,8 @@
+load_backend: loaded SYCL backend from /devbin/libggml-sycl.so
+load_backend: loaded CPU backend from /devbin/libggml-cpu-zen4.so
+| model                          |       size |     params | backend    | ngl |  n_cpu_moe | n_ubatch | type_k | type_v |  fa |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | ---------: | -------: | -----: | -----: | --: | --------------: | -------------------: |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |            tg32 |          1.30 ± 0.00 |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |    tg32 @ d2048 |         23.54 ± 0.00 |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |    tg32 @ d8192 |         22.93 ± 0.00 |
+

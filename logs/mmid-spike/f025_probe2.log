@@ -1,0 +1,118 @@
+
+
+Loading model... |-\MMID_HYBRID: enabled, fraction 0.250, report window 780 dispatches
+|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\MMID_HYBRID: blk.0.ffn_gate_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.0.ffn_up_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.0.ffn_down_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+|MMID_HYBRID: blk.1.ffn_gate_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.1.ffn_up_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.1.ffn_down_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.2.ffn_gate_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.2.ffn_up_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.2.ffn_down_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\MMID_HYBRID: blk.3.ffn_gate_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.3.ffn_up_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.3.ffn_down_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.4.ffn_gate_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.4.ffn_up_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.4.ffn_down_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.5.ffn_gate_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.5.ffn_up_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.5.ffn_down_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.6.ffn_gate_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.6.ffn_up_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.6.ffn_down_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.7.ffn_gate_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.7.ffn_up_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.7.ffn_down_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.8.ffn_gate_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.8.ffn_up_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.8.ffn_down_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.9.ffn_gate_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.9.ffn_up_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.9.ffn_down_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.10.ffn_gate_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.10.ffn_up_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.10.ffn_down_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.11.ffn_gate_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.11.ffn_up_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.11.ffn_down_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.12.ffn_gate_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.12.ffn_up_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.12.ffn_down_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.13.ffn_gate_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.13.ffn_up_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.13.ffn_down_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.14.ffn_gate_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.14.ffn_up_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.14.ffn_down_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.15.ffn_gate_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.15.ffn_up_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.15.ffn_down_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.16.ffn_gate_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.16.ffn_up_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.16.ffn_down_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.17.ffn_gate_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.17.ffn_up_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.17.ffn_down_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.18.ffn_gate_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.18.ffn_up_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.18.ffn_down_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+|MMID_HYBRID: blk.19.ffn_gate_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.19.ffn_up_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.19.ffn_down_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.20.ffn_gate_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.20.ffn_up_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.20.ffn_down_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.21.ffn_gate_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.21.ffn_up_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.21.ffn_down_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.22.ffn_gate_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.22.ffn_up_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.22.ffn_down_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.23.ffn_gate_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.23.ffn_up_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.23.ffn_down_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.24.ffn_gate_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.24.ffn_up_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.24.ffn_down_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.25.ffn_gate_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.25.ffn_up_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+MMID_HYBRID: blk.25.ffn_down_exps.weight is not device accessible (usm kind 3), declining. Place the CPU-resident experts in SYCL_Host.
+/-\| 
+
+▄▄ ▄▄
+██ ██
+██ ██  ▀▀█▄ ███▄███▄  ▀▀█▄    ▄████ ████▄ ████▄
+██ ██ ▄█▀██ ██ ██ ██ ▄█▀██    ██    ██ ██ ██ ██
+██ ██ ▀█▄██ ██ ██ ██ ▀█▄██ ██ ▀████ ████▀ ████▀
+                                    ██    ██
+                                    ▀▀    ▀▀
+
+build      : b10882-6d9c82ea2
+model      : /models/Qwen3.8-Flash-Next-GGUF/UD-IQ3_XXS/Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf
+ftype      : IQ3_XXS - 3.0625 bpw
+modalities : text
+
+available commands:
+  /exit or Ctrl+C     stop or exit
+  /regen              regenerate the last response
+  /clear              clear the chat history
+  /read <file>        add a text file
+  /glob <pattern>     add text files using globbing pattern
+
+
+
+> Count from one to fifty.
+
+[Start thinking]
+
+We need answer user: "Count from one to fifty." Simple. Need final likely list 1 to 50. Could be just numbers. Ensure maybe English words? User says count from one to fifty. Could output 1,2,...50 or words. Probably numbers. Keep concise.
+[End thinking]
+
+1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50
+
+[ Prompt: 24.6 t/s | Generation: 25.7 t/s ]
+
+
+Exiting...

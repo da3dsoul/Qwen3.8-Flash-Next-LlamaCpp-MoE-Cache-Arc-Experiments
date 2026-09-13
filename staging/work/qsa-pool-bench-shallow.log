@@ -1,0 +1,50 @@
+### arm=warm 03:37:14
+| model                          |       size |     params | backend    | ngl |  n_cpu_moe | n_ubatch | type_k | type_v |  fa |         lm | lazy_mode  |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | ---------: | -------: | -----: | -----: | --: | ---------: | ---------- | --------------: | -------------------: |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |            tg32 |         26.61 ± 0.00 |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |    tg32 @ d8192 |         25.40 ± 0.08 |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |   tg32 @ d32768 |         21.11 ± 0.00 |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |   tg32 @ d65536 |         17.16 ± 0.08 |
+
+build: 6d9c82ea2 (10882)
+### rc=0
+### arm=pool 03:44:14
+| model                          |       size |     params | backend    | ngl |  n_cpu_moe | n_ubatch | type_k | type_v |  fa |         lm | lazy_mode  |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | ---------: | -------: | -----: | -----: | --: | ---------: | ---------- | --------------: | -------------------: |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |            tg32 |         26.64 ± 0.09 |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |    tg32 @ d8192 |         25.49 ± 0.04 |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |   tg32 @ d32768 |         21.28 ± 0.00 |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |   tg32 @ d65536 |         17.34 ± 0.19 |
+
+build: 6d9c82ea2 (10882)
+### rc=0
+### arm=plain 03:50:35
+| model                          |       size |     params | backend    | ngl |  n_cpu_moe | n_ubatch | type_k | type_v |  fa |         lm | lazy_mode  |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | ---------: | -------: | -----: | -----: | --: | ---------: | ---------- | --------------: | -------------------: |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |            tg32 |         26.39 ± 0.15 |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |    tg32 @ d8192 |         24.62 ± 0.46 |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |   tg32 @ d32768 |         19.75 ± 0.29 |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |   tg32 @ d65536 |         15.50 ± 0.11 |
+
+build: 6d9c82ea2 (10882)
+### rc=0
+### arm=pool 03:57:05
+| model                          |       size |     params | backend    | ngl |  n_cpu_moe | n_ubatch | type_k | type_v |  fa |         lm | lazy_mode  |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | ---------: | -------: | -----: | -----: | --: | ---------: | ---------- | --------------: | -------------------: |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |            tg32 |         25.89 ± 0.18 |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |    tg32 @ d8192 |         24.23 ± 0.25 |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |   tg32 @ d32768 |         20.72 ± 0.42 |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |   tg32 @ d65536 |         17.19 ± 0.10 |
+
+build: 6d9c82ea2 (10882)
+### rc=0
+### arm=plain 04:04:03
+| model                          |       size |     params | backend    | ngl |  n_cpu_moe | n_ubatch | type_k | type_v |  fa |         lm | lazy_mode  |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | ---------: | -------: | -----: | -----: | --: | ---------: | ---------- | --------------: | -------------------: |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |            tg32 |         26.67 ± 0.05 |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |    tg32 @ d8192 |         24.77 ± 0.09 |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |   tg32 @ d32768 |         19.79 ± 0.02 |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |   tg32 @ d65536 |         15.44 ± 0.09 |
+
+build: 6d9c82ea2 (10882)
+### rc=0

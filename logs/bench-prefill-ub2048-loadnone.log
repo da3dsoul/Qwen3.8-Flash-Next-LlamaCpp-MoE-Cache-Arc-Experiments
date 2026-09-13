@@ -1,0 +1,16 @@
+load_backend: loaded SYCL backend from /app/libggml-sycl.so
+load_backend: loaded CPU backend from /app/libggml-cpu-zen4.so
+llama-bench: benchmark 1/2: starting
+llama-bench: benchmark 1/2: warmup prompt run
+llama-bench: benchmark 1/2: prompt run 1/2
+llama-bench: benchmark 1/2: prompt run 2/2
+| model                          |       size |     params | backend    | ngl |  n_cpu_moe | threads | n_ubatch |         lm |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | ---------: | ------: | -------: | ---------: | --------------: | -------------------: |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       | 999 |         48 |      32 |     2048 |       none |          pp4096 |          5.96 ± 0.01 |
+llama-bench: benchmark 2/2: starting
+llama-bench: benchmark 2/2: warmup generation run
+llama-bench: benchmark 2/2: generation run 1/2
+llama-bench: benchmark 2/2: generation run 2/2
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       | 999 |         48 |      32 |     2048 |       none |            tg64 |          3.81 ± 0.09 |
+
+build: 6d9c82e (1)

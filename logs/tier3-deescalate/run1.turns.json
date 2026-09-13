@@ -1,0 +1,74 @@
+[
+  {
+    "turn": "t1-short",
+    "wall_s": 8.78,
+    "prompt_tokens": 22,
+    "completion_tokens": 48,
+    "prompt_n": 22,
+    "prompt_ms": 428.845,
+    "prompt_per_second": 51.300586458977016,
+    "predicted_per_second": 14.310285350134622,
+    "finish_reason": "length",
+    "reply": ""
+  },
+  {
+    "turn": "t2-short",
+    "wall_s": 3.88,
+    "prompt_tokens": 49,
+    "completion_tokens": 48,
+    "prompt_n": 31,
+    "prompt_ms": 613.51,
+    "prompt_per_second": 50.528923733924465,
+    "predicted_per_second": 14.51210309398038,
+    "finish_reason": "length",
+    "reply": ""
+  },
+  {
+    "turn": "t3-cross",
+    "wall_s": 35.44,
+    "prompt_tokens": 1747,
+    "completion_tokens": 128,
+    "prompt_n": 1747,
+    "prompt_ms": 20466.108,
+    "prompt_per_second": 85.36063622844168,
+    "predicted_per_second": 13.510049029776361,
+    "finish_reason": "length",
+    "reply": ""
+  },
+  {
+    "turn": "t4-deep",
+    "wall_s": 2.99,
+    "prompt_tokens": 1775,
+    "completion_tokens": 32,
+    "prompt_n": 32,
+    "prompt_ms": 686.039,
+    "prompt_per_second": 46.644578515215606,
+    "predicted_per_second": 13.501853891648057,
+    "finish_reason": "stop",
+    "reply": "There were roughly 10 similar function definitions, including pairs for user and order processing, validation, calculation, formatting, retrieval, and updates."
+  },
+  {
+    "turn": "t5-new-chat",
+    "wall_s": 3.73,
+    "prompt_tokens": 19,
+    "completion_tokens": 48,
+    "prompt_n": 19,
+    "prompt_ms": 401.89,
+    "prompt_per_second": 47.27661798004429,
+    "predicted_per_second": 14.518078560103147,
+    "finish_reason": "length",
+    "reply": ""
+  },
+  {
+    "turn": "t6-new-chat",
+    "wall_s": 3.7,
+    "prompt_tokens": 22,
+    "completion_tokens": 48,
+    "prompt_n": 22,
+    "prompt_ms": 422.336,
+    "prompt_per_second": 52.091225943324744,
+    "predicted_per_second": 14.47882841017227,
+    "finish_reason": "length",
+    "reply": ""
+  }
+]

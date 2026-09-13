@@ -1,0 +1,154 @@
+
+
+Loading model... |-\MMID_HYBRID: enabled, fraction 1.000, report window 780 dispatches
+|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|MMID_HYBRID: calibration [start of decode] 20 rows, ncols 2560, nrows_out 640, 200 iters
+MMID_HYBRID:   [start of decode] bare  submit+wait  : min    15.1 us  mean    17.1 us
+MMID_HYBRID:   [start of decode] full chain, host w : min   474.3 us  mean   485.8 us  (ok=1)
+MMID_HYBRID:   [start of decode] full chain, vram w : min    78.3 us  mean    80.1 us
+/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/ 
+
+▄▄ ▄▄
+██ ██
+██ ██  ▀▀█▄ ███▄███▄  ▀▀█▄    ▄████ ████▄ ████▄
+██ ██ ▄█▀██ ██ ██ ██ ▄█▀██    ██    ██ ██ ██ ██
+██ ██ ▀█▄██ ██ ██ ██ ▀█▄██ ██ ▀████ ████▀ ████▀
+                                    ██    ██
+                                    ▀▀    ▀▀
+
+build      : b10882-6d9c82ea2
+model      : /models/Qwen3.8-Flash-Next-GGUF/UD-IQ3_XXS/Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf
+ftype      : IQ3_XXS - 3.0625 bpw
+modalities : text
+
+available commands:
+  /exit or Ctrl+C     stop or exit
+  /regen              regenerate the last response
+  /clear              clear the chat history
+  /read <file>        add a text file
+  /glob <pattern>     add text files using globbing pattern
+
+
+
+> Count from one to fifty.
+
+[Start thinking]
+
+We need answer user: "CountMMID_HYBRID: 780 dispatches, 15.0 rows each | round trip mean 3261.0 us (min 251.1, max 121192.6) = gather+submit 167.5 + wait 3084.9 + scatter 4.3
+MMID_HYBRID: calibration [in flight] 20 rows, ncols 2560, nrows_out 640, 30 iters
+MMID_HYBRID:   [in flight] bare  submit+wait  : min     7.0 us  mean     8.4 us
+MMID_HYBRID:   [in flight] full chain, host w : min   476.8 us  mean   479.5 us  (ok=1)
+MMID_HYBRID:   [in flight] full chain, vram w : min    82.4 us  mean    83.6 us
+ from one to fifty." Simple. Need final likelyMMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2073.9 us (min 252.8, max 5711.6) = gather+submit 11.6 + wait 2054.8 + scatter 3.1
+MMID_HYBRID: calibration [in flight] 20 rows, ncols 2560, nrows_out 640, 30 iters
+MMID_HYBRID:   [in flight] bare  submit+wait  : min     6.2 us  mean     7.3 us
+MMID_HYBRID:   [in flight] full chain, host w : min   476.6 us  mean   478.9 us  (ok=1)
+MMID_HYBRID:   [in flight] full chain, vram w : min    78.6 us  mean    80.6 us
+ list 1 to 50. Could beMMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2073.7 us (min 252.4, max 6100.8) = gather+submit 10.1 + wait 2055.7 + scatter 3.1
+MMID_HYBRID: calibration [in flight] 20 rows, ncols 2560, nrows_out 640, 30 iters
+MMID_HYBRID:   [in flight] bare  submit+wait  : min     6.6 us  mean     7.7 us
+MMID_HYBRID:   [in flight] full chain, host w : min   476.6 us  mean   478.7 us  (ok=1)
+MMID_HYBRID:   [in flight] full chain, vram w : min    81.1 us  mean    82.8 us
+ concise. Ensure maybe just numbers.
+MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2073.7 us (min 252.5, max 5740.1) = gather+submit 10.1 + wait 2055.8 + scatter 3.0
+MMID_HYBRID: calibration [in flight] 20 rows, ncols 2560, nrows_out 640, 30 iters
+MMID_HYBRID:   [in flight] bare  submit+wait  : min     6.8 us  mean     7.7 us
+MMID_HYBRID:   [in flight] full chain, host w : min   475.1 us  mean   477.1 us  (ok=1)
+MMID_HYBRID:   [in flight] full chain, vram w : min    80.7 us  mean    83.0 us
+[End thinking]
+
+1, 2, 3, 4MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2077.6 us (min 253.7, max 5908.3) = gather+submit 11.6 + wait 2058.6 + scatter 3.2
+MMID_HYBRID: calibration [in flight] 20 rows, ncols 2560, nrows_out 640, 30 iters
+MMID_HYBRID:   [in flight] bare  submit+wait  : min     6.8 us  mean     7.7 us
+MMID_HYBRID:   [in flight] full chain, host w : min   477.6 us  mean   481.9 us  (ok=1)
+MMID_HYBRID:   [in flight] full chain, vram w : min    78.9 us  mean    80.9 us
+, 5, 6, 7,MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2071.3 us (min 254.0, max 5755.0) = gather+submit 10.4 + wait 2053.4 + scatter 3.0
+MMID_HYBRID: calibration [in flight] 20 rows, ncols 2560, nrows_out 640, 30 iters
+MMID_HYBRID:   [in flight] bare  submit+wait  : min     6.7 us  mean     7.6 us
+MMID_HYBRID:   [in flight] full chain, host w : min   477.5 us  mean   479.5 us  (ok=1)
+MMID_HYBRID:   [in flight] full chain, vram w : min    80.7 us  mean    82.5 us
+ 8, 9, 10,MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2072.0 us (min 253.9, max 5727.5) = gather+submit 11.0 + wait 2053.6 + scatter 3.1
+MMID_HYBRID: calibration [in flight] 20 rows, ncols 2560, nrows_out 640, 30 iters
+MMID_HYBRID:   [in flight] bare  submit+wait  : min     7.0 us  mean     7.9 us
+MMID_HYBRID:   [in flight] full chain, host w : min   478.5 us  mean   481.9 us  (ok=1)
+MMID_HYBRID:   [in flight] full chain, vram w : min    81.0 us  mean    82.6 us
+ 11, 12, 1MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2073.1 us (min 250.7, max 5770.5) = gather+submit 13.0 + wait 2052.5 + scatter 3.7
+MMID_HYBRID: calibration [in flight] 20 rows, ncols 2560, nrows_out 640, 30 iters
+MMID_HYBRID:   [in flight] bare  submit+wait  : min     6.7 us  mean     7.8 us
+MMID_HYBRID:   [in flight] full chain, host w : min   478.4 us  mean   480.6 us  (ok=1)
+MMID_HYBRID:   [in flight] full chain, vram w : min    80.7 us  mean    82.5 us
+3, 14, 15,MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2078.0 us (min 251.4, max 6343.9) = gather+submit 11.5 + wait 2059.1 + scatter 3.2
+MMID_HYBRID: calibration [in flight] 20 rows, ncols 2560, nrows_out 640, 30 iters
+MMID_HYBRID:   [in flight] bare  submit+wait  : min     6.7 us  mean     7.7 us
+MMID_HYBRID:   [in flight] full chain, host w : min   477.9 us  mean   480.7 us  (ok=1)
+MMID_HYBRID:   [in flight] full chain, vram w : min    81.1 us  mean    83.0 us
+ 16, 17, 1MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2076.5 us (min 253.0, max 5890.5) = gather+submit 12.9 + wait 2055.6 + scatter 3.7
+MMID_HYBRID: calibration [in flight] 20 rows, ncols 2560, nrows_out 640, 30 iters
+MMID_HYBRID:   [in flight] bare  submit+wait  : min     7.0 us  mean     7.9 us
+MMID_HYBRID:   [in flight] full chain, host w : min   477.9 us  mean   481.2 us  (ok=1)
+MMID_HYBRID:   [in flight] full chain, vram w : min    78.7 us  mean    82.6 us
+8, 19, 20,MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2075.3 us (min 251.0, max 5744.5) = gather+submit 13.5 + wait 2054.3 + scatter 3.7
+MMID_HYBRID: calibration [in flight] 20 rows, ncols 2560, nrows_out 640, 30 iters
+MMID_HYBRID:   [in flight] bare  submit+wait  : min     6.7 us  mean     8.0 us
+MMID_HYBRID:   [in flight] full chain, host w : min   477.4 us  mean   483.1 us  (ok=1)
+MMID_HYBRID:   [in flight] full chain, vram w : min    79.9 us  mean    82.2 us
+ 21, 22, 2MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2075.3 us (min 254.6, max 6128.5) = gather+submit 14.3 + wait 2053.0 + scatter 4.3
+MMID_HYBRID: calibration [in flight] 20 rows, ncols 2560, nrows_out 640, 30 iters
+MMID_HYBRID:   [in flight] bare  submit+wait  : min     7.1 us  mean     8.1 us
+MMID_HYBRID:   [in flight] full chain, host w : min   476.6 us  mean   519.3 us  (ok=1)
+MMID_HYBRID:   [in flight] full chain, vram w : min    79.8 us  mean    81.0 us
+3, 24, 25,MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2075.5 us (min 253.7, max 5771.1) = gather+submit 14.7 + wait 2053.2 + scatter 4.0
+MMID_HYBRID: calibration [in flight] 20 rows, ncols 2560, nrows_out 640, 30 iters
+MMID_HYBRID:   [in flight] bare  submit+wait  : min     7.0 us  mean     8.6 us
+MMID_HYBRID:   [in flight] full chain, host w : min   476.2 us  mean   486.9 us  (ok=1)
+MMID_HYBRID:   [in flight] full chain, vram w : min    79.9 us  mean    81.1 us
+ 26, 27, 2MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2074.5 us (min 253.5, max 5783.7) = gather+submit 13.7 + wait 2052.7 + scatter 4.4
+MMID_HYBRID: calibration [in flight] 20 rows, ncols 2560, nrows_out 640, 30 iters
+MMID_HYBRID:   [in flight] bare  submit+wait  : min     6.3 us  mean     7.8 us
+MMID_HYBRID:   [in flight] full chain, host w : min   477.7 us  mean   480.7 us  (ok=1)
+MMID_HYBRID:   [in flight] full chain, vram w : min    81.1 us  mean    83.1 us
+8, 29, 30,MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2074.4 us (min 254.4, max 6383.3) = gather+submit 13.0 + wait 2053.4 + scatter 4.2
+MMID_HYBRID: calibration [in flight] 20 rows, ncols 2560, nrows_out 640, 30 iters
+MMID_HYBRID:   [in flight] bare  submit+wait  : min     6.9 us  mean    10.6 us
+MMID_HYBRID:   [in flight] full chain, host w : min   476.4 us  mean   480.1 us  (ok=1)
+MMID_HYBRID:   [in flight] full chain, vram w : min    79.7 us  mean    81.3 us
+ 31, 32, 3MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2077.5 us (min 252.5, max 5888.7) = gather+submit 12.2 + wait 2057.5 + scatter 3.3
+MMID_HYBRID: calibration [in flight] 20 rows, ncols 2560, nrows_out 640, 30 iters
+MMID_HYBRID:   [in flight] bare  submit+wait  : min     6.2 us  mean     7.6 us
+MMID_HYBRID:   [in flight] full chain, host w : min   476.9 us  mean   480.6 us  (ok=1)
+MMID_HYBRID:   [in flight] full chain, vram w : min    79.5 us  mean    82.5 us
+3, 34, 35,MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2070.0 us (min 251.6, max 5987.4) = gather+submit 9.5 + wait 2052.0 + scatter 3.0
+MMID_HYBRID: calibration [in flight] 20 rows, ncols 2560, nrows_out 640, 30 iters
+MMID_HYBRID:   [in flight] bare  submit+wait  : min     6.7 us  mean     7.6 us
+MMID_HYBRID:   [in flight] full chain, host w : min   475.8 us  mean   480.0 us  (ok=1)
+MMID_HYBRID:   [in flight] full chain, vram w : min    80.8 us  mean    82.3 us
+ 36, 37, 3MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2069.6 us (min 252.9, max 5692.1) = gather+submit 9.6 + wait 2051.5 + scatter 2.8
+MMID_HYBRID: calibration [in flight] 20 rows, ncols 2560, nrows_out 640, 30 iters
+MMID_HYBRID:   [in flight] bare  submit+wait  : min     6.4 us  mean     8.0 us
+MMID_HYBRID:   [in flight] full chain, host w : min   477.1 us  mean   479.6 us  (ok=1)
+MMID_HYBRID:   [in flight] full chain, vram w : min    80.6 us  mean    82.1 us
+8, 39, 40,MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2080.2 us (min 251.6, max 6448.8) = gather+submit 10.5 + wait 2061.5 + scatter 3.0
+MMID_HYBRID: calibration [in flight] 20 rows, ncols 2560, nrows_out 640, 30 iters
+MMID_HYBRID:   [in flight] bare  submit+wait  : min     6.6 us  mean     7.7 us
+MMID_HYBRID:   [in flight] full chain, host w : min   475.7 us  mean   482.3 us  (ok=1)
+MMID_HYBRID:   [in flight] full chain, vram w : min    79.3 us  mean    80.9 us
+ 41, 42, 4MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2071.1 us (min 251.5, max 5720.3) = gather+submit 9.8 + wait 2053.0 + scatter 2.8
+MMID_HYBRID: calibration [in flight] 20 rows, ncols 2560, nrows_out 640, 30 iters
+MMID_HYBRID:   [in flight] bare  submit+wait  : min     6.8 us  mean     7.7 us
+MMID_HYBRID:   [in flight] full chain, host w : min   477.1 us  mean   496.6 us  (ok=1)
+MMID_HYBRID:   [in flight] full chain, vram w : min    78.6 us  mean    80.0 us
+3, 44, 45,MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2070.3 us (min 252.7, max 5711.6) = gather+submit 9.8 + wait 2052.1 + scatter 3.0
+MMID_HYBRID: calibration [in flight] 20 rows, ncols 2560, nrows_out 640, 30 iters
+MMID_HYBRID:   [in flight] bare  submit+wait  : min     6.3 us  mean     7.4 us
+MMID_HYBRID:   [in flight] full chain, host w : min   477.6 us  mean   479.6 us  (ok=1)
+MMID_HYBRID:   [in flight] full chain, vram w : min    80.6 us  mean    82.0 us
+ 46, 47, 4MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2079.2 us (min 251.9, max 6180.4) = gather+submit 10.6 + wait 2060.5 + scatter 3.0
+MMID_HYBRID: calibration [in flight] 20 rows, ncols 2560, nrows_out 640, 30 iters
+MMID_HYBRID:   [in flight] bare  submit+wait  : min     6.3 us  mean     7.6 us
+MMID_HYBRID:   [in flight] full chain, host w : min   477.7 us  mean   479.4 us  (ok=1)
+MMID_HYBRID:   [in flight] full chain, vram w : min    80.6 us  mean    82.2 us
+8, 49, 50
+
+[ Prompt: 19.8 t/s | Generation: 5.2 t/s ]
+
+
+Exiting...

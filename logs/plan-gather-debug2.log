@@ -1,0 +1,66 @@
+load_backend: loaded SYCL backend from /app/libggml-sycl.so
+load_backend: loaded CPU backend from /app/libggml-cpu-zen4.so
+OK:   buffer type created
+OK:   is_host() is false for the cache buffer type
+OK:   identity check recognizes its own type
+OK:   identity check rejects the plain CPU buffer type
+OK:   buffer allocated for a small single tensor
+OK:   small tensor round-trips byte-identical through the cache buffer type
+OK:   buffer allocated for a >2 GiB context (multiple chunks expected)
+OK:   every tensor round-trips correctly across the auto-split multi-buffer allocation
+Build with Macros:
+  GGML_SYCL_DNNL: yes
+  GGML_SYCL_F16: yes
+  GGML_SYCL_FORCE_MMQ: no
+  GGML_SYCL_GRAPH: yes
+  GGML_SYCL_SUPPORT_LEVEL_ZERO_API: yes
+  GGML_SYCL_SUPPORT_VMM: yes
+Running with Environment Variables:
+  GGML_SYCL_DEBUG: 0
+  GGML_SYCL_DEV2DEV_MEMCPY: 0 (SYCL API)
+  GGML_SYCL_GET_MEM_API: 0 (Level Zero API)
+  GGML_SYCL_ENABLE_DNN: 1
+  GGML_SYCL_FA_ONEDNN: 1
+  GGML_SYCL_FA_ONEDNN_MAX_KV: 0
+  GGML_SYCL_ENABLE_MKL_FA: 1
+  GGML_SYCL_MEMTRACE: 0
+  GGML_SYCL_MEMTRACE_STEP: 64
+  GGML_SYCL_ENABLE_FLASH_ATTN: 1
+  GGML_SYCL_ENABLE_GRAPH: 0
+  GGML_SYCL_ENABLE_OPT: 1
+  GGML_SYCL_ENABLE_VMM: 1
+  GGML_SYCL_ENABLE_FUSION: 1
+  GGML_SYCL_ENABLE_ESIMD: 1
+  GGML_SYCL_PRIORITIZE_DMMV: 0
+  GGML_SYCL_USE_ASYNC_MEM_OP: 1
+  GGML_SYCL_USE_LEVEL_ZERO_API: 1
+  GGML_SYCL_USM_SYSTEM: 0
+  GGML_SYCL_ENABLE_HOST_PINNED_MEM: 1
+  GGML_SYCL_HOST_PINNED_MEM_2G: 0
+Found 1 SYCL devices:
+|  |                   |                                       |       |Max    |        |Max  |Global |                     |
+|  |                   |                                       |       |compute|Max work|sub  |mem    |                     |
+|ID|        Device Type|                                   Name|Version|units  |group   |group|size   |       Driver version|
+|--|-------------------|---------------------------------------|-------|-------|--------|-----|-------|---------------------|
+| 0| [level_zero:gpu:0]|             Intel Arc Pro B70 Graphics|   20.2|    256|    1024|   32| 34242M|         1.15.38308+1|
+SYCL Optimization Feature:
+|ID|        Device Type|Reorder|
+|--|-------------------|-------|
+| 0| [level_zero:gpu:0]|      Y|
+OK:   cold/device/host buffers all allocated
+OK:   cold-tier -> SYCL device -> host round trip is byte-identical
+OK:   plan_and_gather stress: cold-tier tensor allocated
+OK:   plan_and_gather stress: cache created
+  call   0: 115.83 ms, remapped[0..7] valid=yes
+  call  20: 50.18 ms, remapped[0..7] valid=yes
+  call  40: 50.09 ms, remapped[0..7] valid=yes
+  call  60: 50.15 ms, remapped[0..7] valid=yes
+  call  80: 50.09 ms, remapped[0..7] valid=yes
+  call 100: 50.10 ms, remapped[0..7] valid=yes
+  call 120: 50.11 ms, remapped[0..7] valid=yes
+  call 140: 50.13 ms, remapped[0..7] valid=yes
+  call 160: 50.16 ms, remapped[0..7] valid=yes
+  call 180: 50.17 ms, remapped[0..7] valid=yes
+OK:   plan_and_gather stress: 200 consecutive calls completed without hanging
+
+ALL CHECKS PASSED (0 failures)

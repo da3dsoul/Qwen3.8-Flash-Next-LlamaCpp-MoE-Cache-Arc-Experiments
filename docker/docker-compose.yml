@@ -1,0 +1,103 @@
+# Test containers for Phase 0/1 bring-up (PLAN.md). Not a deployment stack --
+# these are interactive shells (bash entrypoint) you `docker compose run`
+# into to build/probe/benchmark, per PLAN.md Phase 0's checklist.
+#
+# Device pinning matches the sibling Qwen3.8-vLLM-KVarN-MTP-Experiments
+# project's llm-b70 service exactly (../coding-agent/docker-compose.yml):
+# this box has three GPUs on the PCIe bus (Arc B70 at 03:00.0, RTX A4000 at
+# 14:00.0, AMD iGPU at 16:00.0) -- confirmed via /dev/dri/by-path that
+# card0/renderD129 is the B70, so devices are pinned there specifically, not
+# the whole /dev/dri directory, to avoid any ambiguity about which GPU a
+# multi-GPU-capable backend might try to enumerate.
+#
+# NEOReadDebugKeys / EnableSharedSystemUsmSupport /
+# EnableImplicitMigrationOnFaultableHardware=0: the exact driver-level fix
+# that ended two host-wide OOM kills + GPU hangs on this box's sibling vLLM
+# deployment (docs/00-background.md §3, ../coding-agent's
+# oom-incident-2026-09-01.md). Keep set for ANY GPU workload on this box's
+# Arc card, not just this project's own cache design.
+#
+# The llm-b70 vLLM container on this box (../coding-agent) must be stopped
+# before running these -- both want the same physical GPU. `docker stop
+# llm-b70` in that project (restart: unless-stopped, so it won't come back
+# on its own; autoheal only restarts unhealthy *running* containers, not
+# stopped ones).
+#
+# Host-RAM pressure (2026-09-09 session): this box also runs several other
+# heavy services unrelated to this project (MSSQL, Shoko, unbooru daemon,
+# two Minecraft servers) that were temporarily stopped to give Phase 0/1
+# testing enough free RAM/swap headroom -- restart them once done:
+#   sudo systemctl start mssql-server shoko unbooru
+#   docker start create_ultimate_selection-mc-1 fateedgespeeps-vanillatweaks_file-1
+# (stopped via: sudo systemctl stop mssql-server shoko unbooru; docker stop
+# create_ultimate_selection-mc-1 fateedgespeeps-vanillatweaks_file-1 -- same
+# unless-stopped/no-auto-restart reasoning as llm-b70 above.) A separate
+# unbooru-tagger-training process (not the unbooru.service daemon) was left
+# running deliberately -- it's an active training run outside this project,
+# not stopped here.
+
+x-b70-gpu: &b70-gpu
+  devices:
+    - /dev/dri/renderD129:/dev/dri/renderD129
+    - /dev/dri/card0:/dev/dri/card0
+  group_add:
+    - "44"   # video
+    - "136"  # render
+  environment: &b70-gpu-env
+    NEOReadDebugKeys: 1
+    EnableSharedSystemUsmSupport: 0
+    EnableImplicitMigrationOnFaultableHardware: 0
+    GGML_SYCL_USM_SYSTEM: 0
+  # Hard host-RAM cap -- same rationale as the sibling project's llm-b70
+  # (mem_limit == memswap_limit disables swap for this cgroup, so a runaway
+  # allocation gets OOM-killed cleanly instead of dragging the whole box
+  # into swap thrash). Sized conservatively below the box's 123 GiB total,
+  # leaving headroom for everything else already running. Raise deliberately
+  # per PLAN.md Phase 0.4/Phase 4's host-RAM-pressure gate, not by default.
+  mem_limit: 90g
+  memswap_limit: 90g
+  ipc: host
+
+services:
+  llm-test-sycl:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.sycl
+    image: qwen4exp-moe-cache:sycl-pinned
+    container_name: qwen4exp-test-sycl
+    <<: *b70-gpu
+    volumes:
+      - ../staging/models:/models:ro
+      - ../staging/work:/work
+    working_dir: /work
+    stdin_open: true
+    tty: true
+    # For running llama-server directly (not just `docker compose run` shells)
+    # to get real, sampler-inclusive serving benchmarks -- see
+    # staging/work/bench_server.sh. llama-bench's own tg/pp numbers measure
+    # pure decode compute with a synthetic dummy token and NO sampling
+    # (confirmed from tools/llama-bench/llama-bench.cpp's test_gen: it calls
+    # llama_decode on a constant token in a loop, never touches the sampler
+    # chain) -- a real deployment pays for the full default sampler chain
+    # (penalties/dry/top-k/top-p/min-p/xtc/temp) plus response
+    # streaming/detokenization on every token, which measured ~3-5x slower
+    # than llama-bench's ceiling in this session's testing. Port 8090 chosen
+    # arbitrarily to avoid clashing with the sibling project's vLLM on 8000.
+    ports:
+      - "8090:8080"
+
+  llm-test-vulkan:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.vulkan
+    image: qwen4exp-moe-cache:vulkan-pinned
+    container_name: qwen4exp-test-vulkan
+    <<: *b70-gpu
+    volumes:
+      - ../staging/models:/models:ro
+      - ../staging/work:/work
+    working_dir: /work
+    stdin_open: true
+    tty: true
+    ports:
+      - "8091:8080"

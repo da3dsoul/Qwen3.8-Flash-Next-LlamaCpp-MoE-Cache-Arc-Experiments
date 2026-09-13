@@ -1,0 +1,145 @@
+# SYCL/oneAPI build of llama.cpp, pinned to a specific upstream commit.
+#
+# Why pinned, not `git clone --depth 1` off master floating: PLAN.md Phase
+# 0.0 requires a build >= 2026-09-09 (both #28592 Vulkan and #28476 SYCL
+# fixes for this exact model+card class landed that day) and the plan wants
+# every subsequent benchmark tied to a known commit hash, not a moving
+# target. Override LLAMA_COMMIT to re-pin.
+#
+# Base recipe follows upstream's own .devops/intel.Dockerfile (oneAPI
+# deep-learning-essentials base + explicit IGC/compute-runtime/level-zero
+# package pins) rather than reinventing the SYCL toolchain setup -- see
+# that file's comments for why those specific driver package versions are
+# used (multi-GPU stability vs. a known compute-runtime issue).
+#
+# Differences from upstream's image: (1) commit is pinned via git clone
+# instead of `COPY . .` from a local checkout -- this project doesn't keep
+# a llama.cpp checkout in-tree; (2) LLAMA_BUILD_TESTS=ON, so
+# test-backend-ops ships (needed for the #25455 MUL_MAT_ID regression smoke
+# test and general SYCL op correctness checks in Phase 0/1); (3) single
+# "full" target (cli + server + bench + tests), no separate light/server
+# split -- this is a test/bring-up image, not a deployment artifact.
+
+ARG ONEAPI_VERSION=2025.3.3-0-devel-ubuntu24.04
+ARG LLAMA_COMMIT=6d9c82ea2bb34e277c0664b8dd3434bfb4dcfb27
+ARG LLAMA_REPO=https://github.com/ggml-org/llama.cpp.git
+
+FROM docker.io/node:24 AS web
+WORKDIR /app/tools/ui
+ARG LLAMA_COMMIT
+ARG LLAMA_REPO
+RUN git init -q . && \
+    git remote add origin ${LLAMA_REPO} && \
+    git fetch -q --depth 1 origin ${LLAMA_COMMIT} && \
+    git checkout -q FETCH_HEAD -- tools/ui && \
+    mv tools/ui/* tools/ui/.[!.]* . 2>/dev/null; \
+    rm -rf tools
+RUN npm ci
+RUN npm run build
+
+FROM docker.io/intel/deep-learning-essentials:${ONEAPI_VERSION} AS build
+
+ARG GGML_SYCL_F16=ON
+ARG LEVEL_ZERO_VERSION=1.28.2
+ARG LEVEL_ZERO_UBUNTU_VERSION=u24.04
+RUN apt-get update && \
+    apt-get install -y git libssl-dev wget ca-certificates && \
+    cd /tmp && \
+    wget -q "https://github.com/oneapi-src/level-zero/releases/download/v${LEVEL_ZERO_VERSION}/level-zero_${LEVEL_ZERO_VERSION}%2B${LEVEL_ZERO_UBUNTU_VERSION}_amd64.deb" -O level-zero.deb && \
+    wget -q "https://github.com/oneapi-src/level-zero/releases/download/v${LEVEL_ZERO_VERSION}/level-zero-devel_${LEVEL_ZERO_VERSION}%2B${LEVEL_ZERO_UBUNTU_VERSION}_amd64.deb" -O level-zero-devel.deb && \
+    apt-get -o Dpkg::Options::="--force-overwrite" install -y ./level-zero.deb ./level-zero-devel.deb && \
+    rm -f /tmp/level-zero.deb /tmp/level-zero-devel.deb
+
+WORKDIR /app
+ARG LLAMA_COMMIT
+ARG LLAMA_REPO
+RUN git init -q . && \
+    git remote add origin ${LLAMA_REPO} && \
+    git fetch -q --depth 1 origin ${LLAMA_COMMIT} && \
+    git checkout -q FETCH_HEAD && \
+    echo "Pinned llama.cpp commit: $(git rev-parse HEAD)" > /app/PINNED_COMMIT.txt
+
+COPY --from=web /app/tools/ui/dist tools/ui/dist
+
+RUN if [ "${GGML_SYCL_F16}" = "ON" ]; then \
+        export OPT_SYCL_F16="-DGGML_SYCL_F16=ON" \
+        && export SYCL_PROGRAM_COMPILE_OPTIONS="-cl-fp32-correctly-rounded-divide-sqrt"; \
+    fi && \
+    cmake -B build -DGGML_NATIVE=OFF -DGGML_SYCL=ON \
+        -DCMAKE_C_COMPILER=icx -DCMAKE_CXX_COMPILER=icpx \
+        -DGGML_BACKEND_DL=ON -DGGML_CPU_ALL_VARIANTS=ON \
+        -DLLAMA_BUILD_TESTS=ON -DLLAMA_CURL=ON \
+        ${OPT_SYCL_F16} && \
+    cmake --build build --config Release -j$(nproc)
+
+RUN mkdir -p /app/lib && find build -name "*.so*" -exec cp -P {} /app/lib \;
+
+RUN mkdir -p /app/full \
+    && cp build/bin/* /app/full \
+    && cp *.py /app/full \
+    && cp -r conversion /app/full \
+    && cp -r gguf-py /app/full \
+    && cp -r requirements /app/full \
+    && cp requirements.txt /app/full \
+    && cp .devops/tools.sh /app/full/tools.sh \
+    && cp /app/PINNED_COMMIT.txt /app/full/PINNED_COMMIT.txt
+
+FROM docker.io/intel/deep-learning-essentials:${ONEAPI_VERSION} AS base
+
+# Multi-GPU-safe driver stack, matching the versions this box's sibling
+# vLLM/XPU deployment settled on after hitting intel/compute-runtime#921 /
+# ggml-org/llama.cpp#21747 on the older 25.x line (this box has three GPUs
+# on the PCIe bus -- Arc B70, RTX A4000, AMD iGPU -- multi-GPU enumeration
+# bugs are not hypothetical here).
+ARG IGC_VERSION=v2.34.4
+ARG IGC_VERSION_FULL=2_2.34.4+21428
+ARG COMPUTE_RUNTIME_VERSION=26.18.38308.1
+ARG COMPUTE_RUNTIME_VERSION_FULL=26.18.38308.1-0
+ARG IGDGMM_VERSION=22.10.0
+RUN mkdir /tmp/neo/ && cd /tmp/neo/ \
+  && wget -q https://github.com/intel/intel-graphics-compiler/releases/download/$IGC_VERSION/intel-igc-core-${IGC_VERSION_FULL}_amd64.deb \
+  && wget -q https://github.com/intel/intel-graphics-compiler/releases/download/$IGC_VERSION/intel-igc-opencl-${IGC_VERSION_FULL}_amd64.deb \
+  && wget -q https://github.com/intel/compute-runtime/releases/download/$COMPUTE_RUNTIME_VERSION/intel-ocloc-dbgsym_${COMPUTE_RUNTIME_VERSION_FULL}_amd64.ddeb \
+  && wget -q https://github.com/intel/compute-runtime/releases/download/$COMPUTE_RUNTIME_VERSION/intel-ocloc_${COMPUTE_RUNTIME_VERSION_FULL}_amd64.deb \
+  && wget -q https://github.com/intel/compute-runtime/releases/download/$COMPUTE_RUNTIME_VERSION/intel-opencl-icd-dbgsym_${COMPUTE_RUNTIME_VERSION_FULL}_amd64.ddeb \
+  && wget -q https://github.com/intel/compute-runtime/releases/download/$COMPUTE_RUNTIME_VERSION/intel-opencl-icd_${COMPUTE_RUNTIME_VERSION_FULL}_amd64.deb \
+  && wget -q https://github.com/intel/compute-runtime/releases/download/$COMPUTE_RUNTIME_VERSION/libigdgmm12_${IGDGMM_VERSION}_amd64.deb \
+  && wget -q https://github.com/intel/compute-runtime/releases/download/$COMPUTE_RUNTIME_VERSION/libze-intel-gpu1-dbgsym_${COMPUTE_RUNTIME_VERSION_FULL}_amd64.ddeb \
+  && wget -q https://github.com/intel/compute-runtime/releases/download/$COMPUTE_RUNTIME_VERSION/libze-intel-gpu1_${COMPUTE_RUNTIME_VERSION_FULL}_amd64.deb \
+  && dpkg --install *.deb
+
+RUN apt-get update \
+    && apt-get install -y libgomp1 curl ffmpeg git python3 python3-pip python3-venv \
+    && apt-get autoremove -y && apt-get clean -y \
+    && rm -rf /tmp/* /var/tmp/* \
+    && find /var/cache/apt/archives /var/lib/apt/lists -not -name lock -type f -delete \
+    && find /var/cache -type f -delete
+
+FROM base AS full
+
+COPY --from=build /app/lib/ /app
+COPY --from=build /app/full /app
+WORKDIR /app
+
+RUN python3 -m venv /opt/venv && \
+    . /opt/venv/bin/activate && \
+    pip install --upgrade pip setuptools wheel && \
+    pip install -r requirements.txt
+
+ENV PATH="/opt/venv/bin:/app:${PATH}"
+# never let the driver silently spill VRAM-exhausted allocations into host
+# RAM -- see docs/00-background.md §3 and PLAN.md ground rules. This is the
+# ggml-level knob; the container also sets the lower-level NEO env vars in
+# docker-compose (NEOReadDebugKeys / EnableSharedSystemUsmSupport /
+# EnableImplicitMigrationOnFaultableHardware), same as the sibling vLLM
+# deployment on this box after its two host-OOM incidents.
+ENV GGML_SYCL_USM_SYSTEM=0
+# icx/icpx-compiled binaries need the oneAPI compiler runtime (libsvml,
+# libimf, etc.) at load time, not just link time -- the base image ships
+# them under /opt/intel/oneapi/*/lib but doesn't put them on the default
+# loader path. Baked in here (equivalent to `source
+# /opt/intel/oneapi/setvars.sh`) so every binary works without remembering
+# to source it in every `docker compose run` invocation.
+ENV LD_LIBRARY_PATH="/app:/opt/intel/oneapi/tcm/1.4/lib:/opt/intel/oneapi/umf/1.0/lib:/opt/intel/oneapi/tbb/2022.3/env/../lib/intel64/gcc4.8:/opt/intel/oneapi/pti/0.16/lib:/opt/intel/oneapi/mpi/2021.17/opt/mpi/libfabric/lib:/opt/intel/oneapi/mpi/2021.17/lib:/opt/intel/oneapi/mkl/2025.3/lib:/opt/intel/oneapi/dnnl/2025.3/lib:/opt/intel/oneapi/debugger/2025.3/opt/debugger/lib:/opt/intel/oneapi/compiler/2025.3/opt/compiler/lib:/opt/intel/oneapi/compiler/2025.3/lib:/opt/intel/oneapi/ccl/2021.17/lib/"
+
+ENTRYPOINT ["/bin/bash"]

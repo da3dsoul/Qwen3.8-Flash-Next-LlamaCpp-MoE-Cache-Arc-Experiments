@@ -1,0 +1,112 @@
+# Dev build of llama.cpp SYCL, from this project's local, actively-modified
+# checkout at src/llama.cpp -- NOT the pinned-commit baseline (Dockerfile.sycl
+# stays untouched as the pristine upstream reference for regression
+# comparisons; this file is where Phase 2+'s moe-cache changes actually get
+# built and tested). Otherwise identical to Dockerfile.sycl's recipe -- see
+# that file's header for the oneAPI/level-zero/compute-runtime rationale.
+#
+# Also builds docker/moe_cache_buffer_test.cpp (Phase 2's standalone
+# validation program -- not part of llama.cpp's own test suite, see that
+# file's header comment for why) against the built libraries.
+
+ARG ONEAPI_VERSION=2025.3.3-0-devel-ubuntu24.04
+
+FROM docker.io/node:24 AS web
+WORKDIR /app/tools/ui
+COPY src/llama.cpp/tools/ui/package.json src/llama.cpp/tools/ui/package-lock.json ./
+RUN npm ci
+COPY src/llama.cpp/tools/ui/ ./
+RUN npm run build
+
+FROM docker.io/intel/deep-learning-essentials:${ONEAPI_VERSION} AS build
+
+ARG GGML_SYCL_F16=ON
+ARG LEVEL_ZERO_VERSION=1.28.2
+ARG LEVEL_ZERO_UBUNTU_VERSION=u24.04
+RUN apt-get update && \
+    apt-get install -y git libssl-dev wget ca-certificates && \
+    cd /tmp && \
+    wget -q "https://github.com/oneapi-src/level-zero/releases/download/v${LEVEL_ZERO_VERSION}/level-zero_${LEVEL_ZERO_VERSION}%2B${LEVEL_ZERO_UBUNTU_VERSION}_amd64.deb" -O level-zero.deb && \
+    wget -q "https://github.com/oneapi-src/level-zero/releases/download/v${LEVEL_ZERO_VERSION}/level-zero-devel_${LEVEL_ZERO_VERSION}%2B${LEVEL_ZERO_UBUNTU_VERSION}_amd64.deb" -O level-zero-devel.deb && \
+    apt-get -o Dpkg::Options::="--force-overwrite" install -y ./level-zero.deb ./level-zero-devel.deb && \
+    rm -f /tmp/level-zero.deb /tmp/level-zero-devel.deb
+
+WORKDIR /app
+COPY src/llama.cpp/ .
+RUN echo "Local dev build from src/llama.cpp, pinned base commit: $(git rev-parse HEAD 2>/dev/null || echo unknown)" > /app/PINNED_COMMIT.txt \
+    && (git status --short 2>/dev/null | head -50 >> /app/PINNED_COMMIT.txt || true)
+
+COPY --from=web /app/tools/ui/dist tools/ui/dist
+
+RUN if [ "${GGML_SYCL_F16}" = "ON" ]; then \
+        export OPT_SYCL_F16="-DGGML_SYCL_F16=ON" \
+        && export SYCL_PROGRAM_COMPILE_OPTIONS="-cl-fp32-correctly-rounded-divide-sqrt"; \
+    fi && \
+    cmake -B build -DGGML_NATIVE=OFF -DGGML_SYCL=ON \
+        -DCMAKE_C_COMPILER=icx -DCMAKE_CXX_COMPILER=icpx \
+        -DGGML_BACKEND_DL=ON -DGGML_CPU_ALL_VARIANTS=ON \
+        -DLLAMA_BUILD_TESTS=ON -DLLAMA_CURL=ON \
+        ${OPT_SYCL_F16} && \
+    cmake --build build --config Release -j8
+
+RUN mkdir -p /app/lib && find build -name "*.so*" -exec cp -P {} /app/lib \;
+
+RUN mkdir -p /app/full \
+    && cp build/bin/* /app/full \
+    && cp *.py /app/full \
+    && cp -r conversion /app/full \
+    && cp -r gguf-py /app/full \
+    && cp -r requirements /app/full \
+    && cp requirements.txt /app/full \
+    && cp .devops/tools.sh /app/full/tools.sh \
+    && cp /app/PINNED_COMMIT.txt /app/full/PINNED_COMMIT.txt
+
+COPY docker/moe_cache_buffer_test.cpp /app/moe_cache_buffer_test.cpp
+RUN icpx -fsycl -std=c++17 \
+        -I/app/ggml/include -I/app/include -I/app/ggml/src/ggml-sycl \
+        -o /app/full/moe_cache_buffer_test /app/moe_cache_buffer_test.cpp \
+        -L/app/lib -lggml -lggml-base -lllama -lggml-sycl -lpthread \
+        -Wl,-rpath,/app
+
+FROM docker.io/intel/deep-learning-essentials:${ONEAPI_VERSION} AS base
+
+ARG IGC_VERSION=v2.34.4
+ARG IGC_VERSION_FULL=2_2.34.4+21428
+ARG COMPUTE_RUNTIME_VERSION=26.18.38308.1
+ARG COMPUTE_RUNTIME_VERSION_FULL=26.18.38308.1-0
+ARG IGDGMM_VERSION=22.10.0
+RUN mkdir /tmp/neo/ && cd /tmp/neo/ \
+  && wget -q https://github.com/intel/intel-graphics-compiler/releases/download/$IGC_VERSION/intel-igc-core-${IGC_VERSION_FULL}_amd64.deb \
+  && wget -q https://github.com/intel/intel-graphics-compiler/releases/download/$IGC_VERSION/intel-igc-opencl-${IGC_VERSION_FULL}_amd64.deb \
+  && wget -q https://github.com/intel/compute-runtime/releases/download/$COMPUTE_RUNTIME_VERSION/intel-ocloc-dbgsym_${COMPUTE_RUNTIME_VERSION_FULL}_amd64.ddeb \
+  && wget -q https://github.com/intel/compute-runtime/releases/download/$COMPUTE_RUNTIME_VERSION/intel-ocloc_${COMPUTE_RUNTIME_VERSION_FULL}_amd64.deb \
+  && wget -q https://github.com/intel/compute-runtime/releases/download/$COMPUTE_RUNTIME_VERSION/intel-opencl-icd-dbgsym_${COMPUTE_RUNTIME_VERSION_FULL}_amd64.ddeb \
+  && wget -q https://github.com/intel/compute-runtime/releases/download/$COMPUTE_RUNTIME_VERSION/intel-opencl-icd_${COMPUTE_RUNTIME_VERSION_FULL}_amd64.deb \
+  && wget -q https://github.com/intel/compute-runtime/releases/download/$COMPUTE_RUNTIME_VERSION/libigdgmm12_${IGDGMM_VERSION}_amd64.deb \
+  && wget -q https://github.com/intel/compute-runtime/releases/download/$COMPUTE_RUNTIME_VERSION/libze-intel-gpu1-dbgsym_${COMPUTE_RUNTIME_VERSION_FULL}_amd64.ddeb \
+  && wget -q https://github.com/intel/compute-runtime/releases/download/$COMPUTE_RUNTIME_VERSION/libze-intel-gpu1_${COMPUTE_RUNTIME_VERSION_FULL}_amd64.deb \
+  && dpkg --install *.deb
+
+RUN apt-get update \
+    && apt-get install -y libgomp1 curl ffmpeg git python3 python3-pip python3-venv \
+    && apt-get autoremove -y && apt-get clean -y \
+    && rm -rf /tmp/* /var/tmp/* \
+    && find /var/cache/apt/archives /var/lib/apt/lists -not -name lock -type f -delete \
+    && find /var/cache -type f -delete
+
+FROM base AS full
+
+COPY --from=build /app/lib/ /app
+COPY --from=build /app/full /app
+WORKDIR /app
+
+RUN python3 -m venv /opt/venv && \
+    . /opt/venv/bin/activate && \
+    pip install --upgrade pip setuptools wheel && \
+    pip install -r requirements.txt
+
+ENV PATH="/opt/venv/bin:/app:${PATH}"
+ENV GGML_SYCL_USM_SYSTEM=0
+ENV LD_LIBRARY_PATH="/app:/opt/intel/oneapi/tcm/1.4/lib:/opt/intel/oneapi/umf/1.0/lib:/opt/intel/oneapi/tbb/2022.3/env/../lib/intel64/gcc4.8:/opt/intel/oneapi/pti/0.16/lib:/opt/intel/oneapi/mpi/2021.17/opt/mpi/libfabric/lib:/opt/intel/oneapi/mpi/2021.17/lib:/opt/intel/oneapi/mkl/2025.3/lib:/opt/intel/oneapi/dnnl/2025.3/lib:/opt/intel/oneapi/debugger/2025.3/opt/debugger/lib:/opt/intel/oneapi/compiler/2025.3/opt/compiler/lib:/opt/intel/oneapi/compiler/2025.3/lib:/opt/intel/oneapi/ccl/2021.17/lib/"
+
+ENTRYPOINT ["/bin/bash"]

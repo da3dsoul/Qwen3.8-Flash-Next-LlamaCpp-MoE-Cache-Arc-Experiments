@@ -1,0 +1,593 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.sycl-dev
+#1 transferring dockerfile: 6.30kB done
+#1 DONE 0.1s
+
+#2 [internal] load metadata for docker.io/library/node:24
+#2 DONE 0.6s
+
+#3 [internal] load metadata for docker.io/intel/deep-learning-essentials:2025.3.3-0-devel-ubuntu24.04
+#3 DONE 0.7s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.1s
+
+#5 [web 1/6] FROM docker.io/library/node:24@sha256:6dac556d980b7f0e5498d08f08cee0ca67798b4ad6c23964a9214920e67758d0
+#5 DONE 0.0s
+
+#6 [build  1/11] FROM docker.io/intel/deep-learning-essentials:2025.3.3-0-devel-ubuntu24.04@sha256:2363f73a031b0c71746bf9205b4a3ae585d7ec511b50159e14aaba42c2e77f33
+#6 DONE 0.0s
+
+#7 [internal] load build context
+#7 transferring context: 694.47kB 0.0s done
+#7 DONE 0.1s
+
+#8 [build  2/11] RUN apt-get update &&     apt-get install -y git libssl-dev wget ca-certificates &&     cd /tmp &&     wget -q "https://github.com/oneapi-src/level-zero/releases/download/v1.28.2/level-zero_1.28.2%2Bu24.04_amd64.deb" -O level-zero.deb &&     wget -q "https://github.com/oneapi-src/level-zero/releases/download/v1.28.2/level-zero-devel_1.28.2%2Bu24.04_amd64.deb" -O level-zero-devel.deb &&     apt-get -o Dpkg::Options::="--force-overwrite" install -y ./level-zero.deb ./level-zero-devel.deb &&     rm -f /tmp/level-zero.deb /tmp/level-zero-devel.deb
+#8 CACHED
+
+#9 [build  3/11] WORKDIR /app
+#9 CACHED
+
+#10 [web 5/6] COPY src/llama.cpp/tools/ui/ ./
+#10 CACHED
+
+#11 [web 2/6] WORKDIR /app/tools/ui
+#11 CACHED
+
+#12 [web 3/6] COPY src/llama.cpp/tools/ui/package.json src/llama.cpp/tools/ui/package-lock.json ./
+#12 CACHED
+
+#13 [web 4/6] RUN npm ci
+#13 CACHED
+
+#14 [web 6/6] RUN npm run build
+#14 CACHED
+
+#15 [build  4/11] COPY src/llama.cpp/ .
+#15 DONE 2.9s
+
+#16 [build  5/11] RUN echo "Local dev build from src/llama.cpp, pinned base commit: $(git rev-parse HEAD 2>/dev/null || echo unknown)" > /app/PINNED_COMMIT.txt     && (git status --short 2>/dev/null | head -50 >> /app/PINNED_COMMIT.txt || true)
+#16 DONE 0.9s
+
+#17 [build  6/11] COPY --from=web /app/tools/ui/dist tools/ui/dist
+#17 DONE 0.5s
+
+#18 [build  7/11] RUN if [ "ON" = "ON" ]; then         export OPT_SYCL_F16="-DGGML_SYCL_F16=ON"         && export SYCL_PROGRAM_COMPILE_OPTIONS="-cl-fp32-correctly-rounded-divide-sqrt";     fi &&     cmake -B build -DGGML_NATIVE=OFF -DGGML_SYCL=ON         -DCMAKE_C_COMPILER=icx -DCMAKE_CXX_COMPILER=icpx         -DGGML_BACKEND_DL=ON -DGGML_CPU_ALL_VARIANTS=ON         -DLLAMA_BUILD_TESTS=ON -DLLAMA_CURL=ON         ${OPT_SYCL_F16} &&     cmake --build build --config Release -j8
+#18 0.814 -- The C compiler identification is IntelLLVM 2025.3.3
+#18 0.872 -- The CXX compiler identification is IntelLLVM 2025.3.3
+#18 0.884 -- Detecting C compiler ABI info
+#18 0.945 -- Detecting C compiler ABI info - done
+#18 0.950 -- Check for working C compiler: /opt/intel/oneapi/compiler/2025.3/bin/icx - skipped
+#18 0.951 -- Detecting C compile features
+#18 0.951 -- Detecting C compile features - done
+#18 0.953 -- Detecting CXX compiler ABI info
+#18 1.024 -- Detecting CXX compiler ABI info - done
+#18 1.029 -- Check for working CXX compiler: /opt/intel/oneapi/compiler/2025.3/bin/icpx - skipped
+#18 1.029 -- Detecting CXX compile features
+#18 1.029 -- Detecting CXX compile features - done
+#18 1.030 -- llama.cpp version: 0.4.0-dev
+#18 1.030 CMAKE_BUILD_TYPE=Release
+#18 1.033 -- Found Git: /usr/bin/git (found version "2.43.0") 
+#18 1.157 CMake Warning at CMakeLists.txt:181 (message):
+#18 1.157   LLAMA_CURL is deprecated and will be ignored
+#18 1.157 Call Stack (most recent call first):
+#18 1.157   CMakeLists.txt:195 (llama_option_depr)
+#18 1.157 
+#18 1.157 
+#18 1.210 -- The ASM compiler identification is IntelLLVM
+#18 1.210 -- Found assembler: /opt/intel/oneapi/compiler/2025.3/bin/icx
+#18 1.218 -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+#18 1.286 -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+#18 1.287 -- Found Threads: TRUE  
+#18 1.291 -- Warning: ccache not found - consider installing it for faster compilation or disable this warning with GGML_CCACHE=OFF
+#18 1.310 -- CMAKE_SYSTEM_PROCESSOR: x86_64
+#18 1.310 -- GGML_SYSTEM_ARCH: x86
+#18 1.555 -- Found OpenMP_C: -fiopenmp (found version "5.1") 
+#18 1.631 -- Found OpenMP_CXX: -fiopenmp (found version "5.1") 
+#18 1.631 -- Found OpenMP: TRUE (found version "5.1")  
+#18 1.632 -- Including CPU backend
+#18 1.632 -- x86 detected
+#18 1.632 -- Adding CPU backend variant ggml-cpu-x64:  
+#18 1.632 -- x86 detected
+#18 1.632 -- Adding CPU backend variant ggml-cpu-sse42: -msse4.2 GGML_SSE42
+#18 1.632 -- x86 detected
+#18 1.632 -- Adding CPU backend variant ggml-cpu-sandybridge: -msse4.2;-mavx GGML_SSE42;GGML_AVX
+#18 1.632 -- x86 detected
+#18 1.633 -- Adding CPU backend variant ggml-cpu-ivybridge: -msse4.2;-mf16c;-mavx GGML_SSE42;GGML_F16C;GGML_AVX
+#18 1.633 -- x86 detected
+#18 1.633 -- Adding CPU backend variant ggml-cpu-piledriver: -msse4.2;-mf16c;-mfma;-mavx GGML_SSE42;GGML_F16C;GGML_FMA;GGML_AVX
+#18 1.633 -- x86 detected
+#18 1.633 -- Adding CPU backend variant ggml-cpu-haswell: -msse4.2;-mf16c;-mfma;-mbmi2;-mavx;-mavx2 GGML_SSE42;GGML_F16C;GGML_FMA;GGML_BMI2;GGML_AVX;GGML_AVX2
+#18 1.633 -- x86 detected
+#18 1.633 -- Adding CPU backend variant ggml-cpu-skylakex: -msse4.2;-mf16c;-mfma;-mbmi2;-mavx;-mavx2;-mavx512f;-mavx512cd;-mavx512vl;-mavx512dq;-mavx512bw GGML_SSE42;GGML_F16C;GGML_FMA;GGML_BMI2;GGML_AVX;GGML_AVX2;GGML_AVX512
+#18 1.633 -- x86 detected
+#18 1.633 -- Adding CPU backend variant ggml-cpu-cannonlake: -msse4.2;-mf16c;-mfma;-mbmi2;-mavx;-mavx2;-mavx512f;-mavx512cd;-mavx512vl;-mavx512dq;-mavx512bw;-mavx512vbmi GGML_SSE42;GGML_F16C;GGML_FMA;GGML_BMI2;GGML_AVX;GGML_AVX2;GGML_AVX512;GGML_AVX512_VBMI
+#18 1.634 -- x86 detected
+#18 1.634 -- Adding CPU backend variant ggml-cpu-cascadelake: -msse4.2;-mf16c;-mfma;-mbmi2;-mavx;-mavx2;-mavx512f;-mavx512cd;-mavx512vl;-mavx512dq;-mavx512bw;-mavx512vnni GGML_SSE42;GGML_F16C;GGML_FMA;GGML_BMI2;GGML_AVX;GGML_AVX2;GGML_AVX512;GGML_AVX512_VNNI
+#18 1.634 -- x86 detected
+#18 1.634 -- Adding CPU backend variant ggml-cpu-icelake: -msse4.2;-mf16c;-mfma;-mbmi2;-mavx;-mavx2;-mavx512f;-mavx512cd;-mavx512vl;-mavx512dq;-mavx512bw;-mavx512vbmi;-mavx512vnni GGML_SSE42;GGML_F16C;GGML_FMA;GGML_BMI2;GGML_AVX;GGML_AVX2;GGML_AVX512;GGML_AVX512_VBMI;GGML_AVX512_VNNI
+#18 1.634 -- x86 detected
+#18 1.634 -- Adding CPU backend variant ggml-cpu-cooperlake: -msse4.2;-mf16c;-mfma;-mbmi2;-mavx;-mavx2;-mavx512f;-mavx512cd;-mavx512vl;-mavx512dq;-mavx512bw;-mavx512vnni;-mavx512bf16 GGML_SSE42;GGML_F16C;GGML_FMA;GGML_BMI2;GGML_AVX;GGML_AVX2;GGML_AVX512;GGML_AVX512_VNNI;GGML_AVX512_BF16
+#18 1.634 -- x86 detected
+#18 1.634 -- Adding CPU backend variant ggml-cpu-zen4: -msse4.2;-mf16c;-mfma;-mbmi2;-mavx;-mavx2;-mavx512f;-mavx512cd;-mavx512vl;-mavx512dq;-mavx512bw;-mavx512vbmi;-mavx512vnni;-mavx512bf16 GGML_SSE42;GGML_F16C;GGML_FMA;GGML_BMI2;GGML_AVX;GGML_AVX2;GGML_AVX512;GGML_AVX512_VBMI;GGML_AVX512_VNNI;GGML_AVX512_BF16
+#18 1.634 -- x86 detected
+#18 1.635 -- Adding CPU backend variant ggml-cpu-alderlake: -msse4.2;-mf16c;-mfma;-mbmi2;-mavx;-mavx2;-mavxvnni GGML_SSE42;GGML_F16C;GGML_FMA;GGML_BMI2;GGML_AVX;GGML_AVX2;GGML_AVX_VNNI
+#18 1.635 -- x86 detected
+#18 1.635 -- Adding CPU backend variant ggml-cpu-sapphirerapids: -msse4.2;-mf16c;-mfma;-mbmi2;-mavx;-mavx2;-mavx512f;-mavx512cd;-mavx512vl;-mavx512dq;-mavx512bw;-mavx512vbmi;-mavx512vnni;-mavx512bf16;-mamx-tile;-mamx-int8 GGML_SSE42;GGML_F16C;GGML_FMA;GGML_BMI2;GGML_AVX;GGML_AVX2;GGML_AVX512;GGML_AVX512_VBMI;GGML_AVX512_VNNI;GGML_AVX512_BF16;GGML_AMX_TILE;GGML_AMX_INT8
+#18 1.635 -- GGML_SYCL_TARGET=INTEL
+#18 1.635 -- Performing Test SUPPORTS_SYCL
+#18 1.735 -- Performing Test SUPPORTS_SYCL - Success
+#18 1.735 -- Using oneAPI Release SYCL compiler (icpx).
+#18 1.735 -- SYCL found
+#18 2.333 -- SYCL Compiler version: 20250303
+#18 2.333 -- SYCL_INCLUDE_DIR: /opt/intel/oneapi/compiler/2025.3/include
+#18 2.333 -- SYCL_LIBRARY=/opt/intel/oneapi/compiler/2025.3/lib/libsycl.so
+#18 2.633 -- Found IntelSYCL: /opt/intel/oneapi/compiler/2025.3/include (found version "202012") 
+#18 2.633 -- GGML_SYCL_SUPPORT_LEVEL_ZERO_API ON
+#18 2.643 -- Level Zero loader found: /usr/lib/x86_64-linux-gnu/libze_loader.so
+#18 2.643 -- Level Zero headers found: /usr/include
+#18 2.646 -- Looking for CL_VERSION_3_0
+#18 2.719 -- Looking for CL_VERSION_3_0 - found
+#18 2.720 -- Found OpenCL: /opt/intel/oneapi/compiler/2025.3/lib/libOpenCL.so (found version "3.0") 
+#18 2.720 -- Found oneDNN: /opt/intel/oneapi/dnnl/2025.3/lib/libdnnl.so.3.9
+#18 2.723 -- MKL_VERSION: 2025.3.0
+#18 2.723 -- MKL_ROOT: /opt/intel/oneapi/mkl/2025.3
+#18 2.723 -- MKL_ARCH: intel64
+#18 2.723 -- MKL_SYCL_LINK: None, set to ` dynamic` by default
+#18 2.723 -- MKL_LINK: None, set to ` dynamic` by default
+#18 2.723 -- MKL_SYCL_INTERFACE_FULL: None, set to ` intel_ilp64` by default
+#18 2.723 -- MKL_INTERFACE_FULL: None, set to ` intel_ilp64` by default
+#18 2.723 -- MKL_SYCL_THREADING: None, set to ` tbb_thread` by default
+#18 2.723 -- MKL_THREADING: None, set to ` intel_thread` by default
+#18 2.723 -- MKL_SYCL_MPI: None, set to ` intelmpi` by default
+#18 2.723 -- MKL_MPI: None, set to ` intelmpi` by default
+#18 2.723 -- Found /opt/intel/oneapi/mkl/2025.3/lib/libmkl_scalapack_ilp64.so
+#18 2.723 -- Found /opt/intel/oneapi/mkl/2025.3/lib/libmkl_cdft_core.so
+#18 2.724 -- Found /opt/intel/oneapi/mkl/2025.3/lib/libmkl_intel_ilp64.so
+#18 2.724 -- Found /opt/intel/oneapi/mkl/2025.3/lib/libmkl_intel_thread.so
+#18 2.724 -- Found /opt/intel/oneapi/mkl/2025.3/lib/libmkl_core.so
+#18 2.724 -- Found /opt/intel/oneapi/mkl/2025.3/lib/libmkl_blacs_intelmpi_ilp64.so
+#18 2.724 -- Could NOT find mkl_sycl_distributed_dft for target MKL::MKL_SYCL_DISTRIBUTED_DFT
+#18 2.724 -- Found /opt/intel/oneapi/mkl/2025.3/lib/libmkl_sycl_blas.so
+#18 2.724 -- Found /opt/intel/oneapi/mkl/2025.3/lib/libmkl_sycl_lapack.so
+#18 2.724 -- Found /opt/intel/oneapi/mkl/2025.3/lib/libmkl_sycl_dft.so
+#18 2.724 -- Found /opt/intel/oneapi/mkl/2025.3/lib/libmkl_sycl_sparse.so
+#18 2.724 -- Found /opt/intel/oneapi/mkl/2025.3/lib/libmkl_sycl_data_fitting.so
+#18 2.724 -- Found /opt/intel/oneapi/mkl/2025.3/lib/libmkl_sycl_rng.so
+#18 2.724 -- Found /opt/intel/oneapi/mkl/2025.3/lib/libmkl_sycl_stats.so
+#18 2.725 -- Found /opt/intel/oneapi/mkl/2025.3/lib/libmkl_sycl_vm.so
+#18 2.725 -- Found /opt/intel/oneapi/mkl/2025.3/lib/libmkl_tbb_thread.so
+#18 2.725 -- Found /opt/intel/oneapi/compiler/2025.3/lib/libiomp5.so
+#18 2.726 -- find GGML_SYCL_GRAPH
+#18 2.726 -- find GGML_SYCL_HOST_MEM_FALLBACK
+#18 2.726 -- Including SYCL backend
+#18 2.729 -- ggml version: 0.23.0
+#18 2.729 -- ggml commit:  6d9c82ea2-dirty
+#18 2.751 -- Found OpenSSL: /usr/lib/x86_64-linux-gnu/libcrypto.so (found version "3.0.13")  
+#18 2.751 -- Performing Test OPENSSL_VERSION_SUPPORTED
+#18 2.807 -- Performing Test OPENSSL_VERSION_SUPPORTED - Success
+#18 2.807 -- OpenSSL found: 3.0.13
+#18 2.827 -- Generating embedded license file for target: llama-app
+#18 2.830 -- Configuring done (2.1s)
+#18 2.979 -- Generating done (0.1s)
+#18 2.986 -- Build files have been written to: /app/build
+#18 3.021 [  1%] Building C object ggml/src/CMakeFiles/ggml-base.dir/ggml.c.o
+#18 3.021 [  1%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-haswell-feats.dir/ggml-cpu/arch/x86/cpu-feats.cpp.o
+#18 3.021 [  1%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-ivybridge-feats.dir/ggml-cpu/arch/x86/cpu-feats.cpp.o
+#18 3.021 [  1%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-x64-feats.dir/ggml-cpu/arch/x86/cpu-feats.cpp.o
+#18 3.021 [  1%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sandybridge-feats.dir/ggml-cpu/arch/x86/cpu-feats.cpp.o
+#18 3.023 [  1%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sse42-feats.dir/ggml-cpu/arch/x86/cpu-feats.cpp.o
+#18 3.023 [  1%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-skylakex-feats.dir/ggml-cpu/arch/x86/cpu-feats.cpp.o
+#18 3.023 [  1%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-piledriver-feats.dir/ggml-cpu/arch/x86/cpu-feats.cpp.o
+#18 3.147 [  1%] Built target ggml-cpu-x64-feats
+#18 3.147 [  1%] Built target ggml-cpu-skylakex-feats
+#18 3.147 [  1%] Built target ggml-cpu-ivybridge-feats
+#18 3.148 [  1%] Built target ggml-cpu-sandybridge-feats
+#18 3.151 [  1%] Building CXX object ggml/src/CMakeFiles/ggml-base.dir/ggml.cpp.o
+#18 3.152 [  1%] Built target ggml-cpu-piledriver-feats
+#18 3.152 [  1%] Built target ggml-cpu-sse42-feats
+#18 3.152 [  1%] Built target ggml-cpu-haswell-feats
+#18 3.152 [  1%] Building C object ggml/src/CMakeFiles/ggml-base.dir/ggml-alloc.c.o
+#18 3.157 [  1%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cannonlake-feats.dir/ggml-cpu/arch/x86/cpu-feats.cpp.o
+#18 3.158 [  1%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cascadelake-feats.dir/ggml-cpu/arch/x86/cpu-feats.cpp.o
+#18 3.163 [  2%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-icelake-feats.dir/ggml-cpu/arch/x86/cpu-feats.cpp.o
+#18 3.164 [  2%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-zen4-feats.dir/ggml-cpu/arch/x86/cpu-feats.cpp.o
+#18 3.164 [  2%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cooperlake-feats.dir/ggml-cpu/arch/x86/cpu-feats.cpp.o
+#18 3.255 [  3%] Building CXX object ggml/src/CMakeFiles/ggml-base.dir/ggml-backend.cpp.o
+#18 3.282 [  3%] Built target ggml-cpu-cannonlake-feats
+#18 3.288 [  3%] Built target ggml-cpu-cascadelake-feats
+#18 3.290 [  3%] Built target ggml-cpu-cooperlake-feats
+#18 3.290 [  3%] Built target ggml-cpu-icelake-feats
+#18 3.294 [  3%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-alderlake-feats.dir/ggml-cpu/arch/x86/cpu-feats.cpp.o
+#18 3.294 [  3%] Building CXX object ggml/src/CMakeFiles/ggml-base.dir/ggml-backend-meta.cpp.o
+#18 3.297 [  3%] Built target ggml-cpu-zen4-feats
+#18 3.300 [  3%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sapphirerapids-feats.dir/ggml-cpu/arch/x86/cpu-feats.cpp.o
+#18 3.301 [  3%] Building CXX object vendor/hash/CMakeFiles/vendor-hash.dir/hash.cpp.o
+#18 3.307 [  3%] Building CXX object vendor/cpp-httplib/CMakeFiles/cpp-httplib.dir/httplib.cpp.o
+#18 3.361 [  3%] Building CXX object ggml/src/CMakeFiles/ggml-base.dir/ggml-opt.cpp.o
+#18 3.390 [  3%] Building C object vendor/hash/CMakeFiles/vendor-hash.dir/xxhash/xxhash.c.o
+#18 3.423 [  3%] Built target ggml-cpu-alderlake-feats
+#18 3.423 [  3%] Built target ggml-cpu-sapphirerapids-feats
+#18 3.435 [  3%] Building CXX object common/CMakeFiles/llama-common-base.dir/build-info.cpp.o
+#18 3.435 [  3%] Provisioning UI assets
+#18 3.440 -- UI: using pre-built assets from /app/tools/ui/dist
+#18 3.539 [  4%] Linking CXX static library libllama-common-base.a
+#18 3.562 [  4%] Built target llama-common-base
+#18 3.572 [  5%] Building CXX object tools/mtmd/CMakeFiles/llama-llava-cli.dir/deprecation-warning.cpp.o
+#18 3.607 -- UI: gzip compression applied (/app/build/tools/ui/ui-gzip/_gzip)
+#18 3.668 [  5%] Linking CXX executable ../../bin/llama-llava-cli
+#18 3.724 [  5%] Built target llama-llava-cli
+#18 3.734 [  5%] Building CXX object tools/mtmd/CMakeFiles/llama-gemma3-cli.dir/deprecation-warning.cpp.o
+#18 3.769 [  5%] Building CXX object vendor/hash/CMakeFiles/vendor-hash.dir/sha1/sha1.c.o
+#18 3.793 [  5%] Building CXX object ggml/src/CMakeFiles/ggml-base.dir/ggml-threading.cpp.o
+#18 3.833 [  5%] Linking CXX executable ../../bin/llama-gemma3-cli
+#18 3.846 [  5%] Building C object vendor/hash/CMakeFiles/vendor-hash.dir/sha256/sha256.c.o
+#18 3.856 [  5%] Building C object ggml/src/CMakeFiles/ggml-base.dir/ggml-quants.c.o
+#18 3.883 [  5%] Built target llama-gemma3-cli
+#18 3.893 [  5%] Building CXX object tools/mtmd/CMakeFiles/llama-minicpmv-cli.dir/deprecation-warning.cpp.o
+#18 3.929 [  6%] Linking CXX static library libvendor-hash.a
+#18 3.949 [  6%] Built target vendor-hash
+#18 3.959 [  6%] Building CXX object tools/mtmd/CMakeFiles/llama-qwen2vl-cli.dir/deprecation-warning.cpp.o
+#18 3.961 [  6%] Building CXX object ggml/src/CMakeFiles/ggml-base.dir/gguf.cpp.o
+#18 3.987 [  6%] Linking CXX executable ../../bin/llama-minicpmv-cli
+#18 4.034 [  6%] Built target llama-minicpmv-cli
+#18 4.054 [  6%] Linking CXX executable ../../bin/llama-qwen2vl-cli
+#18 4.101 [  6%] Built target llama-qwen2vl-cli
+#18 5.274 -- UI: embedded 70 assets
+#18 5.283 [  6%] Built target llama-ui-assets
+#18 5.292 [  6%] Building CXX object tools/ui/CMakeFiles/llama-ui.dir/ui.cpp.o
+#18 7.000 [  6%] Linking CXX static library libllama-ui.a
+#18 7.022 [  6%] Built target llama-ui
+#18 7.189 [  6%] Linking CXX shared library ../../bin/libggml-base.so
+#18 7.263 [  6%] Built target ggml-base
+#18 7.274 [  6%] Building C object ggml/src/CMakeFiles/ggml-cpu-ivybridge.dir/ggml-cpu/ggml-cpu.c.o
+#18 7.274 [  6%] Building C object ggml/src/CMakeFiles/ggml-cpu-x64.dir/ggml-cpu/ggml-cpu.c.o
+#18 7.274 [  6%] Building C object ggml/src/CMakeFiles/ggml-cpu-sse42.dir/ggml-cpu/ggml-cpu.c.o
+#18 7.275 [  6%] Building C object ggml/src/CMakeFiles/ggml-cpu-piledriver.dir/ggml-cpu/ggml-cpu.c.o
+#18 7.275 [  6%] Building C object ggml/src/CMakeFiles/ggml-cpu-sandybridge.dir/ggml-cpu/ggml-cpu.c.o
+#18 7.275 [  6%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/ggml-sycl.cpp.o
+#18 7.276 [  7%] Building C object ggml/src/CMakeFiles/ggml-cpu-haswell.dir/ggml-cpu/ggml-cpu.c.o
+#18 7.691 [  7%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sse42.dir/ggml-cpu/ggml-cpu.cpp.o
+#18 7.692 [  7%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-x64.dir/ggml-cpu/ggml-cpu.cpp.o
+#18 7.695 [  7%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sandybridge.dir/ggml-cpu/ggml-cpu.cpp.o
+#18 7.710 [  7%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-ivybridge.dir/ggml-cpu/ggml-cpu.cpp.o
+#18 7.715 [  7%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-piledriver.dir/ggml-cpu/ggml-cpu.cpp.o
+#18 7.753 [  7%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-haswell.dir/ggml-cpu/ggml-cpu.cpp.o
+#18 8.031 [  7%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-x64.dir/ggml-cpu/repack.cpp.o
+#18 8.031 [  7%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sse42.dir/ggml-cpu/repack.cpp.o
+#18 8.037 [  7%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sandybridge.dir/ggml-cpu/repack.cpp.o
+#18 8.046 [  7%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-ivybridge.dir/ggml-cpu/repack.cpp.o
+#18 8.050 [  7%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-piledriver.dir/ggml-cpu/repack.cpp.o
+#18 8.096 [  7%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-haswell.dir/ggml-cpu/repack.cpp.o
+#18 12.25 [  7%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-ivybridge.dir/ggml-cpu/iqp.cpp.o
+#18 12.26 [  7%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sse42.dir/ggml-cpu/iqp.cpp.o
+#18 12.29 [  7%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sandybridge.dir/ggml-cpu/iqp.cpp.o
+#18 12.29 [  7%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-haswell.dir/ggml-cpu/iqp.cpp.o
+#18 12.40 [  7%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-x64.dir/ggml-cpu/iqp.cpp.o
+#18 12.41 [  7%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-piledriver.dir/ggml-cpu/iqp.cpp.o
+#18 12.71 [  7%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-haswell.dir/ggml-cpu/hbm.cpp.o
+#18 12.73 [  7%] Building C object ggml/src/CMakeFiles/ggml-cpu-haswell.dir/ggml-cpu/quants.c.o
+#18 13.23 [  7%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-ivybridge.dir/ggml-cpu/hbm.cpp.o
+#18 13.25 [  7%] Building C object ggml/src/CMakeFiles/ggml-cpu-ivybridge.dir/ggml-cpu/quants.c.o
+#18 13.26 [  7%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sandybridge.dir/ggml-cpu/hbm.cpp.o
+#18 13.28 [  7%] Building C object ggml/src/CMakeFiles/ggml-cpu-sandybridge.dir/ggml-cpu/quants.c.o
+#18 13.33 [  7%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sse42.dir/ggml-cpu/hbm.cpp.o
+#18 13.35 [  7%] Building C object ggml/src/CMakeFiles/ggml-cpu-sse42.dir/ggml-cpu/quants.c.o
+#18 13.41 [  7%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-x64.dir/ggml-cpu/hbm.cpp.o
+#18 13.43 [  8%] Building C object ggml/src/CMakeFiles/ggml-cpu-x64.dir/ggml-cpu/quants.c.o
+#18 13.43 [  8%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-piledriver.dir/ggml-cpu/hbm.cpp.o
+#18 13.45 [  8%] Building C object ggml/src/CMakeFiles/ggml-cpu-piledriver.dir/ggml-cpu/quants.c.o
+#18 13.65 [  8%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-haswell.dir/ggml-cpu/traits.cpp.o
+#18 13.87 [  8%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-haswell.dir/ggml-cpu/amx/amx.cpp.o
+#18 14.10 [  8%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-haswell.dir/ggml-cpu/amx/mmq.cpp.o
+#18 14.18 [  8%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-ivybridge.dir/ggml-cpu/traits.cpp.o
+#18 14.21 [  8%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sandybridge.dir/ggml-cpu/traits.cpp.o
+#18 14.30 [  9%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sse42.dir/ggml-cpu/traits.cpp.o
+#18 14.34 [ 10%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-haswell.dir/ggml-cpu/binary-ops.cpp.o
+#18 14.38 [ 10%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-ivybridge.dir/ggml-cpu/amx/amx.cpp.o
+#18 14.38 [ 10%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-piledriver.dir/ggml-cpu/traits.cpp.o
+#18 14.40 [ 11%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sandybridge.dir/ggml-cpu/amx/amx.cpp.o
+#18 14.49 [ 11%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-x64.dir/ggml-cpu/traits.cpp.o
+#18 14.50 [ 11%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sse42.dir/ggml-cpu/amx/amx.cpp.o
+#18 14.59 [ 11%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-piledriver.dir/ggml-cpu/amx/amx.cpp.o
+#18 14.60 [ 12%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-ivybridge.dir/ggml-cpu/amx/mmq.cpp.o
+#18 14.62 [ 12%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sandybridge.dir/ggml-cpu/amx/mmq.cpp.o
+#18 14.70 [ 12%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-x64.dir/ggml-cpu/amx/amx.cpp.o
+#18 14.73 [ 12%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sse42.dir/ggml-cpu/amx/mmq.cpp.o
+#18 14.81 [ 13%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-piledriver.dir/ggml-cpu/amx/mmq.cpp.o
+#18 14.82 [ 13%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-ivybridge.dir/ggml-cpu/binary-ops.cpp.o
+#18 14.85 [ 13%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sandybridge.dir/ggml-cpu/binary-ops.cpp.o
+#18 14.86 [ 13%] Linking CXX static library libcpp-httplib.a
+#18 14.93 [ 13%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-x64.dir/ggml-cpu/amx/mmq.cpp.o
+#18 14.95 [ 13%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sse42.dir/ggml-cpu/binary-ops.cpp.o
+#18 14.97 [ 13%] Built target cpp-httplib
+#18 14.97 [ 13%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sandybridge.dir/ggml-cpu/unary-ops.cpp.o
+#18 15.04 [ 13%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-piledriver.dir/ggml-cpu/binary-ops.cpp.o
+#18 15.16 [ 13%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-x64.dir/ggml-cpu/binary-ops.cpp.o
+#18 15.40 [ 13%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-haswell.dir/ggml-cpu/unary-ops.cpp.o
+#18 15.82 [ 13%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-ivybridge.dir/ggml-cpu/unary-ops.cpp.o
+#18 15.85 [ 13%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-haswell.dir/ggml-cpu/vec.cpp.o
+#18 15.96 [ 13%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sse42.dir/ggml-cpu/unary-ops.cpp.o
+#18 16.05 [ 13%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-piledriver.dir/ggml-cpu/unary-ops.cpp.o
+#18 16.14 [ 13%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sse42.dir/ggml-cpu/vec.cpp.o
+#18 16.20 [ 13%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-x64.dir/ggml-cpu/unary-ops.cpp.o
+#18 16.42 [ 13%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sse42.dir/ggml-cpu/ops.cpp.o
+#18 16.79 [ 13%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sandybridge.dir/ggml-cpu/vec.cpp.o
+#18 17.08 [ 13%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sandybridge.dir/ggml-cpu/ops.cpp.o
+#18 17.24 [ 13%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-haswell.dir/ggml-cpu/ops.cpp.o
+#18 17.62 [ 13%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-ivybridge.dir/ggml-cpu/vec.cpp.o
+#18 17.72 [ 13%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-haswell.dir/ggml-cpu/llamafile/sgemm.cpp.o
+#18 17.83 [ 13%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-piledriver.dir/ggml-cpu/vec.cpp.o
+#18 17.91 [ 13%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-ivybridge.dir/ggml-cpu/ops.cpp.o
+#18 17.94 [ 13%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-x64.dir/ggml-cpu/vec.cpp.o
+#18 18.12 [ 13%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-piledriver.dir/ggml-cpu/ops.cpp.o
+#18 18.21 [ 13%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-x64.dir/ggml-cpu/ops.cpp.o
+#18 19.50 [ 13%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-x64.dir/ggml-cpu/llamafile/sgemm.cpp.o
+#18 19.71 [ 13%] Building C object ggml/src/CMakeFiles/ggml-cpu-haswell.dir/ggml-cpu/arch/x86/quants.c.o
+#18 19.72 [ 13%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/add-id.cpp.o
+#18 20.06 [ 13%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-ivybridge.dir/ggml-cpu/llamafile/sgemm.cpp.o
+#18 21.41 [ 13%] Building C object ggml/src/CMakeFiles/ggml-cpu-ivybridge.dir/ggml-cpu/arch/x86/quants.c.o
+#18 21.70 [ 13%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sse42.dir/ggml-cpu/llamafile/sgemm.cpp.o
+#18 21.74 [ 13%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sandybridge.dir/ggml-cpu/llamafile/sgemm.cpp.o
+#18 21.91 [ 13%] Building C object ggml/src/CMakeFiles/ggml-cpu-sse42.dir/ggml-cpu/arch/x86/quants.c.o
+#18 22.07 [ 14%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sse42.dir/ggml-cpu/arch/x86/repack.cpp.o
+#18 22.28 [ 14%] Linking CXX shared module ../../bin/libggml-cpu-sse42.so
+#18 22.36 [ 14%] Built target ggml-cpu-sse42
+#18 22.36 [ 14%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-haswell.dir/ggml-cpu/arch/x86/repack.cpp.o
+#18 22.42 [ 14%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-ivybridge.dir/ggml-cpu/arch/x86/repack.cpp.o
+#18 22.65 [ 14%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-piledriver.dir/ggml-cpu/llamafile/sgemm.cpp.o
+#18 22.78 [ 14%] Building C object ggml/src/CMakeFiles/ggml-cpu-sandybridge.dir/ggml-cpu/arch/x86/quants.c.o
+#18 22.85 [ 14%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sandybridge.dir/ggml-cpu/arch/x86/repack.cpp.o
+#18 23.04 [ 14%] Linking CXX shared module ../../bin/libggml-cpu-haswell.so
+#18 23.06 [ 14%] Building C object ggml/src/CMakeFiles/ggml-cpu-piledriver.dir/ggml-cpu/arch/x86/quants.c.o
+#18 23.11 [ 15%] Building C object ggml/src/CMakeFiles/ggml-cpu-x64.dir/ggml-cpu/arch/x86/quants.c.o
+#18 23.11 [ 16%] Linking CXX shared module ../../bin/libggml-cpu-sandybridge.so
+#18 23.11 [ 16%] Built target ggml-cpu-haswell
+#18 23.12 [ 16%] Building C object ggml/src/CMakeFiles/ggml-cpu-skylakex.dir/ggml-cpu/ggml-cpu.c.o
+#18 23.18 [ 16%] Built target ggml-cpu-sandybridge
+#18 23.19 [ 16%] Building C object ggml/src/CMakeFiles/ggml-cpu-cannonlake.dir/ggml-cpu/ggml-cpu.c.o
+#18 23.31 [ 16%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-x64.dir/ggml-cpu/arch/x86/repack.cpp.o
+#18 23.40 [ 16%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-piledriver.dir/ggml-cpu/arch/x86/repack.cpp.o
+#18 23.41 [ 16%] Linking CXX shared module ../../bin/libggml-cpu-ivybridge.so
+#18 23.48 [ 16%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-skylakex.dir/ggml-cpu/ggml-cpu.cpp.o
+#18 23.48 [ 16%] Built target ggml-cpu-ivybridge
+#18 23.49 [ 16%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-skylakex.dir/ggml-cpu/repack.cpp.o
+#18 23.51 [ 16%] Linking CXX shared module ../../bin/libggml-cpu-x64.so
+#18 23.58 [ 16%] Built target ggml-cpu-x64
+#18 23.59 [ 16%] Building C object ggml/src/CMakeFiles/ggml-cpu-cascadelake.dir/ggml-cpu/ggml-cpu.c.o
+#18 23.60 [ 16%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-skylakex.dir/ggml-cpu/iqp.cpp.o
+#18 23.62 [ 17%] Building C object ggml/src/CMakeFiles/ggml-cpu-icelake.dir/ggml-cpu/ggml-cpu.c.o
+#18 23.70 [ 17%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cannonlake.dir/ggml-cpu/ggml-cpu.cpp.o
+#18 23.83 [ 17%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-skylakex.dir/ggml-cpu/hbm.cpp.o
+#18 23.84 [ 17%] Building C object ggml/src/CMakeFiles/ggml-cpu-skylakex.dir/ggml-cpu/quants.c.o
+#18 24.03 [ 17%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-icelake.dir/ggml-cpu/ggml-cpu.cpp.o
+#18 24.04 [ 18%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cannonlake.dir/ggml-cpu/repack.cpp.o
+#18 24.07 [ 19%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cascadelake.dir/ggml-cpu/ggml-cpu.cpp.o
+#18 24.11 [ 20%] Linking CXX shared module ../../bin/libggml-cpu-piledriver.so
+#18 24.11 [ 20%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cascadelake.dir/ggml-cpu/repack.cpp.o
+#18 24.19 [ 20%] Built target ggml-cpu-piledriver
+#18 24.19 [ 20%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cannonlake.dir/ggml-cpu/iqp.cpp.o
+#18 24.36 [ 20%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-icelake.dir/ggml-cpu/repack.cpp.o
+#18 24.41 [ 20%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cascadelake.dir/ggml-cpu/iqp.cpp.o
+#18 24.58 [ 20%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/binbcast.cpp.o
+#18 24.64 [ 20%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cascadelake.dir/ggml-cpu/hbm.cpp.o
+#18 24.66 [ 20%] Building C object ggml/src/CMakeFiles/ggml-cpu-cascadelake.dir/ggml-cpu/quants.c.o
+#18 24.74 [ 20%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cascadelake.dir/ggml-cpu/traits.cpp.o
+#18 24.87 [ 20%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cascadelake.dir/ggml-cpu/amx/amx.cpp.o
+#18 24.94 [ 20%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cascadelake.dir/ggml-cpu/amx/mmq.cpp.o
+#18 25.11 [ 20%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cascadelake.dir/ggml-cpu/binary-ops.cpp.o
+#18 25.18 [ 21%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cascadelake.dir/ggml-cpu/unary-ops.cpp.o
+#18 25.59 [ 21%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cascadelake.dir/ggml-cpu/vec.cpp.o
+#18 25.88 [ 21%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cascadelake.dir/ggml-cpu/ops.cpp.o
+#18 26.08 [ 21%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cascadelake.dir/ggml-cpu/llamafile/sgemm.cpp.o
+#18 27.01 [ 21%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-icelake.dir/ggml-cpu/iqp.cpp.o
+#18 27.46 [ 21%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-icelake.dir/ggml-cpu/hbm.cpp.o
+#18 27.48 [ 21%] Building C object ggml/src/CMakeFiles/ggml-cpu-icelake.dir/ggml-cpu/quants.c.o
+#18 27.73 [ 22%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-skylakex.dir/ggml-cpu/traits.cpp.o
+#18 27.95 [ 22%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-skylakex.dir/ggml-cpu/amx/amx.cpp.o
+#18 28.18 [ 22%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-skylakex.dir/ggml-cpu/amx/mmq.cpp.o
+#18 28.29 [ 22%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cannonlake.dir/ggml-cpu/hbm.cpp.o
+#18 28.31 [ 22%] Building C object ggml/src/CMakeFiles/ggml-cpu-cannonlake.dir/ggml-cpu/quants.c.o
+#18 28.40 [ 22%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-skylakex.dir/ggml-cpu/binary-ops.cpp.o
+#18 28.43 [ 22%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/col2im-1d.cpp.o
+#18 28.62 [ 22%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-icelake.dir/ggml-cpu/traits.cpp.o
+#18 28.65 [ 22%] Building C object ggml/src/CMakeFiles/ggml-cpu-cascadelake.dir/ggml-cpu/arch/x86/quants.c.o
+#18 28.84 [ 22%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-icelake.dir/ggml-cpu/amx/amx.cpp.o
+#18 29.00 [ 22%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-icelake.dir/ggml-cpu/amx/mmq.cpp.o
+#18 29.07 [ 23%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-icelake.dir/ggml-cpu/binary-ops.cpp.o
+#18 29.21 [ 23%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cannonlake.dir/ggml-cpu/traits.cpp.o
+#18 29.24 [ 23%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-icelake.dir/ggml-cpu/unary-ops.cpp.o
+#18 29.35 [ 23%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-skylakex.dir/ggml-cpu/unary-ops.cpp.o
+#18 29.41 [ 23%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cannonlake.dir/ggml-cpu/amx/amx.cpp.o
+#18 29.65 [ 23%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cannonlake.dir/ggml-cpu/amx/mmq.cpp.o
+#18 29.77 [ 23%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cascadelake.dir/ggml-cpu/arch/x86/repack.cpp.o
+#18 29.89 [ 23%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cannonlake.dir/ggml-cpu/binary-ops.cpp.o
+#18 30.05 [ 23%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-icelake.dir/ggml-cpu/vec.cpp.o
+#18 30.34 [ 23%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-icelake.dir/ggml-cpu/ops.cpp.o
+#18 30.92 [ 24%] Building C object ggml/src/CMakeFiles/ggml-cpu-cooperlake.dir/ggml-cpu/ggml-cpu.c.o
+#18 30.92 [ 24%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cannonlake.dir/ggml-cpu/unary-ops.cpp.o
+#18 31.00 [ 25%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cooperlake.dir/ggml-cpu/ggml-cpu.cpp.o
+#18 31.01 [ 25%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-skylakex.dir/ggml-cpu/vec.cpp.o
+#18 31.28 [ 25%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-skylakex.dir/ggml-cpu/ops.cpp.o
+#18 31.36 [ 25%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cannonlake.dir/ggml-cpu/vec.cpp.o
+#18 31.39 [ 25%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cooperlake.dir/ggml-cpu/repack.cpp.o
+#18 31.65 [ 25%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cannonlake.dir/ggml-cpu/ops.cpp.o
+#18 31.92 [ 25%] Linking CXX shared module ../../bin/libggml-cpu-cascadelake.so
+#18 32.01 [ 25%] Built target ggml-cpu-cascadelake
+#18 32.01 [ 25%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cannonlake.dir/ggml-cpu/llamafile/sgemm.cpp.o
+#18 32.63 [ 25%] Building C object ggml/src/CMakeFiles/ggml-cpu-cannonlake.dir/ggml-cpu/arch/x86/quants.c.o
+#18 32.99 [ 25%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cannonlake.dir/ggml-cpu/arch/x86/repack.cpp.o
+#18 33.23 [ 26%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/common.cpp.o
+#18 33.51 [ 26%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/concat.cpp.o
+#18 34.30 [ 26%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/conv.cpp.o
+#18 35.80 [ 26%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cooperlake.dir/ggml-cpu/iqp.cpp.o
+#18 35.82 [ 26%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cooperlake.dir/ggml-cpu/hbm.cpp.o
+#18 35.83 [ 26%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-icelake.dir/ggml-cpu/llamafile/sgemm.cpp.o
+#18 36.15 [ 26%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/conv2d-dw.cpp.o
+#18 36.26 [ 26%] Building C object ggml/src/CMakeFiles/ggml-cpu-cooperlake.dir/ggml-cpu/quants.c.o
+#18 37.04 [ 26%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-skylakex.dir/ggml-cpu/llamafile/sgemm.cpp.o
+#18 37.23 [ 26%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cooperlake.dir/ggml-cpu/traits.cpp.o
+#18 37.46 [ 26%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cooperlake.dir/ggml-cpu/amx/amx.cpp.o
+#18 37.60 [ 26%] Linking CXX shared module ../../bin/libggml-cpu-cannonlake.so
+#18 37.68 [ 26%] Built target ggml-cpu-cannonlake
+#18 37.69 [ 26%] Building C object ggml/src/CMakeFiles/ggml-cpu-zen4.dir/ggml-cpu/ggml-cpu.c.o
+#18 37.69 [ 26%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cooperlake.dir/ggml-cpu/amx/mmq.cpp.o
+#18 37.83 [ 26%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/conv2d-transpose.cpp.o
+#18 37.93 [ 27%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cooperlake.dir/ggml-cpu/binary-ops.cpp.o
+#18 38.17 [ 27%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-zen4.dir/ggml-cpu/ggml-cpu.cpp.o
+#18 38.52 [ 27%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-zen4.dir/ggml-cpu/repack.cpp.o
+#18 38.87 [ 27%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cooperlake.dir/ggml-cpu/unary-ops.cpp.o
+#18 39.07 [ 27%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cooperlake.dir/ggml-cpu/vec.cpp.o
+#18 39.34 [ 27%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cooperlake.dir/ggml-cpu/ops.cpp.o
+#18 39.51 [ 27%] Building C object ggml/src/CMakeFiles/ggml-cpu-icelake.dir/ggml-cpu/arch/x86/quants.c.o
+#18 39.67 [ 27%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cooperlake.dir/ggml-cpu/llamafile/sgemm.cpp.o
+#18 39.86 [ 27%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-icelake.dir/ggml-cpu/arch/x86/repack.cpp.o
+#18 40.51 [ 27%] Building C object ggml/src/CMakeFiles/ggml-cpu-cooperlake.dir/ggml-cpu/arch/x86/quants.c.o
+#18 40.71 [ 27%] Building C object ggml/src/CMakeFiles/ggml-cpu-skylakex.dir/ggml-cpu/arch/x86/quants.c.o
+#18 40.85 [ 27%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-cooperlake.dir/ggml-cpu/arch/x86/repack.cpp.o
+#18 40.88 [ 27%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/conv2d.cpp.o
+#18 41.06 [ 28%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-skylakex.dir/ggml-cpu/arch/x86/repack.cpp.o
+#18 41.09 [ 28%] Linking CXX shared module ../../bin/libggml-cpu-icelake.so
+#18 41.17 [ 28%] Built target ggml-cpu-icelake
+#18 41.17 [ 28%] Building C object ggml/src/CMakeFiles/ggml-cpu-alderlake.dir/ggml-cpu/ggml-cpu.c.o
+#18 41.64 [ 28%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-alderlake.dir/ggml-cpu/ggml-cpu.cpp.o
+#18 42.03 [ 29%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-alderlake.dir/ggml-cpu/repack.cpp.o
+#18 42.09 [ 29%] Building C object ggml/src/CMakeFiles/ggml-cpu-sapphirerapids.dir/ggml-cpu/ggml-cpu.c.o
+#18 42.44 [ 29%] Linking CXX shared module ../../bin/libggml-cpu-skylakex.so
+#18 42.52 [ 29%] Built target ggml-cpu-skylakex
+#18 42.53 [ 29%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sapphirerapids.dir/ggml-cpu/ggml-cpu.cpp.o
+#18 42.58 [ 29%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sapphirerapids.dir/ggml-cpu/repack.cpp.o
+#18 42.78 [ 29%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sapphirerapids.dir/ggml-cpu/iqp.cpp.o
+#18 42.88 [ 29%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-zen4.dir/ggml-cpu/iqp.cpp.o
+#18 42.91 [ 29%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-zen4.dir/ggml-cpu/hbm.cpp.o
+#18 42.93 [ 30%] Building C object ggml/src/CMakeFiles/ggml-cpu-zen4.dir/ggml-cpu/quants.c.o
+#18 43.22 [ 30%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sapphirerapids.dir/ggml-cpu/hbm.cpp.o
+#18 43.24 [ 30%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-zen4.dir/ggml-cpu/traits.cpp.o
+#18 43.33 [ 30%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-zen4.dir/ggml-cpu/amx/amx.cpp.o
+#18 43.42 [ 30%] Building C object ggml/src/CMakeFiles/ggml-cpu-sapphirerapids.dir/ggml-cpu/quants.c.o
+#18 43.45 [ 30%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-zen4.dir/ggml-cpu/amx/mmq.cpp.o
+#18 43.57 [ 30%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sapphirerapids.dir/ggml-cpu/traits.cpp.o
+#18 43.69 [ 30%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-zen4.dir/ggml-cpu/binary-ops.cpp.o
+#18 43.79 [ 31%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sapphirerapids.dir/ggml-cpu/amx/amx.cpp.o
+#18 43.91 [ 31%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-zen4.dir/ggml-cpu/unary-ops.cpp.o
+#18 44.06 [ 31%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sapphirerapids.dir/ggml-cpu/amx/mmq.cpp.o
+#18 44.35 [ 31%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sapphirerapids.dir/ggml-cpu/binary-ops.cpp.o
+#18 44.73 [ 31%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-zen4.dir/ggml-cpu/vec.cpp.o
+#18 45.04 [ 31%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sapphirerapids.dir/ggml-cpu/unary-ops.cpp.o
+#18 45.07 [ 31%] Linking CXX shared module ../../bin/libggml-cpu-cooperlake.so
+#18 45.16 [ 31%] Built target ggml-cpu-cooperlake
+#18 45.16 [ 31%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sapphirerapids.dir/ggml-cpu/vec.cpp.o
+#18 45.40 [ 31%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-alderlake.dir/ggml-cpu/iqp.cpp.o
+#18 45.47 [ 31%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sapphirerapids.dir/ggml-cpu/ops.cpp.o
+#18 45.61 [ 31%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/conv3d.cpp.o
+#18 45.74 [ 31%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-zen4.dir/ggml-cpu/ops.cpp.o
+#18 45.84 [ 31%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-alderlake.dir/ggml-cpu/hbm.cpp.o
+#18 45.86 [ 31%] Building C object ggml/src/CMakeFiles/ggml-cpu-alderlake.dir/ggml-cpu/quants.c.o
+#18 46.50 [ 31%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-alderlake.dir/ggml-cpu/traits.cpp.o
+#18 46.67 [ 31%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-alderlake.dir/ggml-cpu/amx/amx.cpp.o
+#18 46.71 [ 31%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-alderlake.dir/ggml-cpu/amx/mmq.cpp.o
+#18 46.80 [ 31%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-alderlake.dir/ggml-cpu/binary-ops.cpp.o
+#18 46.91 [ 31%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-zen4.dir/ggml-cpu/llamafile/sgemm.cpp.o
+#18 46.91 [ 32%] Building C object ggml/src/CMakeFiles/ggml-cpu-zen4.dir/ggml-cpu/arch/x86/quants.c.o
+#18 46.93 [ 32%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-zen4.dir/ggml-cpu/arch/x86/repack.cpp.o
+#18 47.26 [ 32%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/convert.cpp.o
+#18 47.90 [ 32%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-alderlake.dir/ggml-cpu/unary-ops.cpp.o
+#18 48.15 [ 32%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sapphirerapids.dir/ggml-cpu/llamafile/sgemm.cpp.o
+#18 48.28 [ 32%] Building C object ggml/src/CMakeFiles/ggml-cpu-sapphirerapids.dir/ggml-cpu/arch/x86/quants.c.o
+#18 48.64 [ 33%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-sapphirerapids.dir/ggml-cpu/arch/x86/repack.cpp.o
+#18 49.67 [ 34%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-alderlake.dir/ggml-cpu/vec.cpp.o
+#18 49.98 [ 34%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-alderlake.dir/ggml-cpu/ops.cpp.o
+#18 49.99 [ 34%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-alderlake.dir/ggml-cpu/llamafile/sgemm.cpp.o
+#18 50.57 [ 34%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/count-equal.cpp.o
+#18 50.70 [ 34%] Building C object ggml/src/CMakeFiles/ggml-cpu-alderlake.dir/ggml-cpu/arch/x86/quants.c.o
+#18 51.05 [ 34%] Building CXX object ggml/src/CMakeFiles/ggml-cpu-alderlake.dir/ggml-cpu/arch/x86/repack.cpp.o
+#18 51.52 [ 35%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/cpy.cpp.o
+#18 51.64 [ 35%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/cross_entropy_loss.cpp.o
+#18 51.68 [ 35%] Linking CXX shared module ../../bin/libggml-cpu-sapphirerapids.so
+#18 51.75 [ 35%] Built target ggml-cpu-sapphirerapids
+#18 51.75 [ 35%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/diag.cpp.o
+#18 51.75 [ 35%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/cumsum.cpp.o
+#18 51.79 [ 35%] Linking CXX shared module ../../bin/libggml-cpu-zen4.so
+#18 51.88 [ 35%] Built target ggml-cpu-zen4
+#18 51.88 [ 35%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/dmmv.cpp.o
+#18 54.09 [ 35%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/dsv4-hc.cpp.o
+#18 55.47 [ 35%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/element_wise.cpp.o
+#18 55.96 [ 35%] Linking CXX shared module ../../bin/libggml-cpu-alderlake.so
+#18 56.05 [ 35%] Built target ggml-cpu-alderlake
+#18 56.05 [ 35%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/fattn-buffers.cpp.o
+#18 56.45 [ 35%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/fattn-mkl.cpp.o
+#18 56.49 [ 36%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/fattn-onednn.cpp.o
+#18 56.50 [ 36%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/fattn-tile.cpp.o
+#18 59.05 [ 36%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/fattn.cpp.o
+#18 59.48 [ 36%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/fill.cpp.o
+#18 60.11 [ 36%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/fusion.cpp.o
+#18 60.42 [ 36%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/fwht.cpp.o
+#18 61.34 [ 36%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/gated_delta_net.cpp.o
+#18 61.76 [ 36%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/getrows.cpp.o
+#18 62.22 [ 36%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/gla.cpp.o
+#18 64.11 [ 37%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/im2col.cpp.o
+#18 64.25 [ 37%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/lightning-indexer.cpp.o
+#18 64.30 [ 37%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/mem.cpp.o
+#18 65.45 [ 37%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/memtrace.cpp.o
+#18 66.14 [ 37%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/mmq.cpp.o
+#18 66.85 [ 37%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/mmvq.cpp.o
+#18 67.09 [ 37%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/moe-cache.cpp.o
+#18 67.53 [ 37%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/norm.cpp.o
+#18 68.00 [ 38%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/opt-step.cpp.o
+#18 68.74 /app/ggml/src/ggml-sycl/moe-cache.cpp:626:25: error: no matching function for call to 'reduce_over_group'
+#18 68.74   626 |                         sycl::reduce_over_group(item.get_group(), local_best, moe_plan_candidate_min{});
+#18 68.74       |                         ^~~~~~~~~~~~~~~~~~~~~~~
+#18 68.74 /opt/intel/oneapi/compiler/2025.3/include/sycl/group_algorithm.hpp:217:1: note: candidate template ignored: requirement 'detail::is_scalar_arithmetic<moe_plan_candidate>::value || (detail::is_complex<moe_plan_candidate, void>::value && detail::integral_constant<bool, false>::value)' was not satisfied [with Group = group<1>, T = moe_plan_candidate, BinaryOperation = moe_plan_candidate_min]
+#18 68.74   217 | reduce_over_group(Group g, T x, BinaryOperation binary_op) {
+#18 68.74       | ^
+#18 68.74 /opt/intel/oneapi/compiler/2025.3/include/sycl/group_algorithm.hpp:250:1: note: candidate template ignored: requirement 'detail::is_complex<moe_plan_candidate, void>::value' was not satisfied [with Group = group<1>, T = moe_plan_candidate, BinaryOperation = moe_plan_candidate_min]
+#18 68.74   250 | reduce_over_group(Group g, T x, BinaryOperation) {
+#18 68.74       | ^
+#18 68.74 /opt/intel/oneapi/compiler/2025.3/include/sycl/group_algorithm.hpp:269:1: note: candidate template ignored: requirement 'detail::is_vector_arithmetic_or_complex<moe_plan_candidate>::value' was not satisfied [with Group = group<1>, T = moe_plan_candidate, BinaryOperation = moe_plan_candidate_min]
+#18 68.74   269 | reduce_over_group(Group g, T x, BinaryOperation binary_op) {
+#18 68.74       | ^
+#18 68.74 /opt/intel/oneapi/compiler/2025.3/include/sycl/group_algorithm.hpp:293:1: note: candidate function template not viable: requires 4 arguments, but 3 were provided
+#18 68.74   293 | reduce_over_group(Group g, V x, T init, BinaryOperation binary_op) {
+#18 68.74       | ^                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#18 68.74 /opt/intel/oneapi/compiler/2025.3/include/sycl/group_algorithm.hpp:313:1: note: candidate function template not viable: requires 4 arguments, but 3 were provided
+#18 68.74   313 | reduce_over_group(Group g, V x, T init, BinaryOperation binary_op) {
+#18 68.74       | ^                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#18 68.91 [ 38%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/outprod.cpp.o
+#18 69.13 [ 38%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/pad.cpp.o
+#18 69.16 1 error generated.
+#18 69.18 gmake[2]: *** [ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/build.make:594: ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/moe-cache.cpp.o] Error 1
+#18 69.18 gmake[2]: *** Waiting for unfinished jobs....
+#18 81.55 gmake[1]: *** [CMakeFiles/Makefile2:2748: ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/all] Error 2
+#18 81.55 gmake: *** [Makefile:146: all] Error 2
+#18 ERROR: process "/bin/sh -c if [ \"${GGML_SYCL_F16}\" = \"ON\" ]; then         export OPT_SYCL_F16=\"-DGGML_SYCL_F16=ON\"         && export SYCL_PROGRAM_COMPILE_OPTIONS=\"-cl-fp32-correctly-rounded-divide-sqrt\";     fi &&     cmake -B build -DGGML_NATIVE=OFF -DGGML_SYCL=ON         -DCMAKE_C_COMPILER=icx -DCMAKE_CXX_COMPILER=icpx         -DGGML_BACKEND_DL=ON -DGGML_CPU_ALL_VARIANTS=ON         -DLLAMA_BUILD_TESTS=ON -DLLAMA_CURL=ON         ${OPT_SYCL_F16} &&     cmake --build build --config Release -j8" did not complete successfully: exit code: 2
+------
+ > [build  7/11] RUN if [ "ON" = "ON" ]; then         export OPT_SYCL_F16="-DGGML_SYCL_F16=ON"         && export SYCL_PROGRAM_COMPILE_OPTIONS="-cl-fp32-correctly-rounded-divide-sqrt";     fi &&     cmake -B build -DGGML_NATIVE=OFF -DGGML_SYCL=ON         -DCMAKE_C_COMPILER=icx -DCMAKE_CXX_COMPILER=icpx         -DGGML_BACKEND_DL=ON -DGGML_CPU_ALL_VARIANTS=ON         -DLLAMA_BUILD_TESTS=ON -DLLAMA_CURL=ON         ${OPT_SYCL_F16} &&     cmake --build build --config Release -j8:
+68.74 /opt/intel/oneapi/compiler/2025.3/include/sycl/group_algorithm.hpp:313:1: note: candidate function template not viable: requires 4 arguments, but 3 were provided
+68.74   313 | reduce_over_group(Group g, V x, T init, BinaryOperation binary_op) {
+68.74       | ^                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+68.91 [ 38%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/outprod.cpp.o
+69.13 [ 38%] Building CXX object ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/pad.cpp.o
+69.16 1 error generated.
+69.18 gmake[2]: *** [ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/build.make:594: ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/moe-cache.cpp.o] Error 1
+69.18 gmake[2]: *** Waiting for unfinished jobs....
+81.55 gmake[1]: *** [CMakeFiles/Makefile2:2748: ggml/src/ggml-sycl/CMakeFiles/ggml-sycl.dir/all] Error 2
+81.55 gmake: *** [Makefile:146: all] Error 2
+------
+Dockerfile.sycl-dev:41
+--------------------
+  40 |     
+  41 | >>> RUN if [ "${GGML_SYCL_F16}" = "ON" ]; then \
+  42 | >>>         export OPT_SYCL_F16="-DGGML_SYCL_F16=ON" \
+  43 | >>>         && export SYCL_PROGRAM_COMPILE_OPTIONS="-cl-fp32-correctly-rounded-divide-sqrt"; \
+  44 | >>>     fi && \
+  45 | >>>     cmake -B build -DGGML_NATIVE=OFF -DGGML_SYCL=ON \
+  46 | >>>         -DCMAKE_C_COMPILER=icx -DCMAKE_CXX_COMPILER=icpx \
+  47 | >>>         -DGGML_BACKEND_DL=ON -DGGML_CPU_ALL_VARIANTS=ON \
+  48 | >>>         -DLLAMA_BUILD_TESTS=ON -DLLAMA_CURL=ON \
+  49 | >>>         ${OPT_SYCL_F16} && \
+  50 | >>>     cmake --build build --config Release -j8
+  51 |     
+--------------------
+ERROR: failed to solve: process "/bin/sh -c if [ \"${GGML_SYCL_F16}\" = \"ON\" ]; then         export OPT_SYCL_F16=\"-DGGML_SYCL_F16=ON\"         && export SYCL_PROGRAM_COMPILE_OPTIONS=\"-cl-fp32-correctly-rounded-divide-sqrt\";     fi &&     cmake -B build -DGGML_NATIVE=OFF -DGGML_SYCL=ON         -DCMAKE_C_COMPILER=icx -DCMAKE_CXX_COMPILER=icpx         -DGGML_BACKEND_DL=ON -DGGML_CPU_ALL_VARIANTS=ON         -DLLAMA_BUILD_TESTS=ON -DLLAMA_CURL=ON         ${OPT_SYCL_F16} &&     cmake --build build --config Release -j8" did not complete successfully: exit code: 2

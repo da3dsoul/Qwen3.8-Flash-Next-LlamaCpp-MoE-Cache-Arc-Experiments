@@ -1,0 +1,66 @@
+
+
+Loading model... |-\MMID_HYBRID: enabled, fraction 1.000, report window 780 dispatches
+|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\MMID_HYBRID: calibration on blk.0.ffn_gate_exps.weight, 20 rows, ncols 2560, nrows_out 640, 200 iters
+MMID_HYBRID:   bare  submit+wait  : min    15.5 us  mean    19.1 us
+MMID_HYBRID:   full chain, host w : min   474.5 us  mean   490.7 us  (ok=1)
+MMID_HYBRID:   full chain, vram w : min    78.4 us  mean    80.2 us
+|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/- 
+
+▄▄ ▄▄
+██ ██
+██ ██  ▀▀█▄ ███▄███▄  ▀▀█▄    ▄████ ████▄ ████▄
+██ ██ ▄█▀██ ██ ██ ██ ▄█▀██    ██    ██ ██ ██ ██
+██ ██ ▀█▄██ ██ ██ ██ ▀█▄██ ██ ▀████ ████▀ ████▀
+                                    ██    ██
+                                    ▀▀    ▀▀
+
+build      : b10882-6d9c82ea2
+model      : /models/Qwen3.8-Flash-Next-GGUF/UD-IQ3_XXS/Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf
+ftype      : IQ3_XXS - 3.0625 bpw
+modalities : text
+
+available commands:
+  /exit or Ctrl+C     stop or exit
+  /regen              regenerate the last response
+  /clear              clear the chat history
+  /read <file>        add a text file
+  /glob <pattern>     add text files using globbing pattern
+
+
+
+> Count from one to fifty.
+
+[Start thinking]
+
+We need answer user: "CountMMID_HYBRID: 780 dispatches, 15.0 rows each | round trip mean 3258.2 us (min 253.6, max 122057.2) = gather+submit 168.0 + wait 3081.2 + scatter 4.7
+ from one to fifty." Simple. Need final withMMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2067.8 us (min 252.8, max 5726.2) = gather+submit 10.4 + wait 2050.6 + scatter 2.9
+ numbers 1 to 50. Could beMMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2071.4 us (min 253.0, max 5870.8) = gather+submit 9.2 + wait 2054.4 + scatter 2.7
+ list. Ensure maybe just count.
+MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2066.7 us (min 251.8, max 5681.9) = gather+submit 9.2 + wait 2050.7 + scatter 2.6
+[End thinking]
+
+1, 2, 3, 4MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2066.9 us (min 252.1, max 5787.4) = gather+submit 10.9 + wait 2049.3 + scatter 2.7
+, 5, 6, 7,MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2065.9 us (min 252.0, max 5696.7) = gather+submit 11.3 + wait 2047.8 + scatter 2.9
+ 8, 9, 10,MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2069.8 us (min 252.0, max 5734.8) = gather+submit 11.4 + wait 2051.4 + scatter 3.1
+ 11, 12, 1MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2073.1 us (min 252.5, max 6007.3) = gather+submit 10.0 + wait 2056.2 + scatter 2.9
+3, 14, 15,MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2069.6 us (min 250.8, max 5890.8) = gather+submit 9.1 + wait 2053.6 + scatter 2.6
+ 16, 17, 1MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2065.0 us (min 250.4, max 5705.3) = gather+submit 9.1 + wait 2049.0 + scatter 2.6
+8, 19, 20,MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2066.1 us (min 252.4, max 5976.3) = gather+submit 10.0 + wait 2049.0 + scatter 2.9
+ 21, 22, 2MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2071.5 us (min 252.1, max 5761.0) = gather+submit 13.4 + wait 2050.7 + scatter 3.5
+3, 24, 25,MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2066.1 us (min 252.6, max 5747.4) = gather+submit 9.2 + wait 2050.0 + scatter 2.6
+ 26, 27, 2MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2066.1 us (min 252.0, max 6387.2) = gather+submit 9.1 + wait 2049.2 + scatter 2.6
+8, 29, 30,MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2069.9 us (min 251.5, max 5846.9) = gather+submit 9.7 + wait 2053.2 + scatter 2.8
+ 31, 32, 3MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2067.0 us (min 252.1, max 5710.6) = gather+submit 9.4 + wait 2050.5 + scatter 2.8
+3, 34, 35,MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2073.9 us (min 251.2, max 6142.5) = gather+submit 11.7 + wait 2055.1 + scatter 3.0
+ 36, 37, 3MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2066.8 us (min 253.0, max 5816.7) = gather+submit 12.6 + wait 2047.2 + scatter 3.3
+8, 39, 40,MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2065.8 us (min 250.8, max 5702.3) = gather+submit 9.6 + wait 2049.0 + scatter 2.9
+ 41, 42, 4MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2071.6 us (min 252.4, max 6112.3) = gather+submit 9.8 + wait 2054.8 + scatter 3.0
+3, 44, 45,MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2065.2 us (min 252.9, max 5700.3) = gather+submit 9.8 + wait 2048.3 + scatter 3.0
+ 46, 47, 4MMID_HYBRID: 780 dispatches, 10.0 rows each | round trip mean 2065.5 us (min 252.0, max 5725.4) = gather+submit 10.0 + wait 2048.5 + scatter 2.9
+8, 49, 50
+
+[ Prompt: 20.4 t/s | Generation: 5.2 t/s ]
+
+
+Exiting...

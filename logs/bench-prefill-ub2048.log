@@ -1,0 +1,5 @@
+load_backend: loaded SYCL backend from /app/libggml-sycl.so
+load_backend: loaded CPU backend from /app/libggml-cpu-zen4.so
+llama-bench: benchmark 1/2: starting
+llama-bench: benchmark 1/2: warmup prompt run
+

@@ -1,0 +1,68 @@
+
+
+Loading model... |0.01.422.117 I cmn  common_param: common_params_print_info: verbosity = 3 (adjust with the `-lv N` CLI arg)
+0.01.422.629 W srv  llama_server: -----------------
+0.01.422.631 W srv  llama_server: CORS is set to allow all origins ('*') and no API key is set
+0.01.422.631 W srv  llama_server: this can be a security risk (cross-origin attacks)
+0.01.422.631 W srv  llama_server: more info: https://github.com/ggml-org/llama.cpp/pull/25655
+0.01.422.631 W srv  llama_server: -----------------
+0.01.423.841 I srv    load_model: loading model '/models/Qwen3.8-Flash-Next-GGUF/UD-IQ3_XXS/Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf'
+-\|/-0.01.980.673 W common_fit_params: failed to fit params to free device memory: n_gpu_layers already set by user to 99, abort
+\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|2.03.486.829 I cmn          init: llama threadpool init, n_threads = 16
+/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|2.53.145.486 I srv    load_model: initializing, n_slots = 1, n_ctx_slot = 4096, kv_unified = 'false'
+/2.53.152.876 W srv          init: chat template supports preserving reasoning, it is enabled by default (may use more tokens, disable via --no-reasoning-preserve)
+2.53.152.914 I srv  llama_server: model loaded
+2.53.152.917 I srv  llama_server: listening on http://127.0.0.1:57079
+- 
+
+▄▄ ▄▄
+██ ██
+██ ██  ▀▀█▄ ███▄███▄  ▀▀█▄    ▄████ ████▄ ████▄
+██ ██ ▄█▀██ ██ ██ ██ ▄█▀██    ██    ██ ██ ██ ██
+██ ██ ▀█▄██ ██ ██ ██ ▀█▄██ ██ ▀████ ████▀ ████▀
+                                    ██    ██
+                                    ▀▀    ▀▀
+
+build      : b10882-6d9c82ea2
+model      : /models/Qwen3.8-Flash-Next-GGUF/UD-IQ3_XXS/Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf
+ftype      : IQ3_XXS - 3.0625 bpw
+modalities : text
+
+available commands:
+  /exit or Ctrl+C     stop or exit
+  /regen              regenerate the last response
+  /clear              clear the chat history
+  /read <file>        add a text file
+  /glob <pattern>     add text files using globbing pattern
+
+
+
+> Write a short story about a robot who discovers music for the first time.
+2.53.318.172 I slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = -1
+2.53.318.257 I slot launch_slot_: id  0 | task 0 | processing task, is_child = 0
+3.03.880.238 I slot print_timing: id  0 | task 0 | prompt processing, n_tokens =     42, progress = 0.63, t =  10.56 s / 3.98 tokens per second
+3.10.177.650 I slot print_timing: id  0 | task 0 | prompt processing, n_tokens =     63, progress = 0.94, t =  16.86 s / 3.74 tokens per second
+
+[Start thinking]
+
+We need to respond to user: "Write a short story about a robot who discovers music for the first time." Need produce final answer only story. Need maybe in English. Need craft short story. Could be evocative. Ensure not too long? "short story". Let's write maybe 700-1000 words? Desired oververbosity 9 but user asked short story, so moderate. Need no analysis in final. Let's compose polished story.
+
+Title maybe3.17.532.983 I slot print_timing: id  0 | task 0 | n_gen =    100, tg =  16.52 t/s, tg_3s =  16.69 t/s
+ "The First Song". Robot unit in archive, cleaning, discovers old music box or vinyl. It analyzes frequencies, initially noise, then pattern, emotion. Maybe robot3.20.552.679 I slot print_timing: id  0 | task 0 | n_gen =    133, tg =  14.65 t/s, tg_3s =  10.93 t/s
+ named Unit 7, designated for sorting abandoned items. It hears rain and a3.23.711.640 I slot print_timing: id  0 | task 0 | n_gen =    148, tg =  12.08 t/s, tg_3s =   4.75 t/s
+ broken piano. It discovers music by accident. Need first time. Could include3.26.755.192 I slot print_timing: id  0 | task 0 | n_gen =    164, tg =  10.71 t/s, tg_3s =   5.26 t/s
+ internal logs. Let's write with sensory detail.
+
+Need ensure story about robot3.29.872.717 I slot print_timing: id  0 | task 0 | n_gen =    180, tg =   9.76 t/s, tg_3s =   5.13 t/s
+ discovers music for first time. Maybe ending: robot hums, creates music. Let's produce.3.32.587.716 I slot print_timing: id  0 | task 0 | prompt eval time =   18221.41 ms /    67 tokens (  271.96 ms per token,     3.68 tokens per second)
+3.32.587.721 I slot print_timing: id  0 | task 0 |        eval time =   21048.01 ms /   200 tokens (  105.77 ms per token,     9.45 tokens per second)
+3.32.587.722 I slot print_timing: id  0 | task 0 |       total time =   39269.42 ms /   267 tokens
+3.32.587.725 I slot print_timing: id  0 | task 0 |    graphs reused =        198
+3.32.587.762 I slot      release: id  0 | task 0 | stop processing: n_tokens = 266, truncated = 0
+
+3.32.588.154 I srv    operator(): operator(): cleaning up before exit...
+
+[ Prompt: 3.7 t/s | Generation: 9.5 t/s ]
+
+
+Exiting...

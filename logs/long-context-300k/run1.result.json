@@ -1,0 +1,28 @@
+{
+  "server_timings": {
+    "cache_n": 0,
+    "prompt_n": 305801,
+    "prompt_ms": 1197022.8260000001,
+    "prompt_per_token_ms": 3.9143849300689015,
+    "prompt_per_second": 255.46797718291796,
+    "predicted_n": 1000,
+    "predicted_ms": 173198.557,
+    "predicted_per_token_ms": 173.37192892892892,
+    "predicted_per_second": 5.767946438491402
+  },
+  "usage": {
+    "completion_tokens": 1000,
+    "prompt_tokens": 305801,
+    "total_tokens": 306801,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "finish_reason": "length",
+  "client_wall_s": 1370.4323012409732,
+  "client_ttft_s": 1197.9537039989373,
+  "content_chars": 0,
+  "reasoning_chars": 999,
+  "n_stream_chunks": 999,
+  "max_tokens_requested": 1000
+}

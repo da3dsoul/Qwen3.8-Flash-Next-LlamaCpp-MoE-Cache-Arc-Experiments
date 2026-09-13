@@ -1,0 +1,80 @@
+
+
+Loading model... |-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\MOE_PROFILE first entry: device_planned_fused GEMV
+|/-\|/-\|/-\|/-\|/-\|/-\|/- 
+
+▄▄ ▄▄
+██ ██
+██ ██  ▀▀█▄ ███▄███▄  ▀▀█▄    ▄████ ████▄ ████▄
+██ ██ ▄█▀██ ██ ██ ██ ▄█▀██    ██    ██ ██ ██ ██
+██ ██ ▀█▄██ ██ ██ ██ ▀█▄██ ██ ▀████ ████▀ ████▀
+                                    ██    ██
+                                    ▀▀    ▀▀
+
+build      : b10882-6d9c82ea2
+model      : /models/Qwen3.8-Flash-Next-GGUF/UD-Q3_K_XL/Qwen3.8-Flash-Next-UD-Q3_K_XL-00001-of-00003.gguf
+ftype      : Q3_K - Medium
+modalities : text
+
+available commands:
+  /exit or Ctrl+C     stop or exit
+  /regen              regenerate the last response
+  /clear              clear the chat history
+  /read <file>        add a text file
+  /glob <pattern>     add text files using globbing pattern
+
+
+
+> Write a short story about a robot who discovers music for the first time.
+
+[Start thinking]
+
+WeMOE_PROFILE ops=144 (~1 tok) per-token: plan 3.1 ms, gather 40.0 ms, gemv 9.6 ms | misses 9.94/10.00 routes (1% hit) | declines 0 | wall 0.0 ms/tok
+ needMOE_PROFILE ops=288 (~2 tok) per-token: plan 6.3 ms, gather 30.2 ms, gemv 10.2 ms | misses 7.40/10.00 routes (26% hit) | declines 0 | wall 149.4 ms/tok
+ toMOE_PROFILE ops=432 (~3 tok) per-token: plan 8.2 ms, gather 25.9 ms, gemv 11.0 ms | misses 6.29/10.00 routes (37% hit) | declines 0 | wall 283.9 ms/tok
+ respondMOE_PROFILE ops=576 (~4 tok) per-token: plan 8.6 ms, gather 23.9 ms, gemv 11.0 ms | misses 5.78/10.00 routes (42% hit) | declines 0 | wall 107.3 ms/tok
+ toMOE_PROFILE ops=720 (~5 tok) per-token: plan 9.2 ms, gather 22.2 ms, gemv 11.3 ms | misses 5.34/10.00 routes (47% hit) | declines 0 | wall 241.9 ms/tok
+ userMOE_PROFILE mul_mat_id calls=1440 cached=1440 ne11=10 ne12=1 ids_ne0=10 ids_ne1=1
+MOE_PROFILE ops=864 (~6 tok) per-token: plan 9.6 ms, gather 21.2 ms, gemv 11.5 ms | misses 5.08/10.00 routes (49% hit) | declines 0 | wall 140.5 ms/tok
+:MOE_PROFILE ops=1008 (~7 tok) per-token: plan 9.5 ms, gather 19.7 ms, gemv 11.5 ms | misses 4.68/10.00 routes (53% hit) | declines 0 | wall 81.1 ms/tok
+ "MOE_PROFILE ops=1152 (~8 tok) per-token: plan 9.6 ms, gather 19.5 ms, gemv 11.4 ms | misses 4.63/10.00 routes (54% hit) | declines 0 | wall 119.8 ms/tok
+WriteMOE_PROFILE ops=1296 (~9 tok) per-token: plan 9.8 ms, gather 19.3 ms, gemv 11.5 ms | misses 4.59/10.00 routes (54% hit) | declines 0 | wall 159.1 ms/tok
+ aMOE_PROFILE ops=1440 (~10 tok) per-token: plan 10.0 ms, gather 20.2 ms, gemv 11.5 ms | misses 4.84/10.00 routes (52% hit) | declines 0 | wall 203.0 ms/tok
+ shortMOE_PROFILE ops=1584 (~11 tok) per-token: plan 10.1 ms, gather 20.1 ms, gemv 11.4 ms | misses 4.82/10.00 routes (52% hit) | declines 0 | wall 60.4 ms/tok
+ storyMOE_PROFILE ops=1728 (~12 tok) per-token: plan 10.0 ms, gather 19.3 ms, gemv 11.4 ms | misses 4.61/10.00 routes (54% hit) | declines 0 | wall 51.7 ms/tok
+ aboutMOE_PROFILE ops=1872 (~13 tok) per-token: plan 10.0 ms, gather 18.9 ms, gemv 11.4 ms | misses 4.50/10.00 routes (55% hit) | declines 0 | wall 54.6 ms/tok
+ aMOE_PROFILE ops=2016 (~14 tok) per-token: plan 10.0 ms, gather 19.1 ms, gemv 11.3 ms | misses 4.56/10.00 routes (54% hit) | declines 0 | wall 63.3 ms/tok
+ robotMOE_PROFILE ops=2160 (~15 tok) per-token: plan 10.0 ms, gather 18.8 ms, gemv 11.3 ms | misses 4.48/10.00 routes (55% hit) | declines 0 | wall 56.5 ms/tok
+ whoMOE_PROFILE mul_mat_id calls=2880 cached=2880 ne11=10 ne12=1 ids_ne0=10 ids_ne1=1
+MOE_PROFILE ops=2304 (~16 tok) per-token: plan 10.0 ms, gather 18.4 ms, gemv 11.3 ms | misses 4.38/10.00 routes (56% hit) | declines 0 | wall 53.7 ms/tok
+ discoversMOE_PROFILE ops=2448 (~17 tok) per-token: plan 10.0 ms, gather 18.2 ms, gemv 11.3 ms | misses 4.33/10.00 routes (57% hit) | declines 0 | wall 55.6 ms/tok
+ musicMOE_PROFILE ops=2592 (~18 tok) per-token: plan 10.2 ms, gather 18.1 ms, gemv 11.3 ms | misses 4.30/10.00 routes (57% hit) | declines 0 | wall 55.7 ms/tok
+ forMOE_PROFILE ops=2736 (~19 tok) per-token: plan 10.3 ms, gather 17.7 ms, gemv 11.3 ms | misses 4.21/10.00 routes (58% hit) | declines 0 | wall 51.6 ms/tok
+ theMOE_PROFILE ops=2880 (~20 tok) per-token: plan 10.3 ms, gather 17.3 ms, gemv 11.3 ms | misses 4.11/10.00 routes (59% hit) | declines 0 | wall 50.3 ms/tok
+ firstMOE_PROFILE ops=3024 (~21 tok) per-token: plan 10.4 ms, gather 17.2 ms, gemv 11.3 ms | misses 4.09/10.00 routes (59% hit) | declines 0 | wall 55.1 ms/tok
+ timeMOE_PROFILE ops=3168 (~22 tok) per-token: plan 10.5 ms, gather 16.8 ms, gemv 11.3 ms | misses 3.99/10.00 routes (60% hit) | declines 0 | wall 48.9 ms/tok
+."MOE_PROFILE ops=3312 (~23 tok) per-token: plan 10.5 ms, gather 16.7 ms, gemv 11.4 ms | misses 3.96/10.00 routes (60% hit) | declines 0 | wall 191.7 ms/tok
+ NeedMOE_PROFILE ops=3456 (~24 tok) per-token: plan 10.6 ms, gather 16.4 ms, gemv 11.5 ms | misses 3.88/10.00 routes (61% hit) | declines 0 | wall 137.6 ms/tok
+ produceMOE_PROFILE ops=3600 (~25 tok) per-token: plan 10.6 ms, gather 16.1 ms, gemv 11.6 ms | misses 3.79/10.00 routes (62% hit) | declines 0 | wall 271.8 ms/tok
+ creativeMOE_PROFILE mul_mat_id calls=4320 cached=4320 ne11=10 ne12=1 ids_ne0=10 ids_ne1=1
+MOE_PROFILE ops=3744 (~26 tok) per-token: plan 10.5 ms, gather 15.9 ms, gemv 11.6 ms | misses 3.74/10.00 routes (63% hit) | declines 0 | wall 110.3 ms/tok
+ shortMOE_PROFILE ops=3888 (~27 tok) per-token: plan 10.6 ms, gather 15.5 ms, gemv 11.7 ms | misses 3.65/10.00 routes (63% hit) | declines 0 | wall 213.0 ms/tok
+ storyMOE_PROFILE ops=4032 (~28 tok) per-token: plan 10.6 ms, gather 15.2 ms, gemv 11.7 ms | misses 3.57/10.00 routes (64% hit) | declines 0 | wall 147.6 ms/tok
+.MOE_PROFILE ops=4176 (~29 tok) per-token: plan 10.6 ms, gather 15.1 ms, gemv 11.8 ms | misses 3.53/10.00 routes (65% hit) | declines 0 | wall 207.1 ms/tok
+ NeedMOE_PROFILE ops=4320 (~30 tok) per-token: plan 10.7 ms, gather 14.9 ms, gemv 11.8 ms | misses 3.49/10.00 routes (65% hit) | declines 0 | wall 191.5 ms/tok
+ finalMOE_PROFILE ops=4464 (~31 tok) per-token: plan 10.7 ms, gather 14.8 ms, gemv 11.9 ms | misses 3.46/10.00 routes (65% hit) | declines 0 | wall 295.1 ms/tok
+ onlyMOE_PROFILE ops=4608 (~32 tok) per-token: plan 10.7 ms, gather 14.8 ms, gemv 11.9 ms | misses 3.44/10.00 routes (66% hit) | declines 0 | wall 170.5 ms/tok
+ storyMOE_PROFILE ops=4752 (~33 tok) per-token: plan 10.7 ms, gather 14.6 ms, gemv 12.0 ms | misses 3.39/10.00 routes (66% hit) | declines 0 | wall 222.4 ms/tok
+ likelyMOE_PROFILE ops=4896 (~34 tok) per-token: plan 10.8 ms, gather 14.5 ms, gemv 12.0 ms | misses 3.39/10.00 routes (66% hit) | declines 0 | wall 212.0 ms/tok
+.MOE_PROFILE ops=5040 (~35 tok) per-token: plan 10.7 ms, gather 14.5 ms, gemv 12.0 ms | misses 3.39/10.00 routes (66% hit) | declines 0 | wall 114.7 ms/tok
+ KeepMOE_PROFILE mul_mat_id calls=5760 cached=5760 ne11=10 ne12=1 ids_ne0=10 ids_ne1=1
+MOE_PROFILE ops=5184 (~36 tok) per-token: plan 10.8 ms, gather 14.5 ms, gemv 12.0 ms | misses 3.37/10.00 routes (66% hit) | declines 0 | wall 247.2 ms/tok
+ conciseMOE_PROFILE ops=5328 (~37 tok) per-token: plan 10.8 ms, gather 14.4 ms, gemv 12.0 ms | misses 3.34/10.00 routes (67% hit) | declines 0 | wall 143.4 ms/tok
+ butMOE_PROFILE ops=5472 (~38 tok) per-token: plan 10.8 ms, gather 14.5 ms, gemv 12.1 ms | misses 3.36/10.00 routes (66% hit) | declines 0 | wall 220.7 ms/tok
+ evMOE_PROFILE ops=5616 (~39 tok) per-token: plan 10.8 ms, gather 14.5 ms, gemv 12.1 ms | misses 3.38/10.00 routes (66% hit) | declines 0 | wall 245.4 ms/tok
+oc
+
+[ Prompt: 1.7 t/s | Generation: 6.1 t/s ]
+
+
+Exiting...

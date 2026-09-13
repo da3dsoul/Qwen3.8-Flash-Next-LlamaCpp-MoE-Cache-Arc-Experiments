@@ -1,0 +1,23 @@
+0.02.229.892 W llama_model_loader: tensor overrides to CPU are used with mmap enabled - consider using --load-mode none for better performance
+2.12.959.713 W llama_context: n_ctx_seq (294912) > n_ctx_train (262144) -- possible training context overflow
+2.13.163.702 I cmn          init: llama threadpool init, n_threads = 16
+2.20.019.024 W llama_perplexity: model was trained on only 262144 context tokens (294912 specified)
+2.20.019.028 I 
+2.20.019.096 I system_info: n_threads = 16 (n_threads_batch = 16) / 32 | CPU : SSE3 = 1 | SSSE3 = 1 | AVX = 1 | AVX2 = 1 | F16C = 1 | FMA = 1 | BMI2 = 1 | AVX512 = 1 | AVX512_VBMI = 1 | AVX512_VNNI = 1 | AVX512_BF16 = 1 | LLAMAFILE = 1 | OPENMP = 1 | REPACK = 1 | 
+2.20.019.239 I perplexity: tokenizing the input ..
+2.20.409.929 I perplexity: tokenization took 390.68 ms
+/devbin/libggml-base.so.0(+0x17db8)[0x7cf8208f0db8]
+/devbin/libggml-base.so.0(ggml_print_backtrace+0x285)[0x7cf8208f0d95]
+/devbin/libggml-base.so.0(+0x32646)[0x7cf82090b646]
+/lib/x86_64-linux-gnu/libstdc++.so.6(+0xbb0da)[0x7cf81fe3d0da]
+/lib/x86_64-linux-gnu/libstdc++.so.6(_ZSt10unexpectedv+0x0)[0x7cf81fe27a55]
+/lib/x86_64-linux-gnu/libstdc++.so.6(+0xbb391)[0x7cf81fe3d391]
+/lib/x86_64-linux-gnu/libstdc++.so.6(+0xa5ac8)[0x7cf81fe27ac8]
+/devbin/libllama-perplexity-impl.so(+0x11bca)[0x7cf8209eebca]
+/devbin/libllama-perplexity-impl.so(_Z16llama_perplexityiPPc+0x2e55)[0x7cf8209e47a5]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca)[0x7cf81fab11ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b)[0x7cf81fab128b]
+/devbin/llama-perplexity[0x405415]
+terminate called after throwing an instance of 'std::bad_alloc'
+  what():  std::bad_alloc
+timeout: the monitored command dumped core

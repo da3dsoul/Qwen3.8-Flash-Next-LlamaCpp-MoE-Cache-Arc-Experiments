@@ -1,0 +1,99 @@
+=== 1. op-level equivalence vs the CPU reference ===
+|  |                   |                                       |       |compute|Max work|sub  |mem    |                     |
+|ID|        Device Type|                                   Name|Version|units  |group   |group|size   |       Driver version|
+|--|-------------------|---------------------------------------|-------|-------|--------|-----|-------|---------------------|
+| 0| [level_zero:gpu:0]|             Intel Arc Pro B70 Graphics|   20.2|    256|    1024|   32| 34242M|         1.15.38308+1|
+SYCL Optimization Feature:
+|ID|        Device Type|Reorder|
+|--|-------------------|-------|
+| 0| [level_zero:gpu:0]|      Y|
+Testing 2 devices
+
+Backend 1/2: SYCL0
+  Device description: Intel(R) Arc(TM) Pro B70 Graphics
+  Device memory: 32656 MB (32580 MB free)
+
+  QSA_INDEXER(type_k=q4_0,n_kv=2048,idx_dim=128,r=4,n_tps=1,width=259,pooled_cached=0,block_topk=0): [1;32mOK[0m
+  QSA_INDEXER_BLK(type_k=q4_0,n_kv=2048,idx_dim=128,r=4,n_tps=1,width=259,pooled_cached=0,block_topk=1): [1;32mOK[0m
+  QSA_INDEXER_BLK(type_k=q4_0,n_kv=2048,idx_dim=128,r=4,n_tps=4,width=259,pooled_cached=0,block_topk=1): [1;32mOK[0m
+  QSA_INDEXER(type_k=f16,n_kv=2048,idx_dim=128,r=4,n_tps=1,width=259,pooled_cached=0,block_topk=0): [1;32mOK[0m
+  QSA_INDEXER_CACHED(type_k=q4_0,n_kv=2048,idx_dim=128,r=4,n_tps=1,width=259,pooled_cached=1,block_topk=0): [1;32mOK[0m
+  5/5 tests passed
+  Backend SYCL0: [1;32mOK[0m
+Backend 2/2: CPU
+  Skipping
+2/2 backends passed
+[1;32mOK[0m
+
+=== 2. n_kv <= width: both paths select every cell, so output must be identical ===
+/work/qsa_blk_validate.sh: line 13:   277 Aborted                 (core dumped) LD_LIBRARY_PATH="$bin:$ONEAPI" "$bin/llama-completion" -m "$M" -no-cnv -ngl 99 -fa 1 -ctk q4_0 -ctv q4_0 -ncmoe 24 --temp 0 --seed 42 -st --no-warmup "$@" > "$out" 2> "$out.err"
+  else:
+                if item.has_key('legacy_status') if hasattr(item, 'has_key') else 'legacy_status' in item:
+                    result.append(item['legacy_status'])
+        except:
+            errors_list.append("error processing order " + str(i))
+            pass
+    output_1 = []
+    for j 
+SHALLOW: DIFFER
+172,181c172
+<     for j  in range(0, len(result)):
+<         output_1.append(result[j])
+<     return output_1
+< 
+< def validate_user_1(rec):
+<     if rec == None:
+<         return False
+<     if rec.get('name') == "" or rec.get('name') == None:
+<         return
+
+=== 3. set_input_qsa change is a no-op for the old path (32k, old graph both arms) ===
+SET_INPUT: DIFFER
+4097c4097
+< ``` [end of text]
+---
+> ```
+4098a4099,4100
+> <think>
+> This is a massive codebase with 40+ near-identical function groups (process_X, validate_X, calculate_X_total, format_X_name, get_X_by_id, update_X, delete_X, XHandler
+
+=== 4. 32k, selection active (n_kv > 2051): block path output + prefill rate ===
+/work/qsa_blk_validate.sh: line 13:   321 Aborted                 (core dumped) LD_LIBRARY_PATH="$bin:$ONEAPI" "$bin/llama-completion" -m "$M" -no-cnv -ngl 99 -fa 1 -ctk q4_0 -ctv q4_0 -ncmoe 24 --temp 0 --seed 42 -st --no-warmup "$@" > "$out" 2> "$out.err"
+e:
+            return False
+    def to_string(self):
+        s = ""
+        for k in self.Data:
+            s = s + str(k) + "=" + str(self.Data[k]) + ","
+        return s
+
+
+def process_product_2(data_2=[]):
+    global counter
+    result = []
+    for i in range(len(data_2)):
+        item = data_2[i]
+        if item == None:
+            continue
+        try:
+            if item['status'] == "active" or item['status'] == "Active" or item['status'] == "ACTIVE":
+                x = item['value'] * 8
+                y = x + 3
+                z = y / 1 if 1 != 0 else 0
+                temp_result = str(item['id']) + "_" + str(z)
+                result.append(temp_result)
+                counter = counter + 1
+            else:
+                if item.has_key('legacy_status') if hasattr(item, 'has
+-- /work/qsa-blk-32k-cell.txt
+1.37.344.140 I common_perf_print: prompt eval time =   77788.39 ms / 31911 tokens (    2.44 ms per token,   410.23 tokens per second)
+1.37.344.140 I common_perf_print:        eval time =   10891.91 ms /    47 runs   (  231.74 ms per token,     4.32 tokens per second)
+1.37.344.141 I common_perf_print:       total time =   88714.79 ms / 31958 tokens
+-- /work/qsa-blk-32k-blk.txt
+
+=== 5. perplexity at depth (selection active, same corpus both arms) ===
+-- arm cell
+[1]16.5559,[2]4.1148,[3]2.5914,
+1.09.379.683 I Final estimate: PPL = 2.5914 +/- 0.05920
+-- arm blk
+

@@ -1,0 +1,16 @@
+<think>
+The user wants me to refactor a massive legacy Python codebase that has 400+ near-identical function groups (process_*, validate_*, calculate_*_total_*, format_*_name_*, get_*_by_id_*, update_*_*, delete_*_*, and Handler classes). Each group differs only in:
+- The entity name (user, order, product, invoice, customer, shipment, employee, ticket, payment, account, vendor, warehouse, review, coupon, subscription, session, device, report, category, transaction)
+- The multiplier for value calculation (x * 2-9)
+- The additive constant (y = x + 1-50)
+- The divisor (z = y / 1-7)
+- The tax rate (0.10-0.90)
+- Whether format uses .upper() or .lower() (the `if True`/`if False` pattern)
+- The cache key default (obj.get('id', N))
+
+I need to:
+1. Eliminate all global mutable state
+2. Fix bare `except` clauses
+3. Fix mutable default arguments
+4. Replace
+

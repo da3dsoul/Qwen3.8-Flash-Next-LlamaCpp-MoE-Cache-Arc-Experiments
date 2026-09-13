@@ -1,0 +1,170 @@
+OK   n_kv=  2048 n_pos=     1 q=     0 rev=0 width=2048 n_top=512 |old|=1 |new|=1 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     1 q=     0 rev=1 width=2048 n_top=512 |old|=1 |new|=1 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     2 q=     0 rev=0 width=2048 n_top=512 |old|=1 |new|=1 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     2 q=     0 rev=1 width=2048 n_top=512 |old|=1 |new|=1 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     2 q=     1 rev=0 width=2048 n_top=512 |old|=2 |new|=2 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     2 q=     1 rev=1 width=2048 n_top=512 |old|=2 |new|=2 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     3 q=     0 rev=0 width=2048 n_top=512 |old|=1 |new|=1 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     3 q=     0 rev=1 width=2048 n_top=512 |old|=1 |new|=1 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     3 q=     1 rev=0 width=2048 n_top=512 |old|=2 |new|=2 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     3 q=     1 rev=1 width=2048 n_top=512 |old|=2 |new|=2 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     3 q=     2 rev=0 width=2048 n_top=512 |old|=3 |new|=3 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     3 q=     2 rev=1 width=2048 n_top=512 |old|=3 |new|=3 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     4 q=     0 rev=0 width=2048 n_top=512 |old|=1 |new|=1 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     4 q=     0 rev=1 width=2048 n_top=512 |old|=1 |new|=1 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     4 q=     1 rev=0 width=2048 n_top=512 |old|=2 |new|=2 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     4 q=     1 rev=1 width=2048 n_top=512 |old|=2 |new|=2 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     4 q=     2 rev=0 width=2048 n_top=512 |old|=3 |new|=3 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     4 q=     2 rev=1 width=2048 n_top=512 |old|=3 |new|=3 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     4 q=     3 rev=0 width=2048 n_top=512 |old|=4 |new|=4 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     4 q=     3 rev=1 width=2048 n_top=512 |old|=4 |new|=4 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     5 q=     0 rev=0 width=2048 n_top=512 |old|=1 |new|=1 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     5 q=     0 rev=1 width=2048 n_top=512 |old|=1 |new|=1 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     5 q=     1 rev=0 width=2048 n_top=512 |old|=2 |new|=2 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     5 q=     1 rev=1 width=2048 n_top=512 |old|=2 |new|=2 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     5 q=     2 rev=0 width=2048 n_top=512 |old|=3 |new|=3 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     5 q=     2 rev=1 width=2048 n_top=512 |old|=3 |new|=3 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     5 q=     3 rev=0 width=2048 n_top=512 |old|=4 |new|=4 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     5 q=     3 rev=1 width=2048 n_top=512 |old|=4 |new|=4 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     5 q=     4 rev=0 width=2048 n_top=512 |old|=5 |new|=5 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     5 q=     4 rev=1 width=2048 n_top=512 |old|=5 |new|=5 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     7 q=     0 rev=0 width=2048 n_top=512 |old|=1 |new|=1 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     7 q=     0 rev=1 width=2048 n_top=512 |old|=1 |new|=1 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     7 q=     1 rev=0 width=2048 n_top=512 |old|=2 |new|=2 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     7 q=     1 rev=1 width=2048 n_top=512 |old|=2 |new|=2 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     7 q=     2 rev=0 width=2048 n_top=512 |old|=3 |new|=3 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     7 q=     2 rev=1 width=2048 n_top=512 |old|=3 |new|=3 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     7 q=     3 rev=0 width=2048 n_top=512 |old|=4 |new|=4 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     7 q=     3 rev=1 width=2048 n_top=512 |old|=4 |new|=4 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     7 q=     5 rev=0 width=2048 n_top=512 |old|=6 |new|=6 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     7 q=     5 rev=1 width=2048 n_top=512 |old|=6 |new|=6 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     7 q=     6 rev=0 width=2048 n_top=512 |old|=7 |new|=7 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=     7 q=     6 rev=1 width=2048 n_top=512 |old|=7 |new|=7 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=   100 q=     0 rev=0 width=2048 n_top=512 |old|=1 |new|=1 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=   100 q=     0 rev=1 width=2048 n_top=512 |old|=1 |new|=1 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=   100 q=     1 rev=0 width=2048 n_top=512 |old|=2 |new|=2 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=   100 q=     1 rev=1 width=2048 n_top=512 |old|=2 |new|=2 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=   100 q=    50 rev=0 width=2048 n_top=512 |old|=51 |new|=51 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=   100 q=    50 rev=1 width=2048 n_top=512 |old|=51 |new|=51 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=   100 q=    95 rev=0 width=2048 n_top=512 |old|=96 |new|=96 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=   100 q=    95 rev=1 width=2048 n_top=512 |old|=96 |new|=96 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=   100 q=    98 rev=0 width=2048 n_top=512 |old|=99 |new|=99 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=   100 q=    98 rev=1 width=2048 n_top=512 |old|=99 |new|=99 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=   100 q=    99 rev=0 width=2048 n_top=512 |old|=100 |new|=100 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=   100 q=    99 rev=1 width=2048 n_top=512 |old|=100 |new|=100 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  1023 q=     0 rev=0 width=2048 n_top=512 |old|=1 |new|=1 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  1023 q=     0 rev=1 width=2048 n_top=512 |old|=1 |new|=1 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  1023 q=     1 rev=0 width=2048 n_top=512 |old|=2 |new|=2 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  1023 q=     1 rev=1 width=2048 n_top=512 |old|=2 |new|=2 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  1023 q=   511 rev=0 width=2048 n_top=512 |old|=512 |new|=512 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  1023 q=   511 rev=1 width=2048 n_top=512 |old|=512 |new|=512 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  1023 q=  1018 rev=0 width=2048 n_top=512 |old|=1019 |new|=1019 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  1023 q=  1018 rev=1 width=2048 n_top=512 |old|=1019 |new|=1019 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  1023 q=  1021 rev=0 width=2048 n_top=512 |old|=1022 |new|=1022 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  1023 q=  1021 rev=1 width=2048 n_top=512 |old|=1022 |new|=1022 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  1023 q=  1022 rev=0 width=2048 n_top=512 |old|=1023 |new|=1023 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  1023 q=  1022 rev=1 width=2048 n_top=512 |old|=1023 |new|=1023 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  2047 q=     0 rev=0 width=2048 n_top=512 |old|=1 |new|=1 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  2047 q=     0 rev=1 width=2048 n_top=512 |old|=1 |new|=1 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  2047 q=     1 rev=0 width=2048 n_top=512 |old|=2 |new|=2 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  2047 q=     1 rev=1 width=2048 n_top=512 |old|=2 |new|=2 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  2047 q=  1023 rev=0 width=2048 n_top=512 |old|=1024 |new|=1024 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  2047 q=  1023 rev=1 width=2048 n_top=512 |old|=1024 |new|=1024 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  2047 q=  2042 rev=0 width=2048 n_top=512 |old|=2043 |new|=2043 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  2047 q=  2042 rev=1 width=2048 n_top=512 |old|=2043 |new|=2043 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  2047 q=  2045 rev=0 width=2048 n_top=512 |old|=2046 |new|=2046 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  2047 q=  2045 rev=1 width=2048 n_top=512 |old|=2046 |new|=2046 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  2047 q=  2046 rev=0 width=2048 n_top=512 |old|=2047 |new|=2047 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  2047 q=  2046 rev=1 width=2048 n_top=512 |old|=2047 |new|=2047 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  2048 q=     0 rev=0 width=2048 n_top=512 |old|=1 |new|=1 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  2048 q=     0 rev=1 width=2048 n_top=512 |old|=1 |new|=1 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  2048 q=     1 rev=0 width=2048 n_top=512 |old|=2 |new|=2 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  2048 q=     1 rev=1 width=2048 n_top=512 |old|=2 |new|=2 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  2048 q=  1024 rev=0 width=2048 n_top=512 |old|=1025 |new|=1025 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  2048 q=  1024 rev=1 width=2048 n_top=512 |old|=1025 |new|=1025 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  2048 q=  2043 rev=0 width=2048 n_top=512 |old|=2044 |new|=2044 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  2048 q=  2043 rev=1 width=2048 n_top=512 |old|=2044 |new|=2044 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  2048 q=  2046 rev=0 width=2048 n_top=512 |old|=2047 |new|=2047 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  2048 q=  2046 rev=1 width=2048 n_top=512 |old|=2047 |new|=2047 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  2048 q=  2047 rev=0 width=2048 n_top=512 |old|=2048 |new|=2048 old-not-new=0 new-not-old=0
+OK   n_kv=  2048 n_pos=  2048 q=  2047 rev=1 width=2048 n_top=512 |old|=2048 |new|=2048 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2049 q=     0 rev=0 width=2051 n_top=513 |old|=1 |new|=1 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2049 q=     0 rev=1 width=2051 n_top=513 |old|=1 |new|=1 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2049 q=     1 rev=0 width=2051 n_top=513 |old|=2 |new|=2 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2049 q=     1 rev=1 width=2051 n_top=513 |old|=2 |new|=2 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2049 q=  1024 rev=0 width=2051 n_top=513 |old|=1025 |new|=1025 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2049 q=  1024 rev=1 width=2051 n_top=513 |old|=1025 |new|=1025 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2049 q=  2044 rev=0 width=2051 n_top=513 |old|=2045 |new|=2045 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2049 q=  2044 rev=1 width=2051 n_top=513 |old|=2045 |new|=2045 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2049 q=  2047 rev=0 width=2051 n_top=513 |old|=2048 |new|=2048 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2049 q=  2047 rev=1 width=2051 n_top=513 |old|=2048 |new|=2048 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2049 q=  2048 rev=0 width=2051 n_top=513 |old|=2049 |new|=2049 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2049 q=  2048 rev=1 width=2051 n_top=513 |old|=2049 |new|=2049 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2050 q=     0 rev=0 width=2051 n_top=513 |old|=1 |new|=1 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2050 q=     0 rev=1 width=2051 n_top=513 |old|=1 |new|=1 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2050 q=     1 rev=0 width=2051 n_top=513 |old|=2 |new|=2 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2050 q=     1 rev=1 width=2051 n_top=513 |old|=2 |new|=2 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2050 q=  1025 rev=0 width=2051 n_top=513 |old|=1026 |new|=1026 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2050 q=  1025 rev=1 width=2051 n_top=513 |old|=1026 |new|=1026 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2050 q=  2045 rev=0 width=2051 n_top=513 |old|=2046 |new|=2046 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2050 q=  2045 rev=1 width=2051 n_top=513 |old|=2046 |new|=2046 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2050 q=  2048 rev=0 width=2051 n_top=513 |old|=2049 |new|=2049 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2050 q=  2048 rev=1 width=2051 n_top=513 |old|=2049 |new|=2049 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2050 q=  2049 rev=0 width=2051 n_top=513 |old|=2050 |new|=2050 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2050 q=  2049 rev=1 width=2051 n_top=513 |old|=2050 |new|=2050 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2051 q=     0 rev=0 width=2051 n_top=513 |old|=1 |new|=1 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2051 q=     0 rev=1 width=2051 n_top=513 |old|=1 |new|=1 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2051 q=     1 rev=0 width=2051 n_top=513 |old|=2 |new|=2 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2051 q=     1 rev=1 width=2051 n_top=513 |old|=2 |new|=2 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2051 q=  1025 rev=0 width=2051 n_top=513 |old|=1026 |new|=1026 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2051 q=  1025 rev=1 width=2051 n_top=513 |old|=1026 |new|=1026 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2051 q=  2046 rev=0 width=2051 n_top=513 |old|=2047 |new|=2047 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2051 q=  2046 rev=1 width=2051 n_top=513 |old|=2047 |new|=2047 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2051 q=  2049 rev=0 width=2051 n_top=513 |old|=2050 |new|=2050 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2051 q=  2049 rev=1 width=2051 n_top=513 |old|=2050 |new|=2050 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2051 q=  2050 rev=0 width=2051 n_top=513 |old|=2051 |new|=2051 old-not-new=0 new-not-old=0
+OK   n_kv=  4096 n_pos=  2051 q=  2050 rev=1 width=2051 n_top=513 |old|=2051 |new|=2051 old-not-new=0 new-not-old=0
+round n_kv=  4096 n_pos=  4096 q=  4091 rev=0 width=2051 n_top=513 |old|=2051 |new|=2052 old-not-new=0 new-not-old=1
+round n_kv=  4096 n_pos=  4096 q=  4091 rev=1 width=2051 n_top=513 |old|=2051 |new|=2052 old-not-new=0 new-not-old=1
+round n_kv=  4096 n_pos=  4096 q=  4095 rev=0 width=2051 n_top=513 |old|=2051 |new|=2052 old-not-new=0 new-not-old=1
+round n_kv=  4096 n_pos=  4096 q=  4095 rev=1 width=2051 n_top=513 |old|=2051 |new|=2052 old-not-new=0 new-not-old=1
+round n_kv=  8192 n_pos=  8192 q=  4096 rev=0 width=2051 n_top=513 |old|=2051 |new|=2049 old-not-new=2 new-not-old=0
+round n_kv=  8192 n_pos=  8192 q=  4096 rev=1 width=2051 n_top=513 |old|=2051 |new|=2049 old-not-new=2 new-not-old=0
+round n_kv=  8192 n_pos=  8192 q=  8187 rev=0 width=2051 n_top=513 |old|=2051 |new|=2052 old-not-new=0 new-not-old=1
+round n_kv=  8192 n_pos=  8192 q=  8187 rev=1 width=2051 n_top=513 |old|=2051 |new|=2052 old-not-new=0 new-not-old=1
+round n_kv=  8192 n_pos=  8192 q=  8191 rev=0 width=2051 n_top=513 |old|=2051 |new|=2052 old-not-new=0 new-not-old=1
+round n_kv=  8192 n_pos=  8192 q=  8191 rev=1 width=2051 n_top=513 |old|=2051 |new|=2052 old-not-new=0 new-not-old=1
+round n_kv= 32768 n_pos= 32768 q= 16384 rev=0 width=2051 n_top=513 |old|=2051 |new|=2049 old-not-new=2 new-not-old=0
+round n_kv= 32768 n_pos= 32768 q= 16384 rev=1 width=2051 n_top=513 |old|=2051 |new|=2049 old-not-new=2 new-not-old=0
+round n_kv= 32768 n_pos= 32768 q= 32763 rev=0 width=2051 n_top=513 |old|=2051 |new|=2052 old-not-new=0 new-not-old=1
+round n_kv= 32768 n_pos= 32768 q= 32763 rev=1 width=2051 n_top=513 |old|=2051 |new|=2052 old-not-new=0 new-not-old=1
+round n_kv= 32768 n_pos= 32768 q= 32767 rev=0 width=2051 n_top=513 |old|=2051 |new|=2052 old-not-new=0 new-not-old=1
+round n_kv= 32768 n_pos= 32768 q= 32767 rev=1 width=2051 n_top=513 |old|=2051 |new|=2052 old-not-new=0 new-not-old=1
+round n_kv=  8192 n_pos=  5000 q=  2500 rev=0 width=2051 n_top=513 |old|=2051 |new|=2049 old-not-new=2 new-not-old=0
+round n_kv=  8192 n_pos=  5000 q=  2500 rev=1 width=2051 n_top=513 |old|=2051 |new|=2049 old-not-new=2 new-not-old=0
+round n_kv=  8192 n_pos=  5000 q=  4995 rev=0 width=2051 n_top=513 |old|=2051 |new|=2052 old-not-new=0 new-not-old=1
+round n_kv=  8192 n_pos=  5000 q=  4995 rev=1 width=2051 n_top=513 |old|=2051 |new|=2052 old-not-new=0 new-not-old=1
+round n_kv=  8192 n_pos=  5000 q=  4999 rev=0 width=2051 n_top=513 |old|=2051 |new|=2052 old-not-new=0 new-not-old=1
+round n_kv=  8192 n_pos=  5000 q=  4999 rev=1 width=2051 n_top=513 |old|=2051 |new|=2052 old-not-new=0 new-not-old=1
+
+single sequence, no ties: every diff within the r-cell whole-block rounding
+
+=== unified cache, several sequences interleaved ===
+  n_kv=   64 lens=[7, 5, 3] n_bid=2 n_spare=2 ok
+  n_kv=  256 lens=[61, 39, 17, 3] n_bid=28 n_spare=2 ok
+  n_kv= 4096 lens=[1500, 900, 2] n_bid=600 n_spare=1 ok
+  rounding  n_kv=8192 seq=0 q= 2998: |old|=2051 |new|=2047 old-not-new=4 new-not-old=0
+  rounding  n_kv=8192 seq=0 q= 2998: |old|=2051 |new|=2047 old-not-new=4 new-not-old=0
+  rounding  n_kv=8192 seq=0 q= 2999: |old|=2051 |new|=2048 old-not-new=3 new-not-old=0
+  rounding  n_kv=8192 seq=0 q= 2999: |old|=2051 |new|=2048 old-not-new=3 new-not-old=0
+  rounding  n_kv=8192 seq=1 q= 2498: |old|=2051 |new|=2047 old-not-new=4 new-not-old=0
+  rounding  n_kv=8192 seq=1 q= 2498: |old|=2051 |new|=2047 old-not-new=4 new-not-old=0
+  rounding  n_kv=8192 seq=1 q= 2499: |old|=2051 |new|=2048 old-not-new=3 new-not-old=0
+  rounding  n_kv=8192 seq=1 q= 2499: |old|=2051 |new|=2048 old-not-new=3 new-not-old=0
+  n_kv= 8192 lens=[3000, 2500, 1000, 7] n_bid=1626 n_spare=1 ok
+  rounding  n_kv=8192 seq=0 q= 3999: |old|=2051 |new|=2052 old-not-new=0 new-not-old=1
+  rounding  n_kv=8192 seq=0 q= 3999: |old|=2051 |new|=2052 old-not-new=0 new-not-old=1
+  rounding  n_kv=8192 seq=1 q= 3999: |old|=2051 |new|=2052 old-not-new=0 new-not-old=1
+  rounding  n_kv=8192 seq=1 q= 3999: |old|=2051 |new|=2052 old-not-new=0 new-not-old=1
+  n_kv= 8192 lens=[4000, 4000] n_bid=2000 n_spare=0 ok
+multi-sequence, no-tie arm: all diffs within the r-cell rounding

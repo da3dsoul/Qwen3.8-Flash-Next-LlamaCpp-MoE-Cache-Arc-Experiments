@@ -1,39 +1,163 @@
-# Qwen3.8-Flash-Next on Arc via llama.cpp MoE expert cache
+# Qwen3.8-Flash-Next MoE Expert Cache — llama.cpp SYCL Port (Arc Pro B70)
 
-Goal: run Alibaba's **Qwen3.8-Flash-Next** (~125B MoE params, ~6B active/token,
-plus a separate ~51B-parameter n-gram/PLE lookup table) on an **Intel Arc Pro
-B70 (32GB VRAM)** at usable speed, by porting a CUDA-only llama.cpp fork's
-**MoE expert cache** (hot routed experts pinned in a VRAM slot pool, cold ones
-in host RAM, LRU/frequency-decay eviction, device-side admission planning) to
-llama.cpp's SYCL backend.
+This project started as an attempt to port a CUDA-only MoE expert-cache
+design (host-pinned cold experts + a fixed VRAM slot pool for hot ones) to
+llama.cpp's SYCL backend, to run Qwen3.8-Flash-Next (the `qwen4exp`
+architecture — a hybrid Gated-DeltaNet/MoE/hyper-connection model) well on an
+Intel Arc Pro B70. Partway through, real usage data made it clear the actual
+deployment need was serving **very long context (300K-600K+ tokens)**, not
+maximizing short-prompt decode throughput — and the project's center of
+gravity shifted accordingly. Both halves are documented here, including the
+negative result.
 
-This is a *different* model and a *different* serving stack from this
-account's other Qwen3.8 projects: `qwen38-27b-rtx3090` / `qwen38-27b-b70-vllm`
-/ `Qwen3.8-vLLM-KVarN-MTP-Experiments` all serve the dense
-`Qwen3.8-27B-W4A16-AutoRound` checkpoint on vLLM with the custom **KVarN**
-attention/KV-cache patch. That investigation concluded the MoE expert cache
-does **not** apply there — the served model is dense (no experts at all),
-already fits fully in VRAM, and the technique conflicts with the MTP
-speculative decoding that deployment depends on. Full writeup:
-`../coding-agent/docs/06-moe-cache-research/`.
+Everything is logged chronologically and in detail in **[`PLAN.md`](PLAN.md)**
+— that is the primary source of truth for this project, not this README.
+This file is an entry point.
 
-This project exists because the *reason* it didn't apply there — "our model
-has no experts to cache" — doesn't hold for Qwen3.8-Flash-Next, which is
-genuinely a large sparse MoE. On a 32GB card (vs. the 12GB RTX 3060 the
-technique was demoed on) the hot-expert slot pool can be much larger, which
-should mean a much higher cache hit rate and a correspondingly bigger win —
-that's the bet this project is testing.
+## Headline findings
 
-**Status: planning.** See `PLAN.md` for the phased implementation plan and
-`docs/` for the technical grounding it's built on. Nothing has been
-implemented yet.
+- **The custom SYCL MoE expert cache was built, works, and is correct** —
+  but it only ties, not beats, plain `-ncmoe` static CPU/GPU expert
+  placement (a stock upstream flag, zero custom code). This is a real
+  negative result and the project's own course-correction because of it:
+  `-ncmoe` became the production default, and effort moved to what actually
+  mattered. The cache code is still in the tree and still valid; see
+  `docs/research/13` §3 for exactly why it stopped being the answer.
+- **MTP speculative decoding was implemented from scratch** for `qwen4exp`
+  (no upstream support existed for this architecture's hyper-connection
+  output head) and gives a real, if modest, decode speedup.
+- **The project's actual value ended up being long-context serving.** Three
+  results compound:
+  - Sparse QSA flash attention got decode flat with depth instead of
+    collapsing — a measured ~4-5x cumulative win at 116K tokens across the
+    fixes that got there (`docs/research/10`, `docs/research/11`,
+    `docs/research/12`).
+  - A YaRN/RoPE false alarm got resolved: "YaRN destroys this model" turned
+    out to be a stale-binary artifact, and **unscaled RoPE extrapolation past
+    the model's trained context length is coherent and quantitatively
+    accurate at 305K and 612K tokens** — no patch needed
+    (`docs/research/15`).
+  - A dynamic `--context-tiers` mechanism was designed, built, and validated
+    **end to end at real production scale** — real ~150K- and ~300K-token
+    requests, real in-place model reloads, on the real Arc B70, with an
+    idle-timeout de-escalation fix layered on top so a session that goes
+    quiet drops back to the cheap tier instead of sitting pinned at whatever
+    depth it last reached (`docs/research/13` §9-§13).
+- **It's deployed.** This build now runs as the production `local-smart`
+  backend behind this box's LiteLLM router, serving real traffic. That
+  deployment's config lives in the sibling `coding-agent` repo (out of scope
+  here) — this repo is the research, the port, and the validated artifacts
+  it's built from.
 
-## Layout
+## Repo layout
 
-- `PLAN.md` — the phased build-out plan (read this first if you're picking
-  this project up).
-- `docs/00-background.md` — self-contained technical background: the expert
-  cache mechanism, the model architecture, the target hardware, and the risks
-  already known from a related project's driver-stack history.
-- `docs/research/` — deep-dive research feeding the plan (SYCL backend
-  feasibility, model support status on llama.cpp).
+| Path | What it is |
+|---|---|
+| `PLAN.md` | The full, chronological project log. Every phase, every dated update, every course-correction, in order. Start here for *how* a conclusion was reached; the docs below are where individual questions got answered in depth. |
+| `docs/00-background.md` | Ground rules and the CUDA-fork mechanism this project ports from, condensed from a prior research thread. |
+| `docs/research/*.md` | 14 deep-dive scoping/investigation docs, each answering one specific technical question (index below). |
+| `docker/` | Dockerfiles for the SYCL/Vulkan runtime and build environments, plus the standalone kernel-equivalence test harnesses used during development. |
+| `patches/llama.cpp.patch` | **The actual code.** A unified diff of every change made against the pinned upstream llama.cpp checkout — see "The code" below. |
+| `staging/work/*.sh` `*.py` | The real benchmark/validation drivers this project's numbers came from — reload/tier-crossing tests, YaRN quality probes, per-depth decode-scaling sweeps, the production metrics tailer, etc. Reproducible, not one-off scratch. |
+| `staging/work/bench{120k,300k,600k}/` | The actual benchmark corpora (real, not synthetic-filler, ~116K/~300K/~612K-token prompts) every long-context number in this repo was measured against. |
+| `logs/` | Benchmark reports (`.md`) and a curated set of representative/cited raw logs backing specific claims — not a full dump (see below). |
+
+Not committed here (see `.gitignore`): the vendored `src/llama.cpp/` and
+`src/moe-cache-fork/` checkouts (~1.2G of upstream source), GGUF model
+weights (~209G), compiled `staging/devbin*/` binaries, and the bulk of raw
+debug/profiling logs that aren't cited as evidence anywhere or aren't small
+enough to be worth the noise. The curated logs kept here total under 25 MB.
+
+### The code
+
+This project's actual deliverable — the SYCL MoE expert cache, sparse QSA
+flash attention, `--context-tiers`, the idle de-escalation fix, MTP support
+for `qwen4exp`, and everything else — lives as **local modifications on top
+of a pinned upstream llama.cpp checkout**, not as a standalone codebase. That
+vendored tree isn't committed (see above), so the changes are captured as
+`patches/llama.cpp.patch`: a single diff covering 21 modified files and 13
+new files (mostly under `ggml/src/ggml-sycl/` — `moe-cache.{cpp,hpp}`,
+`fattn-sparse.{cpp,hpp}`, `hyper_connect.{cpp,hpp}`, `topk-radix.{cpp,hpp}`,
+`mmid-hybrid.{cpp,hpp}`, `expert-pool.{cpp,hpp}` — plus the server/arch/model
+plumbing that wires them in).
+
+To reproduce: check out `ggml-org/llama.cpp` at commit `6d9c82ea2` (pinned
+2026-09-09, the commit both the Vulkan `ggml_vk_fill` fix and the SYCL
+IQ-quant silent-fallback fix landed at or after — see `PLAN.md`'s Phase 0.0
+for why that date matters), apply the patch, and build via
+`docker/Dockerfile.sycl` or `staging/work/devbuild.sh`'s incremental-build
+pattern.
+
+## docs/research index
+
+Each of these answers one specific question, with its own verdict/summary
+section near the top (usually `## 0. ...`) — read that first, go deeper only
+if you need the evidence.
+
+| Doc | Answers |
+|---|---|
+| `01-sycl-backend-feasibility.md` | Can the CUDA MoE-cache design be ported to `ggml-sycl` at all? (Yes — structurally symmetric, one real gap: `GGML_OP_TOP_K`.) |
+| `02-model-support-status.md` | What does `qwen4exp` actually need from llama.cpp, and what's already upstream vs. fork-only? |
+| `03-cuda-fork-moe-cache-outline.md` | Structural outline of the CUDA fork's own `moe-cache.cu`/`.cuh` implementation being ported from. |
+| `05-hybrid-cpu-gpu-mul-mat-id-scoping.md` | Scoping a hybrid CPU/GPU `MUL_MAT_ID` dispatch (upstream RFC #24528) as an alternative/complement to the cache. |
+| `06-vllm-migration-and-kvarn-viability.md` | Is migrating to vLLM + the sibling project's KVarN port worth it instead of this llama.cpp effort? |
+| `07-qsa-sparse-attention-scoping.md` | Should Qwen Sparse Attention (the "lightning indexer") be pursued on this backend, and when? |
+| `08-long-context-vram-budget.md` | The joint KV-cache + MoE-expert-placement VRAM budget across context depth, computed rather than cited. |
+| `09-long-context-prefill-fix-scoping.md` | Scoping the fix for long-context prefill/TTFT. |
+| `10-sycl-sparse-attention-scoping.md` | Measuring and scoping QSA sparse attention specifically on SYCL. |
+| `11-long-context-decode-profile.md` | Where a 116K-token decode step's time actually goes, decomposed component by component. |
+| `12-decode-depth-scaling.md` | The *slope* of decode cost vs. context depth, not just a point measurement — what has to change to meet a 300K/600K throughput bar. |
+| `13-dynamic-context-aware-expert-placement.md` | The largest doc — scopes, builds, and validates `--context-tiers` (dynamic context-length-aware expert placement), the 500K tier, the nearunity YaRN unlock, and idle-based de-escalation, ending in a real production-scale validation run. |
+| `14-usage-based-static-expert-placement.md` | A complementary idea: static placement informed by real per-expert usage skew rather than context length. Scoped, not built. |
+| `15-yarn-and-long-context-rope.md` | Resolves the YaRN/RoPE question directly: is scaled or unscaled extrapolation the right call past the trained context length? |
+
+## How to reproduce / use
+
+- **Rebuild the binary:** pin the commit noted above, apply
+  `patches/llama.cpp.patch`, build with `docker/Dockerfile.sycl` (full clean
+  build) or `staging/work/devbuild.sh <file>` (incremental, ~seconds, needs a
+  running build-stage container).
+- **Re-run a specific benchmark:** most claims in `PLAN.md` and
+  `docs/research/*.md` cite the exact driver script under `staging/work/`
+  that produced them (e.g. `tier_switch_run.sh`, `qsa_sparse_bench.sh`,
+  `yarn_600k.sh`) — these are real, runnable scripts, not pseudocode.
+- **Long-context corpora:** `staging/work/bench120k/`, `bench300k/`,
+  `bench600k/` hold the actual prompt files (and their generator scripts)
+  used for every 116K/300K/600K-token measurement in this repo.
+- **The tier mechanism specifically:** `--context-tiers CTX:UB:NCMOE,...`
+  (see `docs/research/13` §9.6 for the exact CLI surface) is the single
+  highest-value artifact here if you just want the production config —
+  `docs/research/13` §11's recommended table is
+  `122880:2048:24,262144:2048:30,512000:1024:32`, with
+  `--rope-scaling yarn --rope-scale 1.0001 --yarn-orig-ctx 513000` to unlock
+  the third tier past the model's native context ceiling.
+
+## Current status / what's open
+
+This is a research repo, not a finished product — real open items, most
+recorded as explicit next steps in their own docs:
+
+- **The largest remaining lever on long-context decode speed**: an O(`n_kv`)
+  host-side term in `set_input_qsa` (the QSA grouping scan / block bias) is
+  named as the next task in `PLAN.md` and `docs/research/13` §5.4 — the
+  incremental-update precedent that would fix it is already in-tree and
+  proven exact elsewhere, just not applied here yet. Projected to take 600K
+  decode from ~12.4 to ~19.7 tok/s if the attribution holds (untested).
+- **MTP + K-quant pathology, never root-caused.** MTP speculative decoding
+  paired with a UD-Q3_K_XL (not I-quant) target measures ~7x worse than the
+  target alone at matched VRAM — a real, reproducible regression, flagged
+  but not debugged (`PLAN.md`, 2026-09-11 update).
+- **`docs/research/13` §13 Option C** (a fully decoupled idle-tier timer,
+  independent of `--sleep-idle-seconds`) was scoped but not built — Option B
+  (piggybacking the existing sleep timeout) was built and validated instead,
+  and is what's actually deployed.
+- **`docs/research/14`'s usage-based static placement** was scoped as a
+  promising, cheap-to-check complementary idea (estimated ~1.1-1.3x, ~70% of
+  the infrastructure already exists) but the one number that would decide
+  it — how skewed real expert usage actually is for this model — was never
+  measured.
+- Several docs flag their own measurements as single-run (n=1) or otherwise
+  under-replicated where a real hardware/timing measurement was involved;
+  each says so explicitly rather than presenting a point estimate as more
+  certain than it is. Check a doc's own "what's left open" section before
+  treating a number as load-bearing.

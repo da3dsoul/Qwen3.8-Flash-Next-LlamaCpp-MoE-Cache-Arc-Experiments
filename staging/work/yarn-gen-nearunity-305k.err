@@ -1,0 +1,26 @@
+0.01.197.507 W llama_completion: warning: scaling RoPE frequency by 0.9999.
+0.01.197.510 I llama_completion: llama backend init
+0.01.197.518 I llama_completion: load the model and apply lora adapter, if any
+0.01.445.449 W llama_model_loader: tensor overrides to CPU are used with mmap enabled - consider using --load-mode none for better performance
+2.12.993.535 W llama_context: n_ctx_seq (311296) > n_ctx_train (262144) -- possible training context overflow
+2.13.431.344 I cmn          init: llama threadpool init, n_threads = 16
+2.13.434.239 I 
+2.13.434.313 I system_info: n_threads = 16 (n_threads_batch = 16) / 32 | CPU : SSE3 = 1 | SSSE3 = 1 | AVX = 1 | AVX2 = 1 | F16C = 1 | FMA = 1 | BMI2 = 1 | AVX512 = 1 | AVX512_VBMI = 1 | AVX512_VNNI = 1 | AVX512_BF16 = 1 | LLAMAFILE = 1 | OPENMP = 1 | REPACK = 1 | 
+2.13.434.314 I 
+2.13.639.148 I sampler seed: 42
+2.13.639.162 I sampler params: 
+	repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
+	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 64
+	top_k = 20, top_p = 0.950, min_p = 0.050, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.000
+	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+2.13.639.172 I sampler chain: logits -> ?penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> min-p -> ?xtc -> temp-ext -> dist 
+2.13.639.172 I generate: n_ctx = 311296, n_batch = 2048, n_predict = 250, n_keep = 0
+2.13.639.173 I 
+21.46.326.220 I common_perf_print:    sampling time =      80.45 ms
+21.46.326.221 I common_perf_print:    samplers time =      31.16 ms / 306009 tokens
+21.46.326.224 I common_perf_print:        load time = 1152088.22 ms
+21.46.326.225 I common_perf_print: prompt eval time = 1151881.39 ms / 305759 tokens (    3.77 ms per token,   265.44 tokens per second)
+21.46.326.226 I common_perf_print:        eval time =   20733.71 ms /   249 runs   (   83.27 ms per token,    12.01 tokens per second)
+21.46.326.226 I common_perf_print:       total time = 1172891.99 ms / 306008 tokens
+21.46.326.227 I common_perf_print: unaccounted time =     196.45 ms /   0.0 %      (total - sampling - prompt eval - eval) / (total)
+21.46.326.227 I common_perf_print:    graphs reused =        247

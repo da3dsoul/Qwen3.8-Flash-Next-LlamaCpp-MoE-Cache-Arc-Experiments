@@ -1,0 +1,72 @@
+--- correctness ---
+
+  QSA_INDEXER_CACHED(type_k=q4_0,n_kv=2048,idx_dim=128,r=4,n_tps=1,width=259,pooled_cached=1): [1;32mOK[0m
+  1/1 tests passed
+  Backend SYCL0: [1;32mOK[0m
+Backend 2/2: CPU
+  Skipping
+2/2 backends passed
+[1;32mOK[0m
+--- perf ---
+load_backend: loaded SYCL backend from /devbin/libggml-sycl.so
+load_backend: loaded CPU backend from /devbin/libggml-cpu-zen4.so
+Build with Macros:
+  GGML_SYCL_DNNL: yes
+  GGML_SYCL_F16: yes
+  GGML_SYCL_FORCE_MMQ: no
+  GGML_SYCL_GRAPH: yes
+  GGML_SYCL_SUPPORT_LEVEL_ZERO_API: yes
+  GGML_SYCL_SUPPORT_VMM: yes
+Running with Environment Variables:
+  GGML_SYCL_DEBUG: 0
+  GGML_SYCL_DEV2DEV_MEMCPY: 0 (SYCL API)
+  GGML_SYCL_GET_MEM_API: 0 (Level Zero API)
+  GGML_SYCL_ENABLE_DNN: 1
+  GGML_SYCL_FA_ONEDNN: 1
+  GGML_SYCL_FA_ONEDNN_MAX_KV: 0
+  GGML_SYCL_FA_ONEDNN_MIN_Q: 32
+  GGML_SYCL_ENABLE_MKL_FA: 1
+  GGML_SYCL_MEMTRACE: 0
+  GGML_SYCL_MEMTRACE_STEP: 64
+  GGML_SYCL_ENABLE_FLASH_ATTN: 1
+  GGML_SYCL_ENABLE_GRAPH: 0
+  GGML_SYCL_ENABLE_OPT: 1
+  GGML_SYCL_ENABLE_VMM: 1
+  GGML_SYCL_ENABLE_FUSION: 1
+  GGML_SYCL_ENABLE_ESIMD: 1
+  GGML_SYCL_PRIORITIZE_DMMV: 0
+  GGML_SYCL_USE_ASYNC_MEM_OP: 1
+  GGML_SYCL_USE_LEVEL_ZERO_API: 1
+  GGML_SYCL_USM_SYSTEM: 0
+  GGML_SYCL_ENABLE_HOST_PINNED_MEM: 1
+  GGML_SYCL_HOST_PINNED_MEM_2G: 0
+Found 1 SYCL devices:
+|  |                   |                                       |       |Max    |        |Max  |Global |                     |
+|  |                   |                                       |       |compute|Max work|sub  |mem    |                     |
+|ID|        Device Type|                                   Name|Version|units  |group   |group|size   |       Driver version|
+|--|-------------------|---------------------------------------|-------|-------|--------|-----|-------|---------------------|
+| 0| [level_zero:gpu:0]|             Intel Arc Pro B70 Graphics|   20.2|    256|    1024|   32| 34242M|         1.15.38308+1|
+SYCL Optimization Feature:
+|ID|        Device Type|Reorder|
+|--|-------------------|-------|
+| 0| [level_zero:gpu:0]|      Y|
+Testing 2 devices
+
+Backend 1/2: SYCL0
+  Device description: Intel(R) Arc(TM) Pro B70 Graphics
+  Device memory: 32656 MB (32580 MB free)
+
+  QSA_INDEXER_CACHED(type_k=q4_0,n_kv=4096,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1):                18087 runs -    55.29 us/run - 67108864 kB/run - [1;34m1157574.39 GB/s[0m
+  QSA_INDEXER_CACHED(type_k=q4_0,n_kv=8192,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1):                15542 runs -    64.34 us/run - 67108864 kB/run - [1;34m994733.14 GB/s[0m
+  QSA_INDEXER_CACHED(type_k=q4_0,n_kv=16384,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1):               13098 runs -    76.35 us/run - 67108864 kB/run - [1;34m838318.19 GB/s[0m
+  QSA_INDEXER_CACHED(type_k=q4_0,n_kv=32768,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1):                9167 runs -   109.09 us/run - 67108864 kB/run - [1;34m586740.54 GB/s[0m
+  QSA_INDEXER_CACHED(type_k=q4_0,n_kv=65536,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1):                6731 runs -   148.57 us/run - 67108864 kB/run - [1;34m430881.12 GB/s[0m
+  QSA_INDEXER_CACHED(type_k=q4_0,n_kv=118016,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1):               4598 runs -   217.51 us/run - 67108864 kB/run - [1;34m294349.80 GB/s[0m
+  QSA_INDEXER_CACHED(type_k=q4_0,n_kv=200704,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1):               2814 runs -   355.40 us/run - 67108864 kB/run - [1;34m180188.18 GB/s[0m
+  QSA_INDEXER_CACHED(type_k=q4_0,n_kv=307200,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1):               1872 runs -   534.41 us/run - 67108864 kB/run - [1;34m119868.63 GB/s[0m
+  QSA_INDEXER_CACHED(type_k=q4_0,n_kv=614400,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1):               1000 runs -  1000.96 us/run - 67108864 kB/run - [1;34m64055.17 GB/s[0m
+  Backend SYCL0: [1;32mOK[0m
+Backend 2/2: CPU
+  Skipping
+2/2 backends passed
+[1;32mOK[0m

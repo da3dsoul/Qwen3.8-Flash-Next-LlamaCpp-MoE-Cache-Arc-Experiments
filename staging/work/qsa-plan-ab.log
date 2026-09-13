@@ -1,0 +1,185 @@
+### arm=slow ncmoe=38 ub=1024 d=8192,32768,614400 16:20:43
+qsa host prof: n_kv = 256 over 1 decode ubatches
+qsa host prof:   prep.alloc             0.003 ms total    0.0030 ms/token
+qsa host prof:   prep.group_cells       0.001 ms total    0.0010 ms/token
+qsa host prof:   prep.blk_enum          0.001 ms total    0.0010 ms/token
+qsa host prof:   prep.cell_loop         0.001 ms total    0.0010 ms/token
+qsa host prof:   prep.fingerprint       0.000 ms total    0.0000 ms/token
+qsa host prof:   set.cpy_cell_blk       0.001 ms total    0.0010 ms/token
+qsa host prof:   set.cpy_blk_cells      0.000 ms total    0.0000 ms/token
+qsa host prof:   set.blk_pos            0.000 ms total    0.0000 ms/token
+qsa host prof:   set.bias               0.000 ms total    0.0000 ms/token
+qsa host prof:   set.pool_cpy           0.000 ms total    0.0000 ms/token
+qsa host prof:   set.upd                0.001 ms total    0.0010 ms/token
+qsa host prof:   PREPARE total          0.008 ms total    0.0080 ms/token
+qsa host prof:   SET_INPUT total        0.002 ms total    0.0020 ms/token
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         38 |     1024 |   q4_0 |   q4_0 |   1 | off        |    tg32 @ d8192 |         21.56 ± 0.00 |
+qsa host prof: n_kv = 8448 over 32 decode ubatches
+qsa host prof:   prep.alloc             0.149 ms total    0.0047 ms/token
+qsa host prof:   prep.group_cells       1.346 ms total    0.0421 ms/token
+qsa host prof:   prep.blk_enum          0.170 ms total    0.0053 ms/token
+qsa host prof:   prep.cell_loop         0.493 ms total    0.0154 ms/token
+qsa host prof:   prep.fingerprint       0.052 ms total    0.0016 ms/token
+qsa host prof:   set.cpy_cell_blk       0.051 ms total    0.0016 ms/token
+qsa host prof:   set.cpy_blk_cells      0.024 ms total    0.0008 ms/token
+qsa host prof:   set.blk_pos            0.000 ms total    0.0000 ms/token
+qsa host prof:   set.bias               0.312 ms total    0.0097 ms/token
+qsa host prof:   set.pool_cpy           0.009 ms total    0.0003 ms/token
+qsa host prof:   set.upd                0.016 ms total    0.0005 ms/token
+qsa host prof:   PREPARE total          2.286 ms total    0.0714 ms/token
+qsa host prof:   SET_INPUT total        0.421 ms total    0.0132 ms/token
+qsa host prof: n_kv = 256 over 1 decode ubatches
+qsa host prof:   prep.alloc             0.003 ms total    0.0030 ms/token
+qsa host prof:   prep.group_cells       0.001 ms total    0.0010 ms/token
+qsa host prof:   prep.blk_enum          0.000 ms total    0.0000 ms/token
+qsa host prof:   prep.cell_loop         0.001 ms total    0.0010 ms/token
+qsa host prof:   prep.fingerprint       0.000 ms total    0.0000 ms/token
+qsa host prof:   set.cpy_cell_blk       0.000 ms total    0.0000 ms/token
+qsa host prof:   set.cpy_blk_cells      0.000 ms total    0.0000 ms/token
+qsa host prof:   set.blk_pos            0.000 ms total    0.0000 ms/token
+qsa host prof:   set.bias               0.001 ms total    0.0010 ms/token
+qsa host prof:   set.pool_cpy           0.000 ms total    0.0000 ms/token
+qsa host prof:   set.upd                0.001 ms total    0.0010 ms/token
+qsa host prof:   PREPARE total          0.007 ms total    0.0070 ms/token
+qsa host prof:   SET_INPUT total        0.004 ms total    0.0040 ms/token
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         38 |     1024 |   q4_0 |   q4_0 |   1 | off        |   tg32 @ d32768 |         23.32 ± 0.00 |
+qsa host prof: n_kv = 33024 over 32 decode ubatches
+qsa host prof:   prep.alloc             0.477 ms total    0.0149 ms/token
+qsa host prof:   prep.group_cells       4.673 ms total    0.1460 ms/token
+qsa host prof:   prep.blk_enum          0.546 ms total    0.0171 ms/token
+qsa host prof:   prep.cell_loop         1.420 ms total    0.0444 ms/token
+qsa host prof:   prep.fingerprint       0.121 ms total    0.0038 ms/token
+qsa host prof:   set.cpy_cell_blk       0.168 ms total    0.0053 ms/token
+qsa host prof:   set.cpy_blk_cells      0.110 ms total    0.0034 ms/token
+qsa host prof:   set.blk_pos            0.000 ms total    0.0000 ms/token
+qsa host prof:   set.bias               0.986 ms total    0.0308 ms/token
+qsa host prof:   set.pool_cpy           0.008 ms total    0.0003 ms/token
+qsa host prof:   set.upd                0.015 ms total    0.0005 ms/token
+qsa host prof:   PREPARE total          7.322 ms total    0.2288 ms/token
+qsa host prof:   SET_INPUT total        1.291 ms total    0.0403 ms/token
+qsa host prof: n_kv = 256 over 1 decode ubatches
+qsa host prof:   prep.alloc             0.003 ms total    0.0030 ms/token
+qsa host prof:   prep.group_cells       0.001 ms total    0.0010 ms/token
+qsa host prof:   prep.blk_enum          0.000 ms total    0.0000 ms/token
+qsa host prof:   prep.cell_loop         0.001 ms total    0.0010 ms/token
+qsa host prof:   prep.fingerprint       0.000 ms total    0.0000 ms/token
+qsa host prof:   set.cpy_cell_blk       0.001 ms total    0.0010 ms/token
+qsa host prof:   set.cpy_blk_cells      0.000 ms total    0.0000 ms/token
+qsa host prof:   set.blk_pos            0.000 ms total    0.0000 ms/token
+qsa host prof:   set.bias               0.001 ms total    0.0010 ms/token
+qsa host prof:   set.pool_cpy           0.000 ms total    0.0000 ms/token
+qsa host prof:   set.upd                0.000 ms total    0.0000 ms/token
+qsa host prof:   PREPARE total          0.008 ms total    0.0080 ms/token
+qsa host prof:   SET_INPUT total        0.002 ms total    0.0020 ms/token
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         38 |     1024 |   q4_0 |   q4_0 |   1 | off        |  tg32 @ d614400 |         17.27 ± 0.00 |
+qsa host prof:   kq_mask               29.115 ms total    0.2941 ms/token (99 calls)
+qsa host prof:   set_inputs all        63.640 ms total    0.6428 ms/token (99 calls)
+qsa host prof:   graph_compute      42566.948 ms total  429.9692 ms/token
+qsa host prof: n_kv = 614656 over 32 decode ubatches
+qsa host prof:   prep.alloc             7.629 ms total    0.2384 ms/token
+qsa host prof:   prep.group_cells      85.298 ms total    2.6656 ms/token
+qsa host prof:   prep.blk_enum         10.526 ms total    0.3289 ms/token
+qsa host prof:   prep.cell_loop        27.222 ms total    0.8507 ms/token
+qsa host prof:   prep.fingerprint       1.811 ms total    0.0566 ms/token
+qsa host prof:   set.cpy_cell_blk       4.353 ms total    0.1360 ms/token
+qsa host prof:   set.cpy_blk_cells      3.944 ms total    0.1232 ms/token
+qsa host prof:   set.blk_pos            0.000 ms total    0.0000 ms/token
+qsa host prof:   set.bias              20.942 ms total    0.6544 ms/token
+qsa host prof:   set.pool_cpy           0.014 ms total    0.0004 ms/token
+qsa host prof:   set.upd                0.024 ms total    0.0008 ms/token
+qsa host prof:   PREPARE total        132.572 ms total    4.1429 ms/token
+qsa host prof:   SET_INPUT total       29.290 ms total    0.9153 ms/token
+### arm=slow rc=0 17:14:48
+### arm=fast ncmoe=38 ub=1024 d=8192,32768,614400 17:14:48
+qsa host prof: n_kv = 256 over 1 decode ubatches
+qsa host prof:   prep.alloc             0.002 ms total    0.0020 ms/token
+qsa host prof:   prep.group_cells       0.001 ms total    0.0010 ms/token
+qsa host prof:   prep.blk_enum          0.000 ms total    0.0000 ms/token
+qsa host prof:   prep.cell_loop         0.001 ms total    0.0010 ms/token
+qsa host prof:   prep.fingerprint       0.000 ms total    0.0000 ms/token
+qsa host prof:   set.cpy_cell_blk       0.000 ms total    0.0000 ms/token
+qsa host prof:   set.cpy_blk_cells      0.000 ms total    0.0000 ms/token
+qsa host prof:   set.blk_pos            0.000 ms total    0.0000 ms/token
+qsa host prof:   set.bias               0.001 ms total    0.0010 ms/token
+qsa host prof:   set.pool_cpy           0.000 ms total    0.0000 ms/token
+qsa host prof:   set.upd                0.000 ms total    0.0000 ms/token
+qsa host prof:   PREPARE total          0.006 ms total    0.0060 ms/token
+qsa host prof:   SET_INPUT total        0.001 ms total    0.0010 ms/token
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         38 |     1024 |   q4_0 |   q4_0 |   1 | off        |    tg32 @ d8192 |         22.85 ± 0.00 |
+qsa host prof: n_kv = 8448 over 32 decode ubatches
+qsa host prof:   prep.alloc             0.074 ms total    0.0023 ms/token
+qsa host prof:   prep.group_cells       0.702 ms total    0.0219 ms/token
+qsa host prof:   prep.blk_enum          0.169 ms total    0.0053 ms/token
+qsa host prof:   prep.cell_loop         0.651 ms total    0.0203 ms/token
+qsa host prof:   prep.fingerprint       0.051 ms total    0.0016 ms/token
+qsa host prof:   set.cpy_cell_blk       0.000 ms total    0.0000 ms/token
+qsa host prof:   set.cpy_blk_cells      0.044 ms total    0.0014 ms/token
+qsa host prof:   set.blk_pos            0.000 ms total    0.0000 ms/token
+qsa host prof:   set.bias               0.030 ms total    0.0009 ms/token
+qsa host prof:   set.pool_cpy           0.010 ms total    0.0003 ms/token
+qsa host prof:   set.upd                0.016 ms total    0.0005 ms/token
+qsa host prof:   PREPARE total          1.723 ms total    0.0538 ms/token
+qsa host prof:   SET_INPUT total        0.110 ms total    0.0034 ms/token
+qsa host prof: n_kv = 256 over 1 decode ubatches
+qsa host prof:   prep.alloc             0.001 ms total    0.0010 ms/token
+qsa host prof:   prep.group_cells       0.001 ms total    0.0010 ms/token
+qsa host prof:   prep.blk_enum          0.001 ms total    0.0010 ms/token
+qsa host prof:   prep.cell_loop         0.000 ms total    0.0000 ms/token
+qsa host prof:   prep.fingerprint       0.000 ms total    0.0000 ms/token
+qsa host prof:   set.cpy_cell_blk       0.000 ms total    0.0000 ms/token
+qsa host prof:   set.cpy_blk_cells      0.000 ms total    0.0000 ms/token
+qsa host prof:   set.blk_pos            0.000 ms total    0.0000 ms/token
+qsa host prof:   set.bias               0.002 ms total    0.0020 ms/token
+qsa host prof:   set.pool_cpy           0.000 ms total    0.0000 ms/token
+qsa host prof:   set.upd                0.000 ms total    0.0000 ms/token
+qsa host prof:   PREPARE total          0.007 ms total    0.0070 ms/token
+qsa host prof:   SET_INPUT total        0.004 ms total    0.0040 ms/token
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         38 |     1024 |   q4_0 |   q4_0 |   1 | off        |   tg32 @ d32768 |         22.62 ± 0.00 |
+qsa host prof: n_kv = 33024 over 32 decode ubatches
+qsa host prof:   prep.alloc             0.191 ms total    0.0060 ms/token
+qsa host prof:   prep.group_cells       2.918 ms total    0.0912 ms/token
+qsa host prof:   prep.blk_enum          0.476 ms total    0.0149 ms/token
+qsa host prof:   prep.cell_loop         2.529 ms total    0.0790 ms/token
+qsa host prof:   prep.fingerprint       0.167 ms total    0.0052 ms/token
+qsa host prof:   set.cpy_cell_blk       0.000 ms total    0.0000 ms/token
+qsa host prof:   set.cpy_blk_cells      0.129 ms total    0.0040 ms/token
+qsa host prof:   set.blk_pos            0.000 ms total    0.0000 ms/token
+qsa host prof:   set.bias               0.050 ms total    0.0016 ms/token
+qsa host prof:   set.pool_cpy           0.005 ms total    0.0002 ms/token
+qsa host prof:   set.upd                0.011 ms total    0.0003 ms/token
+qsa host prof:   PREPARE total          6.373 ms total    0.1992 ms/token
+qsa host prof:   SET_INPUT total        0.206 ms total    0.0064 ms/token
+qsa host prof: n_kv = 256 over 1 decode ubatches
+qsa host prof:   prep.alloc             0.001 ms total    0.0010 ms/token
+qsa host prof:   prep.group_cells       0.002 ms total    0.0020 ms/token
+qsa host prof:   prep.blk_enum          0.001 ms total    0.0010 ms/token
+qsa host prof:   prep.cell_loop         0.001 ms total    0.0010 ms/token
+qsa host prof:   prep.fingerprint       0.000 ms total    0.0000 ms/token
+qsa host prof:   set.cpy_cell_blk       0.000 ms total    0.0000 ms/token
+qsa host prof:   set.cpy_blk_cells      0.000 ms total    0.0000 ms/token
+qsa host prof:   set.blk_pos            0.000 ms total    0.0000 ms/token
+qsa host prof:   set.bias               0.000 ms total    0.0000 ms/token
+qsa host prof:   set.pool_cpy           0.000 ms total    0.0000 ms/token
+qsa host prof:   set.upd                0.000 ms total    0.0000 ms/token
+qsa host prof:   PREPARE total          0.008 ms total    0.0080 ms/token
+qsa host prof:   SET_INPUT total        0.002 ms total    0.0020 ms/token
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         38 |     1024 |   q4_0 |   q4_0 |   1 | off        |  tg32 @ d614400 |         14.22 ± 0.00 |
+qsa host prof:   kq_mask               35.164 ms total    0.3552 ms/token (99 calls)
+qsa host prof:   set_inputs all        44.003 ms total    0.4445 ms/token (99 calls)
+qsa host prof:   graph_compute       8367.484 ms total   84.5200 ms/token
+qsa host prof: n_kv = 614656 over 32 decode ubatches
+qsa host prof:   prep.alloc             2.466 ms total    0.0771 ms/token
+qsa host prof:   prep.group_cells      50.003 ms total    1.5626 ms/token
+qsa host prof:   prep.blk_enum          8.719 ms total    0.2725 ms/token
+qsa host prof:   prep.cell_loop        46.893 ms total    1.4654 ms/token
+qsa host prof:   prep.fingerprint       2.194 ms total    0.0686 ms/token
+qsa host prof:   set.cpy_cell_blk       0.000 ms total    0.0000 ms/token
+qsa host prof:   set.cpy_blk_cells      4.363 ms total    0.1363 ms/token
+qsa host prof:   set.blk_pos            0.000 ms total    0.0000 ms/token
+qsa host prof:   set.bias               0.768 ms total    0.0240 ms/token
+qsa host prof:   set.pool_cpy           0.008 ms total    0.0003 ms/token
+qsa host prof:   set.upd                0.016 ms total    0.0005 ms/token
+qsa host prof:   PREPARE total        110.352 ms total    3.4485 ms/token
+qsa host prof:   SET_INPUT total        5.176 ms total    0.1618 ms/token
+### arm=fast rc=0 18:16:07
+### done 18:16:07

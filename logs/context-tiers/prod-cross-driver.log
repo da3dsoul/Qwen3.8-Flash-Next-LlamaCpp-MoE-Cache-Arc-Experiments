@@ -1,0 +1,3 @@
+time="2026-09-12T11:32:22-04:00" level=warning msg="Found orphan containers ([docker-llm-test-sycl-run-f747379b3d5e docker-llm-test-sycl-run-79732f6acf06]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+server container: d4aed56be387cd14f21e9e9fc57ec463a791df2762b22d61eb61c0da705340b2
+waiting for server health...

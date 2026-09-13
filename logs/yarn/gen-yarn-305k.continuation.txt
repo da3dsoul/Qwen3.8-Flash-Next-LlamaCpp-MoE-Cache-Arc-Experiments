@@ -1,0 +1,16 @@
+<think>
+The user wants me to refactor a massive legacy Python codebase that has 400+ near-identical function groups (process_user_0, process_order_1, process_product_2, etc.) that differ only in:
+1. The entity name (user, order, product, invoice, customer, shipment, employee, ticket, payment, account, vendor, warehouse, review, coupon, subscription, session, device, report, category, transaction)
+2. The multiplier for `x = item['value'] * N`
+3. The constant added `y = x + N`
+4. The divisor `z = y / N`
+5. The tax rate
+6. Whether format uses `.upper()` or `.lower()` (the `if True/False` condition)
+7. The cache key default value
+
+Let me analyze the patterns:
+- Each entity has: process_X_N, validate_X_N, calculate_X_total_N, format_X_name_N, get_X_by_id_N, update_X_N, delete_X_N, and class XHandlerN
+- The process functions differ in: multiplier, addend, divisor
+- The calculate functions differ in: tax rate
+-
+

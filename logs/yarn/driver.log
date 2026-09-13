@@ -1,0 +1,17 @@
+### GPU acquired Sat Sep 12 02:17:24 PM EDT 2026
+               total        used        free      shared  buff/cache   available
+Mem:           123Gi        42Gi       6.6Gi       301Mi        75Gi        80Gi
+Swap:          9.3Gi       9.2Gi        89Mi
+### available GiB = 80
+### ladder rc=0 Sat Sep 12 02:33:51 PM EDT 2026
+### off-8192 18:17:25 : 3.53.245.791 I Final estimate: PPL = 10.6070 +/- 0.55975
+###   rc=0  1 est  18:21:19
+### yarn-8192 18:21:19 : 1.43.401.170 I Final estimate: PPL = 13.1616 +/- 0.72839
+###   rc=0  1 est  18:23:03
+### off-32768 18:23:03 : 4.09.316.911 I Final estimate: PPL = 43.1005 +/- 1.48380
+###   rc=0  1 est  18:27:15
+### yarn-32768 18:27:15 : 4.13.045.513 I Final estimate: PPL = 82.6182 +/- 3.03436
+###   rc=0  1 est  18:31:31
+### off-98304 18:31:31 : ###   rc=0  0 est  18:33:27
+### yarn-98304 18:33:27 : ###   rc=0  0 est  18:33:50
+### done 18:33:50

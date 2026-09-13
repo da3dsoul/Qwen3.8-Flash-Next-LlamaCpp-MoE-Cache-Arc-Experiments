@@ -1,0 +1,73 @@
+0.02.508.165 I cmn  common_param: common_params_print_info: verbosity = 3 (adjust with the `-lv N` CLI arg)
+0.02.508.479 W srv  llama_server: -----------------
+0.02.508.480 W srv  llama_server: CORS is set to allow all origins ('*') and no API key is set
+0.02.508.480 W srv  llama_server: this can be a security risk (cross-origin attacks)
+0.02.508.480 W srv  llama_server: more info: https://github.com/ggml-org/llama.cpp/pull/25655
+0.02.508.480 W srv  llama_server: -----------------
+0.02.509.683 I srv  ctx_tier_ini: context tier 0: n_ctx = 1024, n_ubatch = 512, n_cpu_moe = 4
+0.02.509.684 I srv  ctx_tier_ini: context tier 1: n_ctx = 8192, n_ubatch = 1024, n_cpu_moe = 8
+0.02.509.718 I srv    load_model: loading model '/models/Qwen3.6-35B-A3B-GGUF/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf'
+0.02.791.383 W llama_model_loader: tensor overrides to CPU are used with mmap enabled - consider using --load-mode none for better performance
+0.52.268.582 I cmn          init: llama threadpool init, n_threads = 4
+0.52.458.591 I srv    load_model: initializing, n_slots = 1, n_ctx_slot = 1024, kv_unified = 'false'
+0.52.462.716 W srv          init: chat template supports preserving reasoning, it is enabled by default (may use more tokens, disable via --no-reasoning-preserve)
+0.52.462.753 I srv  llama_server: model loaded
+0.52.462.757 I srv  llama_server: listening on http://0.0.0.0:8080
+0.52.462.757 W srv  llama_server: NOTICE: server default port will be changed to :9931 in a future release
+0.52.462.758 W srv  llama_server:         ref: https://github.com/ggml-org/llama.cpp/pull/26508
+0.53.089.386 I slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = -1
+0.53.089.475 I slot launch_slot_: id  0 | task 0 | processing task, is_child = 0
+0.56.752.841 I slot print_timing: id  0 | task 0 | prompt eval time =     415.76 ms /    22 tokens (   18.90 ms per token,    52.92 tokens per second)
+0.56.752.844 I slot print_timing: id  0 | task 0 |        eval time =    3247.57 ms /    48 tokens (   69.10 ms per token,    14.47 tokens per second)
+0.56.752.845 I slot print_timing: id  0 | task 0 |       total time =    3663.33 ms /    70 tokens
+0.56.752.847 I slot print_timing: id  0 | task 0 |    graphs reused =         47
+0.56.752.881 I slot      release: id  0 | task 0 | stop processing: n_tokens = 69, truncated = 0
+0.56.756.035 I slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 0.429 (> 0.100 thold), f_keep = 0.304
+0.56.782.043 I slot launch_slot_: id  0 | task 50 | processing task, is_child = 0
+1.00.659.700 I slot print_timing: id  0 | task 50 | prompt eval time =     621.44 ms /    31 tokens (   20.05 ms per token,    49.88 tokens per second)
+1.00.659.704 I slot print_timing: id  0 | task 50 |        eval time =    3256.19 ms /    48 tokens (   69.28 ms per token,    14.43 tokens per second)
+1.00.659.704 I slot print_timing: id  0 | task 50 |       total time =    3877.63 ms /    79 tokens
+1.00.659.705 I slot print_timing: id  0 | task 50 |    graphs reused =         93
+1.00.659.727 I slot      release: id  0 | task 50 | stop processing: n_tokens = 96, truncated = 0
+1.00.664.234 I srv  ctx_tier_upd: switching context tier 0 -> 1 (request is 1539 tokens + 128 reserved): n_ctx = 8192, n_ubatch = 1024, n_cpu_moe = 8
+1.00.925.181 I srv    load_model: loading model '/models/Qwen3.6-35B-A3B-GGUF/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf'
+1.05.917.136 I cmn          init: llama threadpool init, n_threads = 4
+1.06.105.139 I srv    load_model: initializing, n_slots = 1, n_ctx_slot = 8192, kv_unified = 'false'
+1.06.106.910 I srv  ctx_tier_upd: context tier 1 ready in 5.44 s (1 switches so far, 5.44 s total)
+1.06.106.913 I slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = -1
+1.06.106.978 I slot launch_slot_: id  0 | task 101 | processing task, is_child = 0
+1.18.136.734 I slot print_timing: id  0 | task 101 | prompt processing, n_tokens =   1023, progress = 0.66, t =  12.03 s / 85.04 tokens per second
+1.24.105.158 I slot print_timing: id  0 | task 101 | prompt processing, n_tokens =   1535, progress = 1.00, t =  18.00 s / 85.29 tokens per second
+1.31.451.630 I slot print_timing: id  0 | task 101 | n_gen =    100, tg =  13.72 t/s, tg_3s =  13.86 t/s
+1.33.464.216 I slot print_timing: id  0 | task 101 | prompt eval time =   18129.05 ms /  1539 tokens (   11.78 ms per token,    84.89 tokens per second)
+1.33.464.219 I slot print_timing: id  0 | task 101 |        eval time =    9228.16 ms /   128 tokens (   72.66 ms per token,    13.76 tokens per second)
+1.33.464.220 I slot print_timing: id  0 | task 101 |       total time =   27357.21 ms /  1667 tokens
+1.33.464.221 I slot print_timing: id  0 | task 101 |    graphs reused =        127
+1.33.464.297 I slot      release: id  0 | task 101 | stop processing: n_tokens = 1666, truncated = 0
+1.33.470.495 I slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 0.981 (> 0.100 thold), f_keep = 0.923
+1.33.470.556 I slot launch_slot_: id  0 | task 234 | processing task, is_child = 0
+1.36.054.784 I slot print_timing: id  0 | task 234 | prompt eval time =     680.45 ms /    32 tokens (   21.26 ms per token,    47.03 tokens per second)
+1.36.054.789 I slot print_timing: id  0 | task 234 |        eval time =    1903.76 ms /    27 tokens (   73.22 ms per token,    13.66 tokens per second)
+1.36.054.790 I slot print_timing: id  0 | task 234 |       total time =    2584.21 ms /    59 tokens
+1.36.054.791 I slot print_timing: id  0 | task 234 |    graphs reused =        152
+1.36.054.859 I slot      release: id  0 | task 234 | stop processing: n_tokens = 1593, truncated = 0
+1.36.056.852 I srv  ctx_tier_upd: context tier 1 is deeper than this request needs (0), shallow requests in a row: 1/2
+1.36.056.856 I slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 0.158 (> 0.100 thold), f_keep = 0.002
+1.36.150.710 I slot launch_slot_: id  0 | task 264 | processing task, is_child = 0
+1.39.854.248 I slot print_timing: id  0 | task 264 | prompt eval time =     397.72 ms /    19 tokens (   20.93 ms per token,    47.77 tokens per second)
+1.39.854.252 I slot print_timing: id  0 | task 264 |        eval time =    3305.79 ms /    48 tokens (   70.34 ms per token,    14.22 tokens per second)
+1.39.854.252 I slot print_timing: id  0 | task 264 |       total time =    3703.51 ms /    67 tokens
+1.39.854.253 I slot print_timing: id  0 | task 264 |    graphs reused =        198
+1.39.854.273 I slot      release: id  0 | task 264 | stop processing: n_tokens = 66, truncated = 0
+1.39.856.385 I srv  ctx_tier_upd: switching context tier 1 -> 0 (request is 22 tokens + 48 reserved): n_ctx = 1024, n_ubatch = 512, n_cpu_moe = 4
+1.40.110.927 I srv    load_model: loading model '/models/Qwen3.6-35B-A3B-GGUF/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf'
+1.44.889.148 I cmn          init: llama threadpool init, n_threads = 4
+1.45.116.363 I srv    load_model: initializing, n_slots = 1, n_ctx_slot = 1024, kv_unified = 'false'
+1.45.123.913 I srv  ctx_tier_upd: context tier 0 ready in 5.27 s (2 switches so far, 10.71 s total)
+1.45.123.915 I slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = -1
+1.45.123.977 I slot launch_slot_: id  0 | task 314 | processing task, is_child = 0
+1.48.758.767 I slot print_timing: id  0 | task 314 | prompt eval time =     418.72 ms /    22 tokens (   19.03 ms per token,    52.54 tokens per second)
+1.48.758.770 I slot print_timing: id  0 | task 314 |        eval time =    3216.05 ms /    48 tokens (   68.43 ms per token,    14.61 tokens per second)
+1.48.758.771 I slot print_timing: id  0 | task 314 |       total time =    3634.77 ms /    70 tokens
+1.48.758.771 I slot print_timing: id  0 | task 314 |    graphs reused =         47
+1.48.758.790 I slot      release: id  0 | task 314 | stop processing: n_tokens = 69, truncated = 0

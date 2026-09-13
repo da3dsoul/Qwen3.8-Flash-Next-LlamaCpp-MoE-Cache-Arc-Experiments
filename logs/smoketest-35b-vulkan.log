@@ -1,0 +1,43 @@
+
+
+Loading model... |-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/- 
+
+▄▄ ▄▄
+██ ██
+██ ██  ▀▀█▄ ███▄███▄  ▀▀█▄    ▄████ ████▄ ████▄
+██ ██ ▄█▀██ ██ ██ ██ ▄█▀██    ██    ██ ██ ██ ██
+██ ██ ▀█▄██ ██ ██ ██ ▀█▄██ ██ ▀████ ████▀ ████▀
+                                    ██    ██
+                                    ▀▀    ▀▀
+
+build      : b1-6d9c82e
+model      : /models/Qwen3.6-35B-A3B-GGUF/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf
+ftype      : Q4_K - Medium
+modalities : text
+
+available commands:
+  /exit or Ctrl+C     stop or exit
+  /regen              regenerate the last response
+  /clear              clear the chat history
+  /read <file>        add a text file
+  /glob <pattern>     add text files using globbing pattern
+
+
+
+> The capital of France is
+
+[Start thinking]
+
+Here's a thinking process:
+
+1.  **Analyze User Input:** The user asks "The capital of France is" - it's a straightforward factual question, cut off but clearly expecting the name of the capital city.
+2.  **Identify Key Entity:** France (country)
+3.  **Retrieve Knowledge:** What is the capital of France? Paris.
+4.  **Formulate Response:** Keep it concise and direct. "Paris." or "The capital of France is Paris."
+5.  **Check Accuracy:** Verified. Paris is indeed the capital of France. No ambiguity.
+6.
+
+[ Prompt: 8.5 t/s | Generation: 31.0 t/s ]
+
+
+Exiting...

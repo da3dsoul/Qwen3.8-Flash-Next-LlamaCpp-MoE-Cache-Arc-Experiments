@@ -1,0 +1,21 @@
+  QSA_INDEXER(type_k=q4_0,n_kv=4096,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=0):                   9242 runs -   108.21 us/run - 67108864 kB/run - [1;34m591644.15 GB/s[0m
+  QSA_INDEXER(type_k=f16,n_kv=4096,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=0):                    8962 runs -   111.59 us/run - 67108864 kB/run - [1;34m573743.49 GB/s[0m
+  QSA_INDEXER_CACHED(type_k=q4_0,n_kv=4096,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1,block_topk=0):                   18119 runs -    55.19 us/run - 67108864 kB/run - [1;34m1159613.13 GB/s[0m
+  QSA_INDEXER_BLK(type_k=q4_0,n_kv=4096,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=1):              11041 runs -    90.57 us/run - 67108864 kB/run - [1;34m706875.34 GB/s[0m
+  QSA_INDEXER_CACHED_BLK(type_k=q4_0,n_kv=4096,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1,block_topk=1):               23509 runs -    42.54 us/run - 67108864 kB/run - [1;34m1504603.38 GB/s[0m
+  QSA_INDEXER(type_k=q4_0,n_kv=8192,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=0):                   6581 runs -   151.96 us/run - 67108864 kB/run - [1;34m421453.73 GB/s[0m
+  QSA_INDEXER(type_k=f16,n_kv=8192,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=0):                    5950 runs -   168.08 us/run - 67108864 kB/run - [1;34m381054.89 GB/s[0m
+  QSA_INDEXER_CACHED(type_k=q4_0,n_kv=8192,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1,block_topk=0):                   15645 runs -    63.92 us/run - 67108864 kB/run - [1;34m1001322.44 GB/s[0m
+  QSA_INDEXER_BLK(type_k=q4_0,n_kv=8192,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=1):               7671 runs -   130.37 us/run - 67108864 kB/run - [1;34m491253.15 GB/s[0m
+  QSA_INDEXER_CACHED_BLK(type_k=q4_0,n_kv=8192,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1,block_topk=1):               22743 runs -    43.97 us/run - 67108864 kB/run - [1;34m1455573.36 GB/s[0m
+  QSA_INDEXER(type_k=q4_0,n_kv=16384,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=0):                  4118 runs -   242.89 us/run - 67108864 kB/run - [1;34m263846.93 GB/s[0m
+  QSA_INDEXER(type_k=f16,n_kv=16384,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=0):                   3733 runs -   267.88 us/run - 67108864 kB/run - [1;34m239245.33 GB/s[0m
+  QSA_INDEXER_CACHED(type_k=q4_0,n_kv=16384,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1,block_topk=0):                  13081 runs -    76.45 us/run - 67108864 kB/run - [1;34m837250.23 GB/s[0m
+  QSA_INDEXER_BLK(type_k=q4_0,n_kv=16384,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=1):              4750 runs -   210.57 us/run - 67108864 kB/run - [1;34m304347.96 GB/s[0m
+  QSA_INDEXER_CACHED_BLK(type_k=q4_0,n_kv=16384,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1,block_topk=1):              22377 runs -    44.69 us/run - 67108864 kB/run - [1;34m1432203.37 GB/s[0m
+  QSA_INDEXER(type_k=q4_0,n_kv=32768,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=0):                  2336 runs -   428.18 us/run - 67108864 kB/run - [1;34m149871.11 GB/s[0m
+  QSA_INDEXER(type_k=f16,n_kv=32768,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=0):                   2081 runs -   480.72 us/run - 67108864 kB/run - [1;34m133501.90 GB/s[0m
+  QSA_INDEXER_CACHED(type_k=q4_0,n_kv=32768,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1,block_topk=0):                   9211 runs -   108.57 us/run - 67108864 kB/run - [1;34m589539.10 GB/s[0m
+  QSA_INDEXER_BLK(type_k=q4_0,n_kv=32768,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=1):              2706 runs -   369.57 us/run - 67108864 kB/run - [1;34m173632.00 GB/s[0m
+  QSA_INDEXER_CACHED_BLK(type_k=q4_0,n_kv=32768,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=1,block_topk=1):              19852 runs -    50.38 us/run - 67108864 kB/run - [1;34m1270615.08 GB/s[0m
+  QSA_INDEXER(type_k=q4_0,n_kv=65536,idx_dim=128,r=4,n_tps=1,width=2051,pooled_cached=0,block_topk=0):                  1209 runs -   827.47 us/ru

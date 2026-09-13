@@ -1,0 +1,306 @@
+load_backend: loaded SYCL backend from /devbin/libggml-sycl.so
+load_backend: loaded CPU backend from /devbin/libggml-cpu-zen4.so
+Build with Macros:
+  GGML_SYCL_DNNL: yes
+  GGML_SYCL_F16: yes
+  GGML_SYCL_FORCE_MMQ: no
+  GGML_SYCL_GRAPH: yes
+  GGML_SYCL_SUPPORT_LEVEL_ZERO_API: yes
+  GGML_SYCL_SUPPORT_VMM: yes
+Running with Environment Variables:
+  GGML_SYCL_DEBUG: 0
+  GGML_SYCL_DEV2DEV_MEMCPY: 0 (SYCL API)
+  GGML_SYCL_GET_MEM_API: 0 (Level Zero API)
+  GGML_SYCL_ENABLE_DNN: 1
+  GGML_SYCL_FA_ONEDNN: 1
+  GGML_SYCL_FA_ONEDNN_MAX_KV: 0
+  GGML_SYCL_FA_ONEDNN_MIN_Q: 32
+  GGML_SYCL_ENABLE_MKL_FA: 1
+  GGML_SYCL_MEMTRACE: 0
+  GGML_SYCL_MEMTRACE_STEP: 64
+  GGML_SYCL_ENABLE_FLASH_ATTN: 1
+  GGML_SYCL_ENABLE_GRAPH: 0
+  GGML_SYCL_ENABLE_OPT: 1
+  GGML_SYCL_ENABLE_VMM: 1
+  GGML_SYCL_ENABLE_FUSION: 1
+  GGML_SYCL_ENABLE_ESIMD: 1
+  GGML_SYCL_PRIORITIZE_DMMV: 0
+  GGML_SYCL_USE_ASYNC_MEM_OP: 1
+  GGML_SYCL_USE_LEVEL_ZERO_API: 1
+  GGML_SYCL_USM_SYSTEM: 0
+  GGML_SYCL_ENABLE_HOST_PINNED_MEM: 1
+  GGML_SYCL_HOST_PINNED_MEM_2G: 0
+Found 1 SYCL devices:
+|  |                   |                                       |       |Max    |        |Max  |Global |                     |
+|  |                   |                                       |       |compute|Max work|sub  |mem    |                     |
+|ID|        Device Type|                                   Name|Version|units  |group   |group|size   |       Driver version|
+|--|-------------------|---------------------------------------|-------|-------|--------|-----|-------|---------------------|
+| 0| [level_zero:gpu:0]|             Intel Arc Pro B70 Graphics|   20.2|    256|    1024|   32| 34242M|         1.15.38308+1|
+SYCL Optimization Feature:
+|ID|        Device Type|Reorder|
+|--|-------------------|-------|
+| 0| [level_zero:gpu:0]|      Y|
+Testing 2 devices
+
+Backend 1/2: SYCL0
+  Device description: Intel(R) Arc(TM) Pro B70 Graphics
+  Device memory: 32656 MB (32144 MB free)
+
+  SET_ROWS(type_src=f32,type_dst=f32,type_idx=i64,ne=[1,8,1,3],nr23=[1,1],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f32,type_dst=f32,type_idx=i32,ne=[1,8,1,3],nr23=[1,1],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f32,type_dst=q8_0,type_idx=i32,ne=[256,5,1,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f32,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f32,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f32,type_idx=i64,ne=[3,3,1,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f32,type_idx=i64,ne=[31,3,1,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f32,type_idx=i64,ne=[33,5,1,1],nr23=[2,3],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f32,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f32,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f32,type_idx=i64,ne=[3,3,1,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f32,type_idx=i64,ne=[31,3,1,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f32,type_idx=i64,ne=[33,5,1,1],nr23=[2,3],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f32,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f32,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f32,type_idx=i64,ne=[3,3,7,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f32,type_idx=i64,ne=[31,3,7,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f32,type_idx=i64,ne=[33,5,1,7],nr23=[2,3],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f32,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f32,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f32,type_idx=i64,ne=[3,3,7,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f32,type_idx=i64,ne=[31,3,7,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f32,type_idx=i64,ne=[33,5,1,7],nr23=[2,3],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f16,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f16,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f16,type_idx=i64,ne=[3,3,1,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f16,type_idx=i64,ne=[31,3,1,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f16,type_idx=i64,ne=[33,5,1,1],nr23=[2,3],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f16,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f16,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f16,type_idx=i64,ne=[3,3,1,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f16,type_idx=i64,ne=[31,3,1,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f16,type_idx=i64,ne=[33,5,1,1],nr23=[2,3],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f16,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f16,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f16,type_idx=i64,ne=[3,3,7,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f16,type_idx=i64,ne=[31,3,7,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f16,type_idx=i64,ne=[33,5,1,7],nr23=[2,3],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f16,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f16,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f16,type_idx=i64,ne=[3,3,7,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f16,type_idx=i64,ne=[31,3,7,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=f16,type_idx=i64,ne=[33,5,1,7],nr23=[2,3],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=bf16,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=bf16,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=bf16,type_idx=i64,ne=[3,3,1,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=bf16,type_idx=i64,ne=[31,3,1,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=bf16,type_idx=i64,ne=[33,5,1,1],nr23=[2,3],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=bf16,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=bf16,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=bf16,type_idx=i64,ne=[3,3,1,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=bf16,type_idx=i64,ne=[31,3,1,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=bf16,type_idx=i64,ne=[33,5,1,1],nr23=[2,3],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=bf16,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=bf16,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=bf16,type_idx=i64,ne=[3,3,7,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=bf16,type_idx=i64,ne=[31,3,7,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=bf16,type_idx=i64,ne=[33,5,1,7],nr23=[2,3],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=bf16,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=bf16,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=bf16,type_idx=i64,ne=[3,3,7,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=bf16,type_idx=i64,ne=[31,3,7,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=bf16,type_idx=i64,ne=[33,5,1,7],nr23=[2,3],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_0,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_0,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_0,type_idx=i64,ne=[96,3,1,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_0,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_0,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_0,type_idx=i64,ne=[96,3,1,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_0,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_0,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_0,type_idx=i64,ne=[96,3,7,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_0,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_0,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_0,type_idx=i64,ne=[96,3,7,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_1,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_1,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_1,type_idx=i64,ne=[96,3,1,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_1,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_1,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_1,type_idx=i64,ne=[96,3,1,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_1,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_1,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_1,type_idx=i64,ne=[96,3,7,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_1,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_1,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_1,type_idx=i64,ne=[96,3,7,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_0,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_0,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_0,type_idx=i64,ne=[96,3,1,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_0,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_0,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_0,type_idx=i64,ne=[96,3,1,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_0,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_0,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_0,type_idx=i64,ne=[96,3,7,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_0,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_0,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_0,type_idx=i64,ne=[96,3,7,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_1,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_1,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_1,type_idx=i64,ne=[96,3,1,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_1,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_1,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_1,type_idx=i64,ne=[96,3,1,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_1,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_1,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_1,type_idx=i64,ne=[96,3,7,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_1,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_1,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_1,type_idx=i64,ne=[96,3,7,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q8_0,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q8_0,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q8_0,type_idx=i64,ne=[96,3,1,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q8_0,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q8_0,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q8_0,type_idx=i64,ne=[96,3,1,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q8_0,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q8_0,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q8_0,type_idx=i64,ne=[96,3,7,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q8_0,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q8_0,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q8_0,type_idx=i64,ne=[96,3,7,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q1_0,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q1_0,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q1_0,type_idx=i64,ne=[384,3,1,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q1_0,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q1_0,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q1_0,type_idx=i64,ne=[384,3,1,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q1_0,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q1_0,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q1_0,type_idx=i64,ne=[384,3,7,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q1_0,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q1_0,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q1_0,type_idx=i64,ne=[384,3,7,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q2_0,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q2_0,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q2_0,type_idx=i64,ne=[192,3,1,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q2_0,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q2_0,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q2_0,type_idx=i64,ne=[192,3,1,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q2_0,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q2_0,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q2_0,type_idx=i64,ne=[192,3,7,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q2_0,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q2_0,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q2_0,type_idx=i64,ne=[192,3,7,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=mxfp4,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=mxfp4,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=mxfp4,type_idx=i64,ne=[96,3,1,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=mxfp4,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=mxfp4,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=mxfp4,type_idx=i64,ne=[96,3,1,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=mxfp4,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=mxfp4,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=mxfp4,type_idx=i64,ne=[96,3,7,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=mxfp4,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=mxfp4,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=mxfp4,type_idx=i64,ne=[96,3,7,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=nvfp4,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=nvfp4,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=nvfp4,type_idx=i64,ne=[192,3,1,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=nvfp4,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=nvfp4,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=nvfp4,type_idx=i64,ne=[192,3,1,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=nvfp4,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=nvfp4,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=nvfp4,type_idx=i64,ne=[192,3,7,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=nvfp4,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=nvfp4,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=nvfp4,type_idx=i64,ne=[192,3,7,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q2_K,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q2_K,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q2_K,type_idx=i64,ne=[768,3,1,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q2_K,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q2_K,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q2_K,type_idx=i64,ne=[768,3,1,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q2_K,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q2_K,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q2_K,type_idx=i64,ne=[768,3,7,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q2_K,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q2_K,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q2_K,type_idx=i64,ne=[768,3,7,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q3_K,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q3_K,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q3_K,type_idx=i64,ne=[768,3,1,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q3_K,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q3_K,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q3_K,type_idx=i64,ne=[768,3,1,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q3_K,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q3_K,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q3_K,type_idx=i64,ne=[768,3,7,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q3_K,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q3_K,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q3_K,type_idx=i64,ne=[768,3,7,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_K,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_K,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_K,type_idx=i64,ne=[768,3,1,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_K,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_K,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_K,type_idx=i64,ne=[768,3,1,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_K,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_K,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_K,type_idx=i64,ne=[768,3,7,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_K,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_K,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q4_K,type_idx=i64,ne=[768,3,7,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_K,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_K,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_K,type_idx=i64,ne=[768,3,1,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_K,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_K,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_K,type_idx=i64,ne=[768,3,1,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_K,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_K,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_K,type_idx=i64,ne=[768,3,7,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_K,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_K,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q5_K,type_idx=i64,ne=[768,3,7,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q6_K,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q6_K,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q6_K,type_idx=i64,ne=[768,3,1,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q6_K,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q6_K,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q6_K,type_idx=i64,ne=[768,3,1,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q6_K,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q6_K,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q6_K,type_idx=i64,ne=[768,3,7,1],nr23=[2,3],r=2,v=0): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q6_K,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q6_K,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=q6_K,type_idx=i64,ne=[768,3,7,1],nr23=[2,3],r=2,v=1): [1;32mOK[0m
+  SET_ROWS(type_src=f16,type_dst=tq2_0,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=0): not supported [SYCL0] 
+  SET_ROWS(type_src=f16,type_dst=tq2_0,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=0): not supported [SYCL0] 
+  SET_ROWS(type_src=f16,type_dst=tq2_0,type_idx=i64,ne=[768,3,1,1],nr23=[2,3],r=2,v=0): not supported [SYCL0] 
+  SET_ROWS(type_src=f16,type_dst=tq2_0,type_idx=i64,ne=[256,5,1,3],nr23=[1,1],r=1,v=1): not supported [SYCL0] 
+  SET_ROWS(type_src=f16,type_dst=tq2_0,type_idx=i64,ne=[256,11,1,1],nr23=[2,3],r=7,v=1): not supported [SYCL0] 
+  SET_ROWS(type_src=f16,type_dst=tq2_0,type_idx=i64,ne=[768,3,1,1],nr23=[2,3],r=2,v=1): not supported [SYCL0] 
+  SET_ROWS(type_src=f16,type_dst=tq2_0,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=0): not supported [SYCL0] 
+  SET_ROWS(type_src=f16,type_dst=tq2_0,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=0): not supported [SYCL0] 
+  SET_ROWS(type_src=f16,type_dst=tq2_0,type_idx=i64,ne=[768,3,7,1],nr23=[2,3],r=2,v=0): not supported [SYCL0] 
+  SET_ROWS(type_src=f16,type_dst=tq2_0,type_idx=i64,ne=[256,5,7,3],nr23=[1,1],r=1,v=1): not supported [SYCL0] 
+  SET_ROWS(type_src=f16,type_dst=tq2_0,type_idx=i64,ne=[256,11,1,7],nr23=[2,3],r=7,v=1): not supported [SYCL0] 
+  SET_ROWS(type_src=f16,type_dst=tq2_0,type_idx=i64,ne=[768,3,7,1],nr23=[2,3],r=2,v=1): not supported [SYCL0] 
+/app/ggml/src/ggml-sycl/set_rows.cpp:550: Unsupported tensor type: src0 f16 src1 i64 dst tq1_0
+/devbin/libggml-base.so.0(+0x17db8)[0x7dd97f320db8]
+/devbin/libggml-base.so.0(ggml_print_backtrace+0x285)[0x7dd97f320d95]
+/devbin/libggml-base.so.0(ggml_abort+0x109)[0x7dd97f31fe09]
+/devbin/libggml-sycl.so(+0x4c6bb1)[0x7dd978ac6bb1]
+/devbin/libggml-sycl.so(_Z21ggml_sycl_op_set_rowsR25ggml_backend_sycl_contextP11ggml_tensor+0x60)[0x7dd978abc710]
+/devbin/libggml-sycl.so(+0x1d2d00)[0x7dd9787d2d00]
+/devbin/libggml-sycl.so(+0x1d0254)[0x7dd9787d0254]
+/devbin/libggml-base.so.0(ggml_backend_compare_graph_backend+0x31c)[0x7dd97f34a68c]
+/devbin/test-backend-ops[0x540c61]
+/devbin/test-backend-ops[0x47790d]
+/devbin/test-backend-ops[0x417cb4]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca)[0x7dd97edba1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b)[0x7dd97edba28b]
+/devbin/test-backend-ops[0x415935]

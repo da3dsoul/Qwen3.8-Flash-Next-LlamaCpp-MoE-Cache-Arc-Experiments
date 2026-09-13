@@ -1,0 +1,25 @@
+### gen-off-600k 00:23:44
+###   rc=0 01:41:00
+2.29.267.123 W llama_context: n_ctx_seq (614400) > n_ctx_train (262144) -- possible training context overflow
+2.29.964.190 I generate: n_ctx = 614400, n_batch = 2048, n_predict = 250, n_keep = 0
+77.14.206.756 I common_perf_print: prompt eval time = 4431297.12 ms / 612689 tokens (    7.23 ms per token,   138.26 tokens per second)
+77.14.206.757 I common_perf_print:        eval time =   52873.32 ms /   249 runs   (  212.34 ms per token,     4.71 tokens per second)
+--- continuation ---
+<think>
+The user wants me to refactor a massive, repetitive Python codebase. Let me analyze the patterns:
+
+1. There are ~800+ functions that are near-identical copies with only parameter differences (multiplier, addend, divisor, tax rate, entity name)
+2. The entity types cycle through: user, order, product, invoice, customer, shipment, employee, ticket, payment, account, vendor, warehouse, review, coupon, subscription, session, device, report, category, transaction
+3. Each entity has: process_X, validate_X, calculate_X_total, format_X_name, get_X_by_id, update_X, delete_X, and a Handler class
+4. The differences between copies are: multiplier (x), addend (y), divisor (z), tax rate, and whether format uses .upper() or .lower()
+
+Key issues to fix:
+- Global mutable state (data, DATA2, temp, counter, GLOBAL_CACHE, errors_list)
+- Bare `except` clauses
+- Mutable default arguments (`value=[]`)
+- Manual index loops (`for i in range(len(x))`)
+- `== None` / `== True` comparisons
+- String
+
+
+### done 01:41:01

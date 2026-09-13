@@ -1,0 +1,16 @@
+0.00.119.808 I cmn  common_param: common_params_print_info: verbosity = 3 (adjust with the `-lv N` CLI arg)
+0.00.120.046 W srv  llama_server: -----------------
+0.00.120.047 W srv  llama_server: CORS is set to allow all origins ('*') and no API key is set
+0.00.120.047 W srv  llama_server: this can be a security risk (cross-origin attacks)
+0.00.120.047 W srv  llama_server: more info: https://github.com/ggml-org/llama.cpp/pull/25655
+0.00.120.047 W srv  llama_server: -----------------
+0.00.121.243 I srv    load_model: loading model '/models/Qwen3.8-Flash-Next-GGUF/UD-IQ3_XXS/Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf'
+0.00.341.842 W llama_model_loader: tensor overrides to CPU are used with mmap enabled - consider using --load-mode none for better performance
+3.05.952.760 W llama_context: n_ctx_seq (311296) > n_ctx_train (262144) -- possible training context overflow
+3.06.144.478 I cmn          init: llama threadpool init, n_threads = 16
+3.58.739.690 W srv    load_model: the slot context (311296) exceeds the training context of the model (262144) - capping
+4.06.112.758 I srv    load_model: initializing, n_slots = 1, n_ctx_slot = 262144, kv_unified = 'false'
+4.06.142.787 W srv          init: chat template supports preserving reasoning, it is enabled by default (may use more tokens, disable via --no-reasoning-preserve)
+4.06.142.827 I srv  llama_server: model loaded
+4.06.142.831 I srv  llama_server: listening on http://127.0.0.1:8099
+4.06.404.622 I srv    operator(): operator(): cleaning up before exit...

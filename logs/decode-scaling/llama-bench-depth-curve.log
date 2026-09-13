@@ -1,0 +1,12 @@
+load_backend: loaded SYCL backend from /devbin/libggml-sycl.so
+load_backend: loaded CPU backend from /devbin/libggml-cpu-zen4.so
+| model                          |       size |     params | backend    | ngl |  n_cpu_moe | n_ubatch | type_k | type_v |  fa |         lm | lazy_mode  |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | --: | ---------: | -------: | -----: | -----: | --: | ---------: | ---------- | --------------: | -------------------: |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |            tg32 |         26.48 ± 0.45 |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |    tg32 @ d2048 |         26.03 ± 0.04 |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |    tg32 @ d8192 |         24.63 ± 0.02 |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |   tg32 @ d32768 |         19.43 ± 0.09 |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |   tg32 @ d65536 |         15.26 ± 0.04 |
+| qwen4exp A3B IQ3_XXS - 3.0625 bpw |  76.32 GiB |   176.94 B | SYCL       |  99 |         24 |     2048 |   q4_0 |   q4_0 |   1 |       none | off        |  tg32 @ d118016 |         11.22 ± 0.01 |
+
+build: 6d9c82ea2 (10882)
