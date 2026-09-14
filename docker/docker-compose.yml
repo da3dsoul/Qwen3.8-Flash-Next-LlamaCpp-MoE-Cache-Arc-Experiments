@@ -67,7 +67,7 @@ services:
     container_name: qwen4exp-test-sycl
     <<: *b70-gpu
     volumes:
-      - ../staging/models:/models:ro
+      - /media/da3dsoul/Garudias/models:/models:ro
       - ../staging/work:/work
     working_dir: /work
     stdin_open: true
@@ -94,7 +94,7 @@ services:
     container_name: qwen4exp-test-vulkan
     <<: *b70-gpu
     volumes:
-      - ../staging/models:/models:ro
+      - /media/da3dsoul/Garudias/models:/models:ro
       - ../staging/work:/work
     working_dir: /work
     stdin_open: true

@@ -2081,7 +2081,45 @@ left as originally written (per this document's own practice of appending
 corrections rather than editing historical measurements); this entry is the
 correction to fold back if that doc is revisited.
 
-## Ground rules carried from `docs/00-background.md`
+## Update (2026-09-14): model storage moved off the shared array onto a dedicated NVMe
+
+Digging into why a model load takes multiple minutes (user question, not a
+regression) found that `docker stats`' "230GB read for a 77GB model" figure
+was cgroup `io.stat` triple-counting across storage-stack layers (the real
+logical figure was ~99GB for one load, a modest ~29% overshoot) -- but the
+per-device breakdown was real and pointed at genuine contention: ~32% of
+that load's reads missed this box's bcache NVMe cache tier and hit the slow
+RAID5 backing array directly, plausibly via bcache's default 2ms
+`congested_read_threshold_us` tripping under concurrent load from other
+tenants sharing that array (`unbooru-tagger`, `deluged`, `sqlservr` --
+already-known contenders per this project's earlier measurement-hygiene
+lessons). Raising that threshold to 20ms (persisted via a
+`bcache-congestion-threshold.service` systemd unit on the host) was tried as
+a cheap first fix; a before/after load-time test showed a real 22% drop
+(272s -> 213s) but the `nvme`-vs-`md0` read split moved the *wrong* direction
+between the two runs, meaning the win is more likely attributable to
+page-cache-warmth variance between runs than to the threshold change --
+inconclusive, not a confirmed fix.
+
+**Decision: dedicated storage instead of tuning around shared-resource
+contention.** A new 4TB NVMe (Lexar NM790) was installed, partitioned (GPT),
+formatted (ext4, `-m 0`), and mounted at `/media/da3dsoul/Garudias` (named
+per this box's standing `/media/da3dsoul/<name>` convention for extra
+drives, matching `Golias`/`Levias` -- not `/mnt/`, corrected after an
+initial `/mnt/nvme4tb` mount was relabeled and remounted in place, no
+re-copy needed since the filesystem itself didn't change). Production
+(`llm-b70` + `router`) was stopped, all 209 GiB under this project's
+`staging/models/` (all three models there, not just Qwen3.8-Flash-Next --
+the drive is for more than this project) were `rsync`'d over and verified
+byte-identical (`du -sb` matched exactly: 223,905,719,398 bytes both sides)
+before the originals were deleted and replaced with a symlink
+(`staging/models -> /media/da3dsoul/Garudias/models`) for anything that
+still looks in the old spot. Configs updated to the real new path directly
+(not relying on the symlink): this project's `docker/docker-compose.yml`
+(`llm-test-sycl`/`llm-test-vulkan` volume mounts) and the sibling
+`coding-agent` repo's `docker-compose.qwen4exp-moe.override.yml` (`llm-b70`'s
+`/models` mount). Production brought back up afterward, same config
+otherwise (`-ncmoe 25 -ub 2048 -c 122880 -lzm off`, mmap enabled).
 
 - **Never set `GGML_SYCL_USM_SYSTEM=1`.** That's the implicit-migration path
   named for Battlemage that caused the sibling project's two host-wide OOM
