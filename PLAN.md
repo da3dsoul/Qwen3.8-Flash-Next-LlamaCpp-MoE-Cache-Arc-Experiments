@@ -2033,6 +2033,54 @@ throughput claims elsewhere in this document against it.
 and is unaffected; this regression only bites configs that explicitly pass
 `-ub 2048`.
 
+## Update (2026-09-13, later): `-ub 1024` fallback retracted — `-ncmoe 25` restores `-ub 2048` cleanly, measured
+
+The `-ub 1024` fallback above was never re-benchmarked at 116K and was always
+the conservative option, not the preferred one — it gives up roughly half of
+the `-ub` lever (the sweep earlier in this document put `-ub 1024` at 2.06x
+over baseline against `-ub 2048`'s 3.19x at the 32K stand-in shape). Since
+the regression's root cause is a ~266 MiB-or-less VRAM overrun, not something
+structural to `-ub 2048` itself, the cheaper fix is to free that margin
+directly: move one more expert layer to the host.
+
+**`-ncmoe 24 -> 25` was tested against the same real 116,277-token prompt,
+same server-side timers as every other 116K number in this document**
+(`-ngl 99 -fa 1 -ctk q4_0 -ctv q4_0 -ncmoe 25 -ub 2048 -c 122880 -lm none
+-lzm off`, `staging/work/run_116k_lazy.sh`, `NCMOE=25`). Clean start, no OOM,
+`n_ctx_slot = 122880` as expected:
+
+| | Result |
+|---|---|
+| Prefill | **417.54 tok/s** |
+| Decode | 23.82 tok/s |
+| TTFT | 4 min 38.6 s |
+
+This lands inside the pre-regression `-ncmoe 24 -ub 2048` band (394.14-419.70
+tok/s measured across the `-lzm off` and sparse-FA runs above), i.e. **the
+one extra CPU-resident expert layer's cost is within this benchmark's own
+run-to-run noise** — the `-ub 2048` lever is fully recovered, not partially.
+Decode (23.82 tok/s) also matches the sparse-FA-era numbers, confirming
+nothing else regressed. Logs: `logs/long-context-120k-ncmoe25/`.
+
+**New recommended production config, superseding the `-ub 1024` fallback
+above: `-ngl 99 -fa 1 -ctk q4_0 -ctv q4_0 -ncmoe 25 -ub 2048 -c 122880 -lm
+none -lzm off`.** `staging/work/bench120k/serve.sh`'s hardcoded default and
+the sibling `coding-agent` repo's production `--context-tiers` tier-1 value
+(`docker-compose.qwen4exp-moe.override.yml`) were both updated to `25` to
+match (see that repo's own history for the production-side change). The
+`-ub 1024` fallback is not deleted from this document — it remains a valid,
+more-conservative option if a future VRAM regression eats more than one
+layer's margin (~962 MiB, from this document's own `-ncmoe 24` vs `26`
+table) — but it is no longer the recommended default.
+
+Not yet re-tested: whether `-ncmoe 25` also has enough margin for the 262K
+and 512K tiers' own `-ub`/`-ncmoe` pairs (`262144:2048:30`, `512000:1024:32`)
+— those were not touched by today's regression report and were not
+re-verified here. `docs/research/13`'s own tier-recommendation tables are
+left as originally written (per this document's own practice of appending
+corrections rather than editing historical measurements); this entry is the
+correction to fold back if that doc is revisited.
+
 ## Ground rules carried from `docs/00-background.md`
 
 - **Never set `GGML_SYCL_USM_SYSTEM=1`.** That's the implicit-migration path

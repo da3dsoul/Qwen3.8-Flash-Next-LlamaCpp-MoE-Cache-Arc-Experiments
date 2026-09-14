@@ -127,8 +127,11 @@ if you need the evidence.
 - **The tier mechanism specifically:** `--context-tiers CTX:UB:NCMOE,...`
   (see `docs/research/13` §9.6 for the exact CLI surface) is the single
   highest-value artifact here if you just want the production config —
-  `docs/research/13` §11's recommended table is
-  `122880:2048:24,262144:2048:30,512000:1024:32`, with
+  the recommended table, per `docs/research/13` §11 and `PLAN.md`'s
+  2026-09-13 VRAM-margin correction, is
+  `122880:2048:25,262144:2048:30,512000:1024:32` (tier 1's `-ncmoe` moved
+  24 -> 25 after a later addition ate the config's VRAM margin; see
+  `PLAN.md` for the measured before/after), with
   `--rope-scaling yarn --rope-scale 1.0001 --yarn-orig-ctx 513000` to unlock
   the third tier past the model's native context ceiling.
 
