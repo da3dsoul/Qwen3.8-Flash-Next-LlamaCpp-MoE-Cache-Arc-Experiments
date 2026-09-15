@@ -2081,6 +2081,169 @@ left as originally written (per this document's own practice of appending
 corrections rather than editing historical measurements); this entry is the
 correction to fold back if that doc is revisited.
 
+## Update (2026-09-15): decode-time eviction risk found live in production; scoped `--mlock-experts-only` patch added
+
+Follow-up to the 2026-09-14 storage-move update (user question: can startup be
+faster without hurting decode). Live measurement on the running,
+non-sleeping `llm-b70` (`docker restart`, warm-vs-cold, `mincore()` against
+the real GGUF) found the actual reload cost splits into a small disk-bound
+piece (~4-46 s, now smaller since the readahead bump) and a much larger
+non-disk piece before `threadpool init` even runs (~18-72 s across repeated
+restarts, most plausibly SYCL/Level-Zero device init and/or the loader's
+per-tensor `ggml_backend_dev_supports_op` probing in `select_weight_buft` --
+not root-caused further, flagged as a real open item below).
+
+**The bigger find**: `-lzm off` + mmap only guarantees every tensor is read
+*at load time* -- nothing pins those pages afterward. `mincore()` against the
+live, fully-loaded, non-sleeping production GGUF showed only 81.3% of the
+model resident (66.7 / 82.0 GB), and critically, the CPU-resident MoE expert
+tensors placed by `--n-cpu-moe` (the ones `mul_mat_id` reads directly from
+the mmap on *every* decode step) were only 79.5% resident in the largest
+split. This box also runs vLLM/mssql/shoko/unbooru/Minecraft, and Linux is
+free to reclaim clean file-backed pages under their memory pressure with no
+warning. That silently reintroduces the exact page-fault-during-decode
+pattern `-lzm off` was chosen to prevent (§ the `-lzm off` 2.68x win, this
+doc's earlier entries) -- it just does it gradually, off any timer, instead
+of via lazy tensors. `-lm mlock`'s earlier "no effect" result (this doc's
+first `-lzm off` entry) was the container's 8 MiB `RLIMIT_MEMLOCK` / missing
+`CAP_IPC_LOCK` silently no-opping it, not mlock being unhelpful --
+re-confirmed live (`/proc/<pid>/limits` showed `Max locked memory: 8388608`
+before the fix below).
+
+Naively fixing this with plain `-lm mmap+mlock` would lock the *whole*
+mmap-backed CPU set, which turned out to be ~54-61 GB depending on
+context tier (PLE table 28.8 GB + `--n-cpu-moe` experts, 25.4/30.5/32.5 GB
+at tiers 0/1/2 -- computed from actual GGUF tensor metadata via the vendored
+`gguf-py`, not estimated) -- not the naively-assumed 82 GB (whole-file
+residency conflates the harmless GPU-uploaded portion, which is dead weight
+in host RAM once copied to VRAM and was never going to be read from the
+mmap again, with the genuinely at-risk CPU-resident portion). Even 54-61 GB
+didn't fit this box's real headroom (swap already in use at the time of
+this measurement), so the fix built here is narrower: **`--mlock-experts-only`**
+(new flag, `common/arg.cpp` + `src/llama-mmap.{h,cpp}` + `src/llama-model-loader.{h,cpp}`
++ `src/llama-model.cpp` + `include/llama.h` + `common/common.{h,cpp}`) locks
+only tensors matching the MoE-expert pattern via a new `llama_mlock::lock_range()`
+(a standalone page-aligned range lock, independent of the existing
+`grow_to()`'s monotonic-region assumption -- the two must not be mixed on
+the same instance), skipping the PLE table entirely. The PLE table's access
+is a small per-token gather (~2.7 KB/token, `docs/research/02`), not a bulk
+sequential read -- losing a page of it to eviction costs one cheap
+microsecond-scale fault, nothing like the multi-GB lazy-tensor case already
+measured and rejected.
+
+**Validated live** on `llm-b70` (`-lm mmap+mlock --mlock-experts-only`,
+container given `cap_add: IPC_LOCK` + `ulimits.memlock: -1` in the sibling
+`coding-agent` repo's compose override): `/proc/<pid>/status` showed
+`VmLck: 24819500 kB` (~23.7 GiB) after a tier-0 load against a computed
+25.4 GB target (close enough to be page-alignment/quant-padding noise, not
+a bug); `mincore()` re-check showed the CPU-experts bucket at 100.0%
+resident in both splits (was 79.5%/95.6%) while the PLE table stayed
+partially evicted (59.6%) as designed; a real chat completion through the
+new binary produced coherent output. Load itself still succeeded and
+produced correct output with no mlock-failure warnings, confirming
+`CAP_IPC_LOCK` + the raised ulimit actually took effect (`Max locked
+memory: unlimited` in `/proc/<pid>/limits`, vs 8 MiB before).
+
+**What's still open** (as of this entry -- see the immediate follow-up
+update below for the root cause): the ~18-72 s pre-`threadpool init` cost
+is not root-caused (SYCL device init vs. per-tensor `select_weight_buft`
+probing are candidates, not confirmed) -- next step is temporary timing
+instrumentation around both, then a real fix (likely memoizing
+`ggml_backend_dev_supports_op` results per (buffer-type, op-shape) instead
+of calling it fresh per tensor, since this model has thousands of
+near-identical expert tensors). Also not yet re-verified: mlock survives a
+`--context-tiers` switch or sleep/wake correctly at tiers 1/2 (code path is
+identical to the tier-0 case validated here -- `ctx_tier_set()` still calls
+the same `destroy()` + `load_model()` -- but not exercised live at deeper
+tiers due to the token cost of forcing one on production).
+
+## Update (2026-09-15, same day): the pre-threadpool-init cost root-caused -- it's SYCL kernel JIT, not backend probing, and it's already cacheable
+
+Direct follow-up to the "what's still open" item above. Added temporary
+phase-timing instrumentation (`ggml_time_ms()` deltas gated behind `-lv 4+`,
+`[phase]` log lines) around every step of `llama_model_load` (`src/llama.cpp`),
+`load_tensors` (`src/llama-model.cpp`), and `common_init_from_params`
+(`common/common.cpp`) -- left in the tree, harmless at the default verbosity.
+
+**The per-tensor `select_weight_buft` hypothesis was wrong**: tensor
+creation + buft probing for all ~1224 tensors measured **50 ms**, not
+seconds. Ruled out.
+
+**The real breakdown**, measured live via a standalone diagnostic instance
+(`llm-b70-diag`, same binary/flags/tier-0 config as production, isolated on
+port 8081 so it didn't touch the running server):
+
+| Phase | Time |
+|---|---|
+| loader construct + hparams/vocab | ~0.2 s |
+| create tensors (buft probe) | ~0.05 s |
+| init mappings (mmap + `MAP_POPULATE` + mlock the CPU experts) | ~15 s |
+| create backend buffers | ~0.5-7 s (noisy) |
+| load all data (GPU upload + mlock syscalls) | ~14-15 s |
+| `llama_init_from_model` (KV cache + scheduler) | ~0.2-0.6 s |
+| threadpool init | ~0 ms |
+| **first `llama_decode()` call** | **~39-40 s, every single time, on a fresh container** |
+
+That last row is the dominant cost, bigger than the disk-IO-bound mmap
+phase and the tensor-copy phase combined. It is **not** the optional
+`--no-warmup`-gated warmup pass -- tested directly: passing `--no-warmup`
+removed the "warming up..." log line but the ~40 s gap didn't move, because
+`common_context_can_seq_rm()` (`common/common.cpp:1589`, called
+unconditionally after `common_init_from_params` returns, to decide the
+server's KV-cache-trimming strategy) does its own unconditional
+`llama_decode()` of 2 tokens to probe the memory backend's capabilities.
+Whichever decode call happens to run first -- the optional warmup's or this
+mandatory probe's -- pays the cost; skipping one just moves it to the
+other. **This is Intel NEO/Level-Zero JIT-compiling every SPIR-V kernel the
+model's first forward pass touches into native ISA**, a well-known
+oneAPI/compute-runtime cost that has nothing to do with model size or disk
+I/O.
+
+**It's already cached, just not persistently.** Intel's compute runtime
+caches compiled kernels on disk by default at `~/.cache/neo_compiler_cache`
+(confirmed present in the running container, ~19 MB, 14-15 subdirectories)
+-- but that path lives in the container's writable layer, not a bind mount,
+so it survives a plain `docker restart` or a `--context-tiers`/sleep-wake
+reload (same container, same process) but is wiped by a full recreate
+(`docker compose up` after a compose/image change). This lines up exactly
+with the earlier confusing variance: measurements taken via
+`docker compose run --rm` diagnostic containers (fresh cache every time)
+always paid the full ~40 s; measurements taken via `docker restart` on the
+persistent production container (cache already warm from an earlier run)
+sometimes didn't -- they weren't measuring the same thing.
+
+**Fix applied**: bind-mounted the cache directory in the sibling
+`coding-agent` repo's compose override --
+`./models/b70-neo-cache:/root/.cache/neo_compiler_cache` -- so it survives
+recreates too. Zero code change, zero decode-time effect (it's a compiled-
+kernel cache, not model data).
+
+**Validated live, end to end, on real reloads of the actual production
+container** (not the diagnostic instance):
+- A cold container recreate (cache directory freshly created, one-time
+  unavoidable cost): **~60-67 s** to "model loaded".
+- A second recreate immediately after, cache now warm on the host bind
+  mount: **~20.8 s** to "model loaded" -- confirms the fix.
+- A genuine sleep-then-wake cycle on the same (already-warm) container,
+  timed as a real end-user request (`--sleep-idle-seconds 10` for the
+  test, `curl` timing the full round trip including the reload):
+  **21.6 s total**, `http_code=200`, correct output. This is the number
+  that answers the original question -- the scenario the user actually
+  meant by "startup" (loading the model on first message after idle
+  unload) was never paying the ~40 s JIT cost in the first place, because
+  sleep/wake reuses the same container/process; only a full redeploy was.
+
+**Net, for the actual sleep/wake-triggered reload the user asked about**:
+~21-28 s end to end, down from an unmeasured, uncharacterized "multi-minute"
+assumption at the start of this investigation, with every remaining second
+now attributed to a specific, understood phase rather than a mystery.
+
+**What's still open**: the "create backend buffers" phase's 0.5-7 s
+noisiness isn't explained (device memory allocation variance, not
+investigated further); mlock at context tiers 1/2 still unverified live for
+the same reason as before (token cost of forcing a real deep-context
+request on production).
+
 ## Update (2026-09-14): model storage moved off the shared array onto a dedicated NVMe
 
 Digging into why a model load takes multiple minutes (user question, not a

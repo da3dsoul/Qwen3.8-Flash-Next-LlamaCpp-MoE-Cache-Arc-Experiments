@@ -1,5 +1,5 @@
 diff --git a/common/arg.cpp b/common/arg.cpp
-index 43052d58d..26f7d19c1 100644
+index 43052d58d..0843c3f9a 100644
 --- a/common/arg.cpp
 +++ b/common/arg.cpp
 @@ -259,6 +259,25 @@ static void parse_tensor_buffer_overrides(const std::string & value, std::vector
@@ -82,8 +82,70 @@ index 43052d58d..26f7d19c1 100644
      add_opt(common_arg(
          {"-n", "--predict", "--n-predict"}, "N",
          string_format(
+@@ -2715,6 +2781,19 @@ common_params_context common_params_parser_init(common_params & params, llama_ex
+             else { throw std::invalid_argument("invalid value"); }
+         }
+     ).set_env("LLAMA_ARG_LAZY_MODE"));
++    add_opt(common_arg(
++        {"--mlock-experts-only"},
++        string_format(
++            "with --load-mode mlock/mmap+mlock, lock only MoE expert tensors placed on the\n"
++            "CPU (--n-cpu-moe / --context-tiers), not every mmap-backed CPU tensor -- skips\n"
++            "large tensors with a sparse per-token access pattern (e.g. the per-layer token\n"
++            "embedding table), which can tolerate eviction under host memory pressure at the\n"
++            "cost of an occasional single-page fault, in exchange for locking far less RAM\n"
++            "(default: %s)", params.mlock_experts_only ? "true" : "false"),
++        [](common_params & params) {
++            params.mlock_experts_only = true;
++        }
++    ).set_env("LLAMA_ARG_MLOCK_EXPERTS_ONLY"));
+     add_opt(common_arg(
+         {"--numa"}, "TYPE",
+         "attempt optimizations that help on some NUMA systems\n"
+diff --git a/common/common.cpp b/common/common.cpp
+index d162a3880..7210669df 100644
+--- a/common/common.cpp
++++ b/common/common.cpp
+@@ -1326,7 +1326,9 @@ common_init_result::common_init_result(common_params & params, bool model_only)
+             params.verbosity >= LOG_LEVEL_DEBUG ? GGML_LOG_LEVEL_DEBUG : GGML_LOG_LEVEL_ERROR);
+     }
+ 
++    const int64_t t_diag_model_start = ggml_time_ms();
+     llama_model * model = llama_model_load_from_file(params.model.path.c_str(), mparams);
++    COM_INF("[phase] llama_model_load_from_file %6lld ms\n", (long long)(ggml_time_ms() - t_diag_model_start));
+     if (model == NULL) {
+         return;
+     }
+@@ -1395,7 +1397,9 @@ common_init_result::common_init_result(common_params & params, bool model_only)
+         cparams.n_samplers = pimpl->samplers_seq_config.size();
+     }
+ 
++    const int64_t t_diag_ctx_start = ggml_time_ms();
+     llama_context * lctx = llama_init_from_model(model, cparams);
++    COM_INF("[phase] llama_init_from_model %6lld ms\n", (long long)(ggml_time_ms() - t_diag_ctx_start));
+     if (lctx == NULL) {
+         COM_ERR("failed to create context with model '%s'\n", params.model.path.c_str());
+         return;
+@@ -1405,7 +1409,9 @@ common_init_result::common_init_result(common_params & params, bool model_only)
+ 
+     set_process_priority(params.cpuparams.priority);
+ 
++    const int64_t t_diag_tp_start = ggml_time_ms();
+     pimpl->threadpools.init(lctx, params);
++    COM_INF("[phase] threadpools.init %6lld ms\n", (long long)(ggml_time_ms() - t_diag_tp_start));
+ }
+ 
+ llama_model * common_init_result::model() {
+@@ -1689,6 +1695,7 @@ struct llama_model_params common_model_params_to_llama(common_params & params) {
+     mparams.split_mode      = params.split_mode;
+     mparams.load_mode       = params.load_mode;
+     mparams.lazy_mode = params.lazy_mode;
++    mparams.mlock_experts_only = params.mlock_experts_only;
+     mparams.tensor_split    = params.tensor_split;
+     mparams.check_tensors   = params.check_tensors;
+     mparams.use_extra_bufts = !params.no_extra_bufts;
 diff --git a/common/common.h b/common/common.h
-index 63d0badd0..1fc182db9 100644
+index 63d0badd0..17f57c0da 100644
 --- a/common/common.h
 +++ b/common/common.h
 @@ -445,6 +445,14 @@ struct lr_opt {
@@ -101,7 +163,18 @@ index 63d0badd0..1fc182db9 100644
  struct common_params {
      int32_t n_predict             =    -1; // max. number of new tokens to predict, -1 == no limit
      int32_t n_ctx                 =     0; // context size, 0 == context the model was trained with
-@@ -631,6 +639,11 @@ struct common_params {
+@@ -485,6 +493,10 @@ struct common_params {
+ 
+     enum llama_lazy_mode lazy_mode = LLAMA_LAZY_MODE_AUTO; // on-demand reading of tensors marked by the arch
+ 
++    // with load_mode mlock/mmap+mlock: lock only MoE expert tensors placed on the CPU,
++    // not every mmap-backed CPU tensor (e.g. skips the per-layer token embedding table)
++    bool mlock_experts_only = false;
++
+     common_cpu_params cpuparams;
+     common_cpu_params cpuparams_batch;
+ 
+@@ -631,6 +643,11 @@ struct common_params {
      int32_t checkpoint_min_step = 8192;  // minimum spacing between context checkpoints
      int32_t cache_ram_mib       = 8192;  // -1 = no limit, 0 - disable, 1 = 1 MiB, etc.
  
@@ -4781,6 +4854,22 @@ index 000000000..db479607e
 +    const int64_t   nrows,
 +    const int       k,
 +    dpct::queue_ptr main_stream);
+diff --git a/include/llama.h b/include/llama.h
+index 3ab935939..30104e8b0 100644
+--- a/include/llama.h
++++ b/include/llama.h
+@@ -347,6 +347,11 @@ extern "C" {
+         bool no_host;         // bypass host buffer allowing extra buffers to be used
+         bool no_alloc;        // only load metadata and simulate memory allocations
+         bool load_mtp;        // whether to load MTP layers
++
++        // with load_mode mlock/mmap+mlock: lock only MoE expert tensors placed on the CPU
++        // (matching --n-cpu-moe / --context-tiers), skipping large mmap-backed CPU tensors
++        // like the per-layer token embedding table whose access pattern tolerates eviction
++        bool mlock_experts_only;
+     };
+ 
+     struct llama_sampler_seq_config {
 diff --git a/src/llama-arch.cpp b/src/llama-arch.cpp
 index b5efb7206..c10530869 100644
 --- a/src/llama-arch.cpp
@@ -6304,11 +6393,155 @@ index 705189e7e..b629a7f25 100644
      // streams per ubatch, read from the slot infos before ctx_idx takes them
      // declared first, so it is initialised while sinfos_idx is still intact
      const std::vector<uint32_t> ns_ubatch;
+diff --git a/src/llama-mmap.cpp b/src/llama-mmap.cpp
+index 715a6e354..e73b4e06d 100644
+--- a/src/llama-mmap.cpp
++++ b/src/llama-mmap.cpp
+@@ -803,6 +803,19 @@ struct llama_mlock::impl {
+         }
+     }
+ 
++    void lock_range(size_t offset, size_t len) {
++        GGML_ASSERT(addr);
++        if (failed_already || len == 0) {
++            return;
++        }
++        size_t granularity = lock_granularity();
++        size_t begin = offset & ~(granularity - 1);
++        size_t end   = (offset + len + granularity - 1) & ~(granularity - 1);
++        if (!raw_lock((uint8_t *) addr + begin, end - begin)) {
++            failed_already = true;
++        }
++    }
++
+     void * addr;
+     size_t size;
+ 
+@@ -814,6 +827,7 @@ llama_mlock::~llama_mlock() = default;
+ 
+ void llama_mlock::init(void * ptr) { pimpl->init(ptr); }
+ void llama_mlock::grow_to(size_t target_size) { pimpl->grow_to(target_size); }
++void llama_mlock::lock_range(size_t offset, size_t size) { pimpl->lock_range(offset, size); }
+ 
+ #if defined(_POSIX_MEMLOCK_RANGE) || defined(_WIN32)
+ const bool llama_mlock::SUPPORTED = true;
+diff --git a/src/llama-mmap.h b/src/llama-mmap.h
+index cc28c8a73..b17547a99 100644
+--- a/src/llama-mmap.h
++++ b/src/llama-mmap.h
+@@ -69,6 +69,11 @@ struct llama_mlock {
+     void init(void * ptr);
+     void grow_to(size_t target_size);
+ 
++    // lock a single [offset, offset + size) byte range independently of grow_to()'s
++    // monotonic region -- for selectively locking a subset of mapped tensors.
++    // do not mix with grow_to() on the same instance.
++    void lock_range(size_t offset, size_t size);
++
+     static const bool SUPPORTED;
+ 
+ private:
+diff --git a/src/llama-model-loader.cpp b/src/llama-model-loader.cpp
+index 91bb5e7cc..ce4f1e168 100644
+--- a/src/llama-model-loader.cpp
++++ b/src/llama-model-loader.cpp
+@@ -1653,7 +1653,19 @@ bool llama_model_loader::load_all_data(
+                 // locking a lazy tensor would fault all of it in, which is what lazy avoids
+                 if (lmlocks && !lazy.has(cur)) {
+                     const auto & lmlock = lmlocks->at(weight->idx);
+-                    lmlock->grow_to(weight->offs + n_size);
++                    if (mlock_experts_only) {
++                        // only the tensors decode actually reads from this mapping every
++                        // token (the CPU-placed MoE experts) need to stay resident; large
++                        // CPU tensors with a sparse per-token access pattern (e.g. the
++                        // per-layer token embedding table) can tolerate eviction under
++                        // host memory pressure at the cost of an occasional single-page fault
++                        static const std::regex moe_expert_re(R"(\.ffn_(up|down|gate|gate_up)_(ch)?exps)");
++                        if (std::regex_search(ggml_get_name(cur), moe_expert_re)) {
++                            lmlock->lock_range(weight->offs, n_size);
++                        }
++                    } else {
++                        lmlock->grow_to(weight->offs + n_size);
++                    }
+                 }
+ 
+                 auto & mmap_used = mmaps_used[weight->idx];
+diff --git a/src/llama-model-loader.h b/src/llama-model-loader.h
+index 9e51d0ce7..786eabfa6 100644
+--- a/src/llama-model-loader.h
++++ b/src/llama-model-loader.h
+@@ -80,6 +80,9 @@ struct llama_model_loader {
+ 
+     bool use_mmap = false;
+     bool use_direct_io = false;
++    // set by the caller before load_all_data(): with mlock active, lock only tensors
++    // matching the MoE-expert pattern instead of every mmap-backed CPU tensor
++    bool mlock_experts_only = false;
+     bool check_tensors;
+     bool no_alloc;
+     bool load_mtp;
 diff --git a/src/llama-model.cpp b/src/llama-model.cpp
-index 54009b369..c98cf9ddc 100644
+index 54009b369..efd51188e 100644
 --- a/src/llama-model.cpp
 +++ b/src/llama-model.cpp
-@@ -2510,7 +2510,7 @@ llama_memory_i * llama_model::create_memory(const llama_memory_params & params,
+@@ -1401,10 +1401,23 @@ void llama_model_base::load_vocab(llama_model_loader & ml) {
+ }
+ 
+ bool llama_model_base::load_tensors(llama_model_loader & ml) {
++    // TEMPORARY diagnostic instrumentation (2026-09-15, see PLAN.md): phase timing to
++    // find where the pre-threadpool-init load time actually goes. -lv 4+ to see it.
++    const int64_t t_lt_phase0 = ggml_time_ms();
++    int64_t t_lt_phase_prev = t_lt_phase0;
++    auto log_lt_phase = [&](const char * phase) {
++        const int64_t t_now = ggml_time_ms();
++        LLAMA_LOG_INFO("%s: [phase] %-24s %6lld ms (total %6lld ms)\n",
++            __func__, phase, (long long)(t_now - t_lt_phase_prev), (long long)(t_now - t_lt_phase0));
++        t_lt_phase_prev = t_now;
++    };
++
+     const auto & split_mode   = params.split_mode;
+     const bool use_mlock      = params.load_mode == LLAMA_LOAD_MODE_MLOCK || params.load_mode == LLAMA_LOAD_MODE_MMAP_MLOCK;
+     const auto & tensor_split = params.tensor_split;
+ 
++    ml.mlock_experts_only = use_mlock && params.mlock_experts_only;
++
+     const int n_layer_all = hparams.n_layer_all;
+     const int n_gpu_layers = this->n_gpu_layers();
+ 
+@@ -1688,6 +1701,7 @@ bool llama_model_base::load_tensors(llama_model_loader & ml) {
+         }
+     }
+     ml.done_getting_tensors();
++    log_lt_phase("create tensors (buft probe)");
+ 
+     // Tied NVFP4 output is valid when no separate LM-head scale tensors are present.
+     // If sidecar scales exist, the output weight must be an actual output tensor.
+@@ -1703,6 +1717,7 @@ bool llama_model_base::load_tensors(llama_model_loader & ml) {
+     }
+ 
+     ml.init_mappings(true, use_mlock ? &pimpl->mlock_mmaps : nullptr);
++    log_lt_phase("init mappings (mmap+populate)");
+     pimpl->mappings.reserve(ml.mappings.size());
+ 
+     // create the backend buffers
+@@ -1817,6 +1832,8 @@ bool llama_model_base::load_tensors(llama_model_loader & ml) {
+         LLAMA_LOG_INFO("%s: offloaded %d/%d layers to GPU\n", __func__, std::min(n_gpu_layers, max_offloadable_layers), max_backend_supported_layers);
+     }
+ 
++    log_lt_phase("create backend buffers");
++
+     // print memory requirements per buffer type
+     for (auto & [_, bufs] : pimpl->ctxs_bufs) {
+         for (auto & buf: bufs) {
+@@ -1843,6 +1860,7 @@ bool llama_model_base::load_tensors(llama_model_loader & ml) {
+             return false;
+         }
+     }
++    log_lt_phase("load all data");
+ 
+     if (use_mmap_buffer) {
+         for (auto & mapping : ml.mappings) {
+@@ -2510,7 +2528,7 @@ llama_memory_i * llama_model::create_memory(const llama_memory_params & params,
                  const bool mtp_on_hybrid_qwen =
                      params.ctx_type == LLAMA_CONTEXT_TYPE_MTP &&
                      (arch == LLM_ARCH_QWEN3NEXT || arch == LLM_ARCH_QWEN35 || arch == LLM_ARCH_QWEN35MOE ||
@@ -6317,6 +6550,14 @@ index 54009b369..c98cf9ddc 100644
  
                  const bool mtp_on_hybrid_nemotron =
                      params.ctx_type == LLAMA_CONTEXT_TYPE_MTP && arch == LLM_ARCH_NEMOTRON_H_MOE;
+@@ -2774,6 +2792,7 @@ llama_model_params llama_model_default_params() {
+         /*.no_host                     =*/ false,
+         /*.no_alloc                    =*/ false,
+         /*.load_mtp                    =*/ false,
++        /*.mlock_experts_only          =*/ false,
+     };
+ 
+     return result;
 diff --git a/src/llama-model.h b/src/llama-model.h
 index c0cc40655..1692ffd92 100644
 --- a/src/llama-model.h
@@ -6333,6 +6574,68 @@ index c0cc40655..1692ffd92 100644
  };
  
  struct llama_layer_switch_lora {
+diff --git a/src/llama.cpp b/src/llama.cpp
+index ad8e44388..ab01e79e1 100644
+--- a/src/llama.cpp
++++ b/src/llama.cpp
+@@ -315,16 +315,29 @@ static bool llama_prepare_model_devices(const llama_model_params & params, llama
+ // Returns 0 on success, -1 on error, and -2 on cancellation via llama_progress_callback
+ static std::pair<int, llama_model *> llama_model_load(struct gguf_context * metadata, llama_model_set_tensor_data_t set_tensor_data, void * set_tensor_data_ud,
+         const std::string & fname, std::vector<std::string> & splits, FILE * file, llama_model_params & params) {
++    // TEMPORARY diagnostic instrumentation (2026-09-15, see PLAN.md): phase timing to
++    // find where the pre-threadpool-init load time actually goes. -lv 4+ to see it.
++    const int64_t t_phase0 = ggml_time_ms();
++    int64_t t_phase_prev = t_phase0;
++    auto log_phase = [&](const char * phase) {
++        const int64_t t_now = ggml_time_ms();
++        LLAMA_LOG_INFO("%s: [phase] %-24s %6lld ms (total %6lld ms)\n",
++            __func__, phase, (long long)(t_now - t_phase_prev), (long long)(t_now - t_phase0));
++        t_phase_prev = t_now;
++    };
+     try {
+         llama_model_loader ml(metadata, set_tensor_data, set_tensor_data_ud, fname, splits, file, params.load_mode,
+             params.check_tensors, params.no_alloc, params.load_mtp, params.kv_overrides, params.tensor_buft_overrides);
++        log_phase("loader construct");
+ 
+         ml.lazy.mode = params.lazy_mode;
+ 
+         ml.print_info();
+         std::unique_ptr<llama_model> model_ptr(llama_model_create(ml, params));
++        log_phase("model create");
+ 
+         bool ok = llama_prepare_model_devices(params, model_ptr.get());
++        log_phase("prepare devices");
+         if (!ok) {
+             return {-1, nullptr};
+         }
+@@ -349,6 +362,7 @@ static std::pair<int, llama_model *> llama_model_load(struct gguf_context * meta
+         } catch(const std::exception & e) {
+             throw std::runtime_error("error loading model hyperparameters: " + std::string(e.what()));
+         }
++        log_phase("load hparams");
+         if (model->arch == LLM_ARCH_CLIP) {
+             throw std::runtime_error("CLIP cannot be used as main model, use it with --mmproj instead");
+         }
+@@ -357,9 +371,11 @@ static std::pair<int, llama_model *> llama_model_load(struct gguf_context * meta
+         } catch(const std::exception & e) {
+             throw std::runtime_error("error loading model vocabulary: " + std::string(e.what()));
+         }
++        log_phase("load vocab");
+ 
+         model->load_stats(ml);
+         model->print_info();
++        log_phase("load stats + print");
+ 
+         if (params.vocab_only) {
+             LLAMA_LOG_INFO("%s: vocab only - skipping tensors\n", __func__);
+@@ -369,6 +385,7 @@ static std::pair<int, llama_model *> llama_model_load(struct gguf_context * meta
+         if (!model->load_tensors(ml)) {
+             return {-2, nullptr};
+         }
++        log_phase("load tensors (total)");
+ 
+         return {0, model_ptr.release()};
+     } catch (const std::exception & err) {
 diff --git a/src/models/models.h b/src/models/models.h
 index 87195fddd..68be72369 100644
 --- a/src/models/models.h
@@ -7425,7 +7728,7 @@ index 2deb90f6a..e3c9fdeb0 100644
          for (auto cols : {128, 1024, 4096, 8192, 16384, 32768, 65536, 131072, 200000, 2000000}) {
              test_cases.emplace_back(new test_cumsum(GGML_TYPE_F32, {cols, nrows, 1, 1}));
 diff --git a/tools/server/server-context.cpp b/tools/server/server-context.cpp
-index fe068d3e9..6d359c581 100644
+index fe068d3e9..74f914c44 100644
 --- a/tools/server/server-context.cpp
 +++ b/tools/server/server-context.cpp
 @@ -24,6 +24,7 @@
@@ -7464,20 +7767,42 @@ index fe068d3e9..6d359c581 100644
      int64_t t_last_load_progress_ms = 0;
  
      void destroy() {
-@@ -959,6 +974,12 @@ private:
+@@ -951,7 +966,9 @@ private:
+         mctx = nullptr;
+     }
+ 
+-    void handle_sleeping_state(bool new_state) {
++    // depth_hint is only meaningful when new_state is false (waking): the token count
++    // of whatever request triggered the wake, if the caller had one, else -1
++    void handle_sleeping_state(bool new_state, int32_t depth_hint) {
+         GGML_ASSERT(sleeping != new_state);
+         if (new_state) {
+             if (callback_state) {
+@@ -959,9 +976,23 @@ private:
                  // note: for sleeping == false, event is emitted by load_model()
              }
              SRV_INF("%s", "server is entering sleeping state\n");
-+            // idle long enough to sleep is a stronger signal than the request-driven
-+            // down-turns hysteresis needs -- wake back up on the cheapest tier
-+            if (ctx_tiers.size() >= 2 && ctx_tier_cur != 0) {
-+                SRV_INF("sleeping: also resetting context tier %d -> 0\n", ctx_tier_cur);
-+                ctx_tier_set(0);
-+            }
++            // do NOT reset the tier here -- wait_until_no_sleep() must return with a
++            // fully loaded model (HTTP-thread tokenize sites right after it only take a
++            // shared_lock and trust vocab is valid), so wake always reloads before any
++            // request is visible. The wake path below picks the right tier itself when
++            // the waking request offered a depth hint; falling back to whatever was
++            // last active is only for the case where it didn't.
              destroy();
          } else {
              SRV_INF("%s", "server is exiting sleeping state\n");
-@@ -969,6 +990,152 @@ private:
++            if (ctx_tiers.size() >= 2 && depth_hint >= 0) {
++                const int tier = ctx_tier_for(depth_hint);
++                if (tier != ctx_tier_cur) {
++                    SRV_INF("waking: sizing reload from tier %d to %d for a %d-token hint\n",
++                            ctx_tier_cur, tier, depth_hint);
++                    ctx_tier_set(tier);
++                }
++            }
+             if (!load_model(params_base)) {
+                 GGML_ABORT("failed to reload model after sleeping");
+             }
+@@ -969,6 +1000,152 @@ private:
          sleeping = new_state;
      }
  
@@ -7630,7 +7955,7 @@ index fe068d3e9..6d359c581 100644
      struct load_progress_data {
          server_context_impl * ctx;
          std::string stage;
-@@ -1008,9 +1175,14 @@ private:
+@@ -1008,9 +1185,14 @@ private:
          load_progress_data load_progress_mmproj(this, "mmproj_model");
          load_progress_data load_progress_spec  (this, "spec_model");
  
@@ -7646,7 +7971,18 @@ index fe068d3e9..6d359c581 100644
          const auto output_limits = server_output_limits(params_base);
          params_base.n_outputs_max = output_limits.total;
          params_base.n_outputs_max_per_seq = output_limits.per_seq;
-@@ -2395,6 +2567,12 @@ private:
+@@ -1411,8 +1593,8 @@ private:
+         queue_tasks.on_update_slots([this]() {
+             update_slots();
+         });
+-        queue_tasks.on_sleeping_state([this](bool sleeping) {
+-            handle_sleeping_state(sleeping);
++        queue_tasks.on_sleeping_state([this](bool sleeping, int32_t depth_hint) {
++            handle_sleeping_state(sleeping, depth_hint);
+         });
+ 
+         metrics.init();
+@@ -2395,6 +2577,12 @@ private:
  
                      const int id_task = task.id;
  
@@ -7659,7 +7995,37 @@ index fe068d3e9..6d359c581 100644
                      server_slot * slot = get_available_slot(task);
  
                      //
-@@ -4291,12 +4469,17 @@ std::unique_ptr<server_res_generator> server_routes::handle_completions_impl(
+@@ -4228,12 +4416,13 @@ server_context_meta server_context::get_meta() const {
+ // may have bypass_sleep = true if the task does not use ctx_server
+ struct server_res_generator : server_res_spipe {
+     server_response_reader rd;
+-    server_res_generator(server_queue & queue_tasks, server_response & queue_results, int sleep_idle_seconds, bool bypass_sleep = false)
++    server_res_generator(server_queue & queue_tasks, server_response & queue_results, int sleep_idle_seconds,
++                          bool bypass_sleep = false, int32_t depth_hint = -1)
+             : rd(queue_tasks, queue_results, HTTP_POLLING_SECONDS) {
+         // fast path in case sleeping is disabled
+         bypass_sleep |= sleep_idle_seconds < 0;
+         if (!bypass_sleep) {
+-            queue_tasks.wait_until_no_sleep();
++            queue_tasks.wait_until_no_sleep(depth_hint);
+         }
+     }
+     void ok(const json & response_data) {
+@@ -4262,7 +4451,12 @@ std::unique_ptr<server_res_generator> server_routes::handle_completions_impl(
+             task_response_type res_type) {
+     GGML_ASSERT(type == SERVER_TASK_TYPE_COMPLETION || type == SERVER_TASK_TYPE_INFILL);
+ 
+-    auto res = create_response();
++    // cheap pre-tokenize depth estimate, only used to size a wake reload correctly
++    // if the server happens to be asleep; erring high just picks a slightly deeper
++    // tier than strictly needed, never a wrong one (see docs/research/13)
++    const int32_t depth_hint = (int32_t) (data.dump().size() / 3.5);
++
++    auto res = create_response(false, depth_hint);
+     auto completion_id = gen_chatcmplid();
+     auto & rd = res->rd;
+     auto & params = this->params;
+@@ -4291,12 +4485,17 @@ std::unique_ptr<server_res_generator> server_routes::handle_completions_impl(
          // process prompt
          std::vector<server_tokens> inputs;
  
@@ -7683,7 +8049,38 @@ index fe068d3e9..6d359c581 100644
          }
  
          // tasks.reserve(inputs.size()); // TODO: this is inaccurate due to child tasks
-@@ -4880,19 +5063,24 @@ void server_routes::init_routes() {
+@@ -4522,8 +4721,8 @@ std::unique_ptr<server_res_generator> server_routes::handle_completions_impl(
+     return res;
+ }
+ 
+-std::unique_ptr<server_res_generator> server_routes::create_response(bool bypass_sleep) {
+-    return std::make_unique<server_res_generator>(queue_tasks, queue_results, params.sleep_idle_seconds, bypass_sleep);
++std::unique_ptr<server_res_generator> server_routes::create_response(bool bypass_sleep, int32_t depth_hint) {
++    return std::make_unique<server_res_generator>(queue_tasks, queue_results, params.sleep_idle_seconds, bypass_sleep, depth_hint);
+ }
+ 
+ server_routes::server_routes(const common_params & params, server_context & ctx_server)
+@@ -4535,7 +4734,7 @@ server_routes::server_routes(const common_params & params, server_context & ctx_
+ 
+     // note: this must be registered before load_model()
+     //       so that on sleep phase, the callback is called before ctx is destroyed
+-    queue_tasks.on_sleeping_state([this](bool is_sleeping) {
++    queue_tasks.on_sleeping_state([this](bool is_sleeping, int32_t /* depth_hint */) {
+         update_cached_responses(is_sleeping);
+     });
+ }
+@@ -4826,7 +5025,9 @@ void server_routes::init_routes() {
+     };
+ 
+     this->post_infill = [this](const server_http_req & req) {
+-        auto res = create_response();
++        // req.body is available before parsing -- cheap enough to size the wake tier from,
++        // see the same estimate in handle_completions_impl
++        auto res = create_response(false, (int32_t) (req.body.size() / 3.5));
+         // check model compatibility
+         std::string err;
+         if (llama_vocab_fim_pre(ctx_server.vocab) == LLAMA_TOKEN_NULL) {
+@@ -4880,19 +5081,24 @@ void server_routes::init_routes() {
          data["input_extra"] = input_extra; // default to empty array if it's not exist
  
          std::string prompt = json_value(data, "prompt", std::string());
@@ -7721,7 +8118,61 @@ index fe068d3e9..6d359c581 100644
  
          std::vector<raw_buffer> files; // dummy
          return handle_completions_impl(
-@@ -5424,7 +5612,11 @@ std::unique_ptr<server_res_generator> server_routes::handle_embeddings_impl(cons
+@@ -4904,7 +5110,7 @@ void server_routes::init_routes() {
+     };
+ 
+     this->post_completions = [this](const server_http_req & req) {
+-        auto res = create_response();
++        auto res = create_response(false, (int32_t) (req.body.size() / 3.5));
+         std::vector<raw_buffer> files; // dummy
+         const json body = json::parse(req.body);
+         return handle_completions_impl(
+@@ -4916,7 +5122,7 @@ void server_routes::init_routes() {
+     };
+ 
+     this->post_completions_oai = [this](const server_http_req & req) {
+-        auto res = create_response();
++        auto res = create_response(false, (int32_t) (req.body.size() / 3.5));
+         std::vector<raw_buffer> files; // dummy
+         const json body = json::parse(req.body);
+         return handle_completions_impl(
+@@ -4928,7 +5134,7 @@ void server_routes::init_routes() {
+     };
+ 
+     this->post_chat_completions = [this](const server_http_req & req) {
+-        auto res = create_response();
++        auto res = create_response(false, (int32_t) (req.body.size() / 3.5));
+         std::vector<raw_buffer> files;
+         json body = json::parse(req.body);
+         json body_parsed = oaicompat_chat_params_parse(
+@@ -4985,7 +5191,7 @@ void server_routes::init_routes() {
+     };
+ 
+     this->post_responses_oai = [this](const server_http_req & req) {
+-        auto res = create_response();
++        auto res = create_response(false, (int32_t) (req.body.size() / 3.5));
+         std::vector<raw_buffer> files;
+         json body = server_chat_convert_responses_to_chatcmpl(json::parse(req.body));
+         SRV_DBG("%s\n", "Request converted: OpenAI Responses -> OpenAI Chat Completions");
+@@ -5007,7 +5213,7 @@ void server_routes::init_routes() {
+     };
+ 
+     this->post_transcriptions_oai = [this](const server_http_req & req) {
+-        auto res = create_response();
++        auto res = create_response(false, (int32_t) (req.body.size() / 3.5));
+ 
+         if (!meta->has_mtmd || !meta->chat_params.allow_audio) {
+             res->error(format_error_response("The current model does not support audio input.", ERROR_TYPE_NOT_SUPPORTED));
+@@ -5035,7 +5241,7 @@ void server_routes::init_routes() {
+     };
+ 
+     this->post_anthropic_messages = [this](const server_http_req & req) {
+-        auto res = create_response();
++        auto res = create_response(false, (int32_t) (req.body.size() / 3.5));
+         std::vector<raw_buffer> files;
+         json body = server_chat_convert_anthropic_to_oai(json::parse(req.body));
+         SRV_DBG("%s\n", "Request converted: Anthropic -> OpenAI Chat Completions");
+@@ -5424,7 +5630,11 @@ std::unique_ptr<server_res_generator> server_routes::handle_embeddings_impl(cons
          }
      }
  
@@ -7734,3 +8185,104 @@ index fe068d3e9..6d359c581 100644
      for (const auto & tokens : tokenized_prompts) {
          // this check is necessary for models that do not add BOS token to the input
          if (tokens.empty()) {
+diff --git a/tools/server/server-context.h b/tools/server/server-context.h
+index 0acbbffa9..bf521c462 100644
+--- a/tools/server/server-context.h
++++ b/tools/server/server-context.h
+@@ -179,7 +179,7 @@ private:
+ 
+     server_queue & queue_tasks;
+     server_response & queue_results;
+-    std::unique_ptr<server_res_generator> create_response(bool bypass_sleep = false);
++    std::unique_ptr<server_res_generator> create_response(bool bypass_sleep = false, int32_t depth_hint = -1);
+ 
+     // cached responses, to be used during sleep
+     std::mutex     mutex_cache;
+diff --git a/tools/server/server-queue.cpp b/tools/server/server-queue.cpp
+index 78169e9a5..bc1817515 100644
+--- a/tools/server/server-queue.cpp
++++ b/tools/server/server-queue.cpp
+@@ -112,13 +112,14 @@ void server_queue::pop_deferred_task(int id_slot) {
+     condition_tasks.notify_one();
+ }
+ 
+-void server_queue::wait_until_no_sleep() {
++void server_queue::wait_until_no_sleep(int32_t depth_hint) {
+     std::unique_lock<std::mutex> lock(mutex_tasks);
+     if (!sleeping) {
+         return;
+     } else {
+         if (!req_stop_sleeping) {
+             QUE_DBG("%s", "requesting to stop sleeping\n");
++            wake_depth_hint = depth_hint;
+             req_stop_sleeping = true;
+             condition_tasks.notify_one(); // only main thread is waiting on this
+         }
+@@ -329,7 +330,7 @@ void server_queue::start_loop(int64_t idle_sleep_ms) {
+                 sleeping = true;
+                 // Call order cb0 -> cb1 -> cb{N}
+                 for (auto & cb : callback_sleeping_state) {
+-                    cb(true);
++                    cb(true, -1);
+                 }
+                 req_stop_sleeping = false;
+                 // wait until we are requested to exit sleeping state
+@@ -341,9 +342,11 @@ void server_queue::start_loop(int64_t idle_sleep_ms) {
+                 }
+                 QUE_INF("%s", "exiting sleeping state\n");
+                 req_stop_sleeping = false;
++                const int32_t depth_hint = wake_depth_hint;
++                wake_depth_hint = -1;
+                 // Call order cb{N} -> cb1 -> cb0
+                 for (size_t i = callback_sleeping_state.size(); i > 0; i--) {
+-                    callback_sleeping_state[i - 1](false);
++                    callback_sleeping_state[i - 1](false, depth_hint);
+                 }
+                 sleeping = false;
+                 time_last_task = ggml_time_ms();
+diff --git a/tools/server/server-queue.h b/tools/server/server-queue.h
+index e17733a74..8c6fb5899 100644
+--- a/tools/server/server-queue.h
++++ b/tools/server/server-queue.h
+@@ -18,6 +18,9 @@ private:
+     bool running  = false;
+     bool sleeping = false;
+     bool req_stop_sleeping = false;
++    // set by wait_until_no_sleep(), read by start_loop() when it fires the wake
++    // callbacks; -1 means no caller offered an estimate for this wake
++    int32_t wake_depth_hint = -1;
+     int64_t time_last_task = 0;
+ 
+     // queues
+@@ -44,7 +47,8 @@ private:
+     // callback functions
+     std::function<bool(server_task &&, bool)> callback_new_task;
+     std::function<void(void)>                 callback_update_slots;
+-    std::vector<std::function<void(bool)>>    callback_sleeping_state;
++    // second arg is the wake depth hint (-1 = none); unused on the entering-sleep call
++    std::vector<std::function<void(bool, int32_t)>> callback_sleeping_state;
+ 
+ public:
+     ~server_queue() { worker_stop(); }
+@@ -66,8 +70,10 @@ public:
+     void pop_deferred_task(int id_slot);
+ 
+     // if sleeping, request exiting sleep state and wait until it is done
+-    // returns immediately if not sleeping
+-    void wait_until_no_sleep();
++    // returns immediately if not sleeping. depth_hint, if the caller has one (e.g. a
++    // completion request's own token count), lets the wake reload straight into the
++    // tier that request needs instead of guessing from whatever tier was last active
++    void wait_until_no_sleep(int32_t depth_hint = -1);
+ 
+     bool is_sleeping() {
+         std::unique_lock<std::mutex> lock(mutex_tasks);
+@@ -132,7 +138,7 @@ public:
+     // entering sleep: queue.sleeping = true --> cb0(true) --> cb1(true) --> cb2(true)
+     // leaving sleep: cb2(false) --> cb1(false) --> cb0(false) --> queue.sleeping = false
+     // note: caller will hold mutex_tasks while calling the callbacks
+-    void on_sleeping_state(std::function<void(bool)> callback) {
++    void on_sleeping_state(std::function<void(bool, int32_t)> callback) {
+         callback_sleeping_state.push_back(std::move(callback));
+     }
+ 

@@ -75,7 +75,7 @@ flash attention, `--context-tiers`, the idle de-escalation fix, MTP support
 for `qwen4exp`, and everything else — lives as **local modifications on top
 of a pinned upstream llama.cpp checkout**, not as a standalone codebase. That
 vendored tree isn't committed (see above), so the changes are captured as
-`patches/llama.cpp.patch`: a single diff covering 21 modified files and 13
+`patches/llama.cpp.patch`: a single diff covering 31 modified files and 13
 new files (mostly under `ggml/src/ggml-sycl/` — `moe-cache.{cpp,hpp}`,
 `fattn-sparse.{cpp,hpp}`, `hyper_connect.{cpp,hpp}`, `topk-radix.{cpp,hpp}`,
 `mmid-hybrid.{cpp,hpp}`, `expert-pool.{cpp,hpp}` — plus the server/arch/model
@@ -134,6 +134,16 @@ if you need the evidence.
   `PLAN.md` for the measured before/after), with
   `--rope-scaling yarn --rope-scale 1.0001 --yarn-orig-ctx 513000` to unlock
   the third tier past the model's native context ceiling.
+- **Protecting decode from silent page-cache eviction:** `-lzm off` alone
+  only guarantees tensors are read at load time, not that they stay
+  resident — under host memory pressure from other tenants they can get
+  evicted afterward, reintroducing a page fault mid-decode (`PLAN.md`,
+  2026-09-15 update, measured live via `mincore()`). Add
+  `-lm mmap+mlock --mlock-experts-only` (container needs `CAP_IPC_LOCK` and
+  an unlimited/raised `memlock` ulimit) to pin just the `--n-cpu-moe` expert
+  tensors — ~25-33 GiB depending on tier, not the full model — leaving the
+  28.8 GB PLE table on ordinary evictable page cache, since its sparse
+  per-token access tolerates the occasional cheap fault.
 
 ## Current status / what's open
 
