@@ -2365,6 +2365,146 @@ otherwise (`-ncmoe 25 -ub 2048 -c 122880 -lzm off`, mmap enabled).
   without it first; treat graph replay as a Phase 3 add-on whose value is
   measured in isolation before investing further.
 
+## Update (2026-09-19): MTP + K-quant pathology root-caused -- IQP fast path is I-quant-only, never fires for K-quants
+
+Follow-up to "**MTP + UD-Q3_K_XL: don't use this combination as-is**" above
+(2026-09-11 update), which flagged Q3_K_XL+MTP at 3.2 tok/s vs. 21.9-23.4
+tok/s for the target alone (~7x) and named three untested hypotheses.
+Root-caused this session by code reading only, against the `src/llama.cpp`
+checkout -- no live run yet, see caveat below.
+
+**Mechanism.** `ggml/src/ggml-cpu/iqp.cpp` implements a batched, panel-gemm
+fast path for `mul_mat_id` (the MoE expert-routing matmul), gated behind a
+minimum-rows-per-expert threshold: `GGML_IQP_MIN_BATCH_ID = 8`, checked via
+`ggml_cpu_iqp_mul_mat_id_min_batch(cne1)` at
+`ggml/src/ggml-cpu/ggml-cpu.c:1855`. The type list this fast path supports
+(`IQP_TYPE_LIST` macro, `iqp.cpp` ~line 494) is hardcoded to I-quants only --
+`IQ2_XXS, IQ2_XS, IQ2_S, IQ3_XXS, IQ3_S, IQ1_S, IQ1_M, IQ4_XS` -- the Q3_K
+family is not in this list.
+
+In plain single-token decode, `cne1` (rows landing on one expert within a
+single `mul_mat_id` node) is always 1, far under the threshold -- this fast
+path is already dormant for ordinary decode regardless of quant type. It
+only has a chance to fire when MTP's multi-token verify batch routes several
+tokens to the same expert within one op. Net effect: IQ3_XXS+MTP gets a real
+batched-gemm speedup on CPU-offloaded expert layers during verify batches
+(plausibly explaining why that combo nets a positive ~1.15x above, rather
+than a loss); Q3_K_XL+MTP gets none of it and pays the full scalar per-row
+generic path for every CPU-offloaded expert row in the verify batch. This
+reads as a structural asymmetry between quant families under one specific
+fast path, not a tuning problem.
+
+**The other two named hypotheses**:
+- KV-cache type mismatch handling between draft/target -- checked directly
+  against `common/speculative.cpp:1324-1438`; no quant-conditional branching
+  found there. **Ruled out.**
+- Near-VRAM-ceiling silent thrashing distinct from a clean OOM -- this
+  project's two known mechanisms for that (`GGML_SYCL_USM_SYSTEM` implicit
+  migration, and direct `zeMemAllocDevice` allocation bypassing the usual
+  path) are both already disabled/mitigated per `docker/Dockerfile.sycl*`.
+  **Largely ruled out**, though an undocumented third variant can't be fully
+  excluded without a live GPU measurement -- **not fully ruled out**.
+
+**Caveat.** This is a code-reading finding, not a live measurement. It
+explains a *missing* speedup for the CPU-offloaded portion of the verify
+batch under MTP, directionally consistent with the ~7x cliff measured in the
+2026-09-11 update, but reading the code alone doesn't certify the full
+magnitude of that cliff. A CPU-only benchmark to confirm the magnitude is
+in progress as a separate piece of work this session -- no number yet, none
+should be quoted until it lands. Also in progress in the same session: an
+attempt to extend `IQP_TYPE_LIST` to actually support Q3_K, so that
+Q3_K_XL+MTP stops paying this penalty -- outcome not yet known.
+
+## Update (2026-09-19, later): the IQP-panel-path theory above is FALSIFIED for
+## this model -- UD-Q3_K_XL contains zero Q3_K tensors. Q3_K support was still
+## added and validated, but it fixes nothing here. Cliff cause reopened.
+
+Direct follow-up to the entry immediately above, same day. The CPU-only
+benchmark and the `IQP_TYPE_LIST` extension both landed, and the benchmark's
+first step -- checking what quant types the real file actually uses, rather
+than assuming from its name -- overturned the theory before the speedup
+measurement even mattered.
+
+**The premise was wrong.** Inspected `/media/da3dsoul/Garudias/models/
+Qwen3.8-Flash-Next-GGUF/UD-Q3_K_XL/*.gguf` directly via the vendored
+`gguf-py` (independently re-verified by the orchestrating session, not just
+the subagent's claim). Full tensor-type histogram across all 3 shards:
+`Q6_K:1, Q8_0:502, F32:557, IQ4_NL:44, IQ3_XXS:94, IQ4_XS:2, BF16:24`.
+**Not one `Q3_K` block anywhere in the file.** "UD-Q3_K_XL" is Unsloth's
+recipe-tier name, not a literal description of every tensor's type. The
+actual routed-expert tensors: `ffn_gate_exps`/`ffn_up_exps` are `IQ3_XXS`
+(47 of 48 layers) or `IQ4_XS` (1 layer) -- both already in `IQP_TYPE_LIST`,
+already fast-path-eligible, before today's change. `ffn_down_exps` is
+`IQ4_NL` (43 layers) or `Q8_0` (5 layers) -- and cross-checking the *working*
+`UD-IQ3_XXS` quant found its own `down_exps` is **also `IQ4_NL`**, identical
+between the working and broken configs. There is no K-quant/I-quant split
+between these two quants' actual tensors to explain a differential at all.
+
+**`down_exps` is structurally excluded from the fast path regardless of type,
+in both quants equally.** `ggml/src/ggml-cpu/iqp.cpp:1135` hard-requires
+`src0->ne[0] % QK_K (256) == 0` for fast-path eligibility. `down_exps` has
+`ne[0] = 640` (`moe_intermediate_size`), the same "K-quant gotcha" shape
+`docs/research/02` §5.5 already flagged for a different reason (K-quants
+themselves being ineligible at this width) -- but the constraint is on the
+panel's fixed 256-wide superblock layout, not on K-quant-ness specifically,
+and it applies identically whether the model ships with `Q3_K`, `IQ4_NL`, or
+anything else at that tensor. Since it's equally excluded in the working
+IQ3_XXS+MTP config, it cannot be the source of the 7x asymmetry.
+
+**Q3_K support was implemented and correctness-validated anyway** (the user
+asked for this regardless of whether it would fix the cliff). `iqp_decode_q3_K()`
+added to `ggml/src/ggml-cpu/iqp.cpp` (57 lines, one file), reusing
+`block_iqp_x8` exactly like the existing I-quant grids since Q3_K's
+16-groups-of-16 signed-6-bit-scale layout maps onto it directly (unlike
+Q4_K/Q5_K, which carry an extra per-group `min` term the current symmetric
+panel design has no slot for). Validated two ways: (1) a temporary
+`GGML_IQP_VERIFY` build asserting the new decode reproduces
+`ggml_get_type_traits(Q3_K)->to_float()` bit-for-bit inside the same call --
+caught a real bug on the first attempt (hmask byte offset incorrectly
+advancing with the 128-wide half, when only `qs` should; `hmask`'s 32 bytes
+are reused across both halves, distinguished only by which bit is tested),
+fixed, then 0/272 mismatches; (2) `test-backend-ops`'s existing dual-CPU-backend
+in-process check (`ggml_backend_cpu_set_use_ref(true)` forces the generic
+scalar path, compared against the panel path within one `eval()` call, same
+mechanism this project's own `LLAMA_QSA_PLAN_CHECK` oracle follows for
+exactly the reason that cross-run diffs aren't valid here) -- **1314/1314
+`MUL_MAT` and 888/888 `MUL_MAT_ID` tests pass**, including every panel-eligible
+type plus the new `Q3_K`, at the suite's existing nmse < 5e-4 tolerance
+(Q3_K passed comfortably, not near the edge). Built via
+`staging/work/devbuild.sh ggml/src/ggml-cpu/iqp.cpp`.
+
+**Measured speedup: ~1.00x, i.e. none**, for Q3_K specifically and, more
+surprisingly, for the *existing* IQ3_XXS panel path too. A standalone
+harness (single `MUL_MAT_ID` expert, k=2560/m=640 matching real
+`ffn_gate_exps`) swept `cne1` = 1/3/5/8/16/32/64 at 1 and 8 threads, A/B'd via
+the existing `GGML_NO_IQ_PANEL` env escape hatch. Panel-vs-generic ratio was
+~1.00-1.02x across the board on this box's CPU (AMD Ryzen 9 9950X, Zen4/5,
+AVX-512 VNNI) -- statistical noise, not a speedup, for a mechanism this
+project's own earlier reading assumed was a real win. Likely explanation,
+offered as hypothesis: ggml's existing scalar `vec_dot_*_q8_K` kernels are
+already VNNI-accelerated on this CPU, leaving little redundant-decode
+overhead for panel batching to amortize -- the win this path was designed
+for may be real on weaker-SIMD hardware but doesn't show up here, on *any*
+panel-eligible type, not just the new one.
+
+**Net: the panel-path theory is dead for this deployment, on two independent
+grounds** -- the tensors it would need to apply to don't exist in this file,
+and even where the mechanism is eligible it measures no benefit on this CPU
+at all. Cause of the 3.2 vs ~22 tok/s MTP+Q3_K_XL cliff is **reopened**; the
+two hypotheses from the entry above (KV-cache type mismatch, near-VRAM-ceiling
+thrashing) are the remaining live suspects, plus a fourth not previously
+separated out: a gap in the MTP code path itself that only IQ3_XXS has ever
+exercised. Settling any of these needs a real GPU-loaded MTP+Q3_K_XL decode
+run at `-ncmoe 28` on the actual B70 -- not attempted, deliberately, since the
+card is currently fully occupied by live production traffic and stopping it
+is a decision for the user, not something to do inside an investigation
+task.
+
+The `Q3_K` panel-path addition itself is kept in the tree regardless -- it is
+correct, tested, and a generically useful capability for any future
+model/quant that actually ships real `Q3_K` experts at a `ne[0]` divisible by
+256, independent of whether it helps this project's own model.
+
 ---
 
 ## Phase 0 — Go/no-go gates before writing any cache code

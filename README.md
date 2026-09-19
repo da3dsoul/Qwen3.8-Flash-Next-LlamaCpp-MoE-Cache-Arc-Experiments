@@ -150,16 +150,53 @@ if you need the evidence.
 This is a research repo, not a finished product — real open items, most
 recorded as explicit next steps in their own docs:
 
-- **The largest remaining lever on long-context decode speed**: an O(`n_kv`)
-  host-side term in `set_input_qsa` (the QSA grouping scan / block bias) is
-  named as the next task in `PLAN.md` and `docs/research/13` §5.4 — the
-  incremental-update precedent that would fix it is already in-tree and
-  proven exact elsewhere, just not applied here yet. Projected to take 600K
-  decode from ~12.4 to ~19.7 tok/s if the attribution holds (untested).
-- **MTP + K-quant pathology, never root-caused.** MTP speculative decoding
-  paired with a UD-Q3_K_XL (not I-quant) target measures ~7x worse than the
-  target alone at matched VRAM — a real, reproducible regression, flagged
-  but not debugged (`PLAN.md`, 2026-09-11 update).
+- **The O(`n_kv`) host-side term in `set_input_qsa` this bullet used to name
+  as the largest remaining lever has already been fixed, and it was smaller
+  than first estimated.** Bucketed grouping + dropped dead columns +
+  run-length bias + shift/mask for the power-of-two ratio measured 5.13 →
+  2.37 ms/token at `n_kv = 614,656` (2.17x, reproduced to 2.8% across two
+  runs), gated by an in-call correctness oracle against the general
+  algorithm (6/6 sections passed) (`PLAN.md`, 2026-09-12 later update).
+  But the ~19.7 tok/s projection this bullet used to cite doesn't hold: the
+  same update found the term is only 31.9% of the excess depth slope, not
+  all of it. The bigger lever that update also found — dropping `-lm none`
+  for mmap, measured 17.27 vs 12.42 tok/s on the *unfixed* code — is now
+  moot for a different reason, not because it was wrong: production moved
+  off `-lm none` entirely to `-lm mmap+mlock --mlock-experts-only`
+  (`PLAN.md`, 2026-09-15 update). What's actually still open: the fix
+  combined with the current mlock config was never cleanly isolated
+  end-to-end — 600K decode has a measured ~1.5x run-to-run spread on
+  unmodified code (`PLAN.md`, 2026-09-12 later update), so a single current
+  tok/s number for 600K would be quoting noise. The one number that
+  reproduces is the host-instrument measurement above (2.76 ms/token saved,
+  4.8% of the faster arm's token time).
+- **MTP + K-quant pathology: leading hypothesis tested and falsified, cause
+  still open.** MTP speculative decoding paired with a UD-Q3_K_XL target
+  measures ~7x worse than the target alone at matched VRAM (`PLAN.md`,
+  2026-09-11 update). A code-reading pass proposed a specific mechanism
+  (`ggml/src/ggml-cpu/iqp.cpp`'s batched `mul_mat_id` fast path is I-quant-only
+  and only activates at ≥8 rows/expert, a threshold only MTP's verify batches
+  reach) — but inspecting the actual production GGUF (`gguf-py` against the
+  real file, not assumed from its name) found **zero `Q3_K` tensors in
+  `UD-Q3_K_XL` at all**: `ffn_gate_exps`/`ffn_up_exps` are `IQ3_XXS` (already
+  fast-path-eligible) and `ffn_down_exps` is `IQ4_NL`/`Q8_0`, identical to the
+  working `UD-IQ3_XXS` quant's own `down_exps` type. `down_exps` is also
+  permanently ineligible for the fast path regardless of type — its `ne[0]`
+  is 640 (`moe_intermediate_size`), and the path hard-requires
+  `ne[0] % 256 == 0` (`ggml/src/ggml-cpu/iqp.cpp:1135`) — but that's equally
+  true in both the working and broken quant, so it can't explain the
+  difference either. **The panel-path theory does not hold for this model**;
+  the real cause of the 7x cliff is unresolved, and the other two originally-named
+  hypotheses (KV-cache type mismatch; near-VRAM-ceiling thrashing) remain the
+  live suspects. Confirming either now needs a real GPU-loaded MTP+Q3_K_XL
+  decode measurement on production hardware — not yet attempted, since the
+  GPU is currently occupied by live production traffic (`PLAN.md`, 2026-09-19
+  update). Separately: `Q3_K` support was still added to the fast path
+  (`ggml/src/ggml-cpu/iqp.cpp`, `iqp_decode_q3_K`), correctness-validated via
+  `test-backend-ops`'s dual-path check (888/888 `MUL_MAT_ID` tests pass) — a
+  real, tested addition, but it measures ~1.00x (no speedup) on this CPU and
+  doesn't apply to this deployment's files regardless, since no `Q3_K` tensors
+  exist in them.
 - **`docs/research/13` §13 Option C** (a fully decoupled idle-tier timer,
   independent of `--sleep-idle-seconds`) was scoped but not built — Option B
   (piggybacking the existing sleep timeout) was built and validated instead,
