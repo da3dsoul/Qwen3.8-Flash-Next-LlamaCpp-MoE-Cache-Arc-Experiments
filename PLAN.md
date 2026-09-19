@@ -2081,6 +2081,70 @@ left as originally written (per this document's own practice of appending
 corrections rather than editing historical measurements); this entry is the
 correction to fold back if that doc is revisited.
 
+## Update (2026-09-15, later): `-np 2 -kvu` deployed -- 2 concurrent requests off one dynamically-shared KV pool
+
+Follow-up to the two updates above, prompted by a real user question: two
+concurrent connections to `llm-b70` (`-np 1` at the time) queued the second
+behind the first rather than erroring -- correct behavior for a single-slot
+server, but raised the question of whether 2 concurrent requests could be
+served without regressing the single-request context ceiling this whole
+`--context-tiers` mechanism exists to protect.
+
+**The naive approach (`-np 2`, `kv_unified` left at its default `false`)
+was rejected on VRAM math alone, not tested.** With a statically pre-split
+KV pool, every tier's `n_ctx` halves per slot regardless of whether the
+other slot is in use (61,440/131,072/256,000 vs the documented
+122,880/262,144/512,000 floors) -- a real regression to the already-proven
+116K-token capability. The alternative, doubling `-c` to preserve full
+depth per slot, was VRAM-infeasible even optimistically (~515 MiB margin
+against a card that already OOM'd once on a similar margin) and outright
+over budget pessimistically, computed from `docs/research/08`'s VRAM
+formula before touching a GPU.
+
+**`-kvu` (`--kv-unified`) changes the trade entirely.** One shared KV pool
+sized at the full tier's `n_ctx`, allocated dynamically per sequence
+instead of pre-split -- a single deep conversation can still use the whole
+tier if the other slot is idle/shallow; two active conversations share the
+pool rather than each being hard-capped at half. The formula predicted
+this would cost about the same VRAM margin as today's `-np 1`, *if* the
+graph allocator's buffer-reuse (already confirmed, doc 08 §3.3, across one
+sequence's 12 sequential attention layers) also extends across two
+sequences batched together in the same step -- previously unverified in
+either direction.
+
+**Verified live before touching production**, via the same isolated
+diagnostic-instance pattern used for the earlier phase-timing work (`-np 2
+-kvu`, tier-0 config, side port, `-lv 4`): it loaded clean, and the real
+allocator numbers came back *better* than the optimistic estimate --
+`SYCL0 model buffer size = 25,953.66 MiB` + `SYCL0 compute buffer size =
+3,452.38 MiB` = ~29.4 GiB against the 32,402 MiB card, ~3 GiB margin (vs.
+`-np 1`'s ~1.7 GiB today). The allocator's reuse does extend across
+concurrently-batched sequences -- confirmed, not assumed. Two real
+concurrent requests (one ~2,600-token prompt + a trivial one, then a
+balanced pair of ~520-token prompts) both completed correctly, `200 OK`,
+with per-request decode landing around 8-9.5 tok/s while both slots were
+active, against a ~23-25 tok/s solo baseline. **Concurrency costs
+per-request decode throughput, roughly to a third, not correctness or
+depth** -- the expected, honest trade of sharing one GPU's decode
+bandwidth across two active streams, not a bug.
+
+**Deployed**: `coding-agent/docker-compose.qwen4exp-moe.override.yml`'s
+`llm-b70` command changed `-np 1` to `-np 2 -kvu`. Production reload
+confirmed the same live numbers (`n_slots = 2, n_ctx_slot = 122880,
+kv_unified = 'true'` -- note `n_ctx_slot` reports the *full* tier value now,
+not a half-split), and two real concurrent chat-completion requests against
+the actual production server both returned `200 OK` in ~5.55s each,
+started and finishing together.
+
+**What's still open**: only tested at tier 0 (122,880); tiers 1/2's
+concurrent-load VRAM margin is computed from the same formula but not
+independently re-measured live, for the same reason as the mlock
+tier 1/2 gap noted above -- token cost of forcing a real deep-context
+request on production. The `--context-tier-down-turns`/idle-deescalation
+logic already requires *all* slots idle before a tier switch
+(`ctx_tier_update` iterates every slot), so this generalizes structurally,
+just not independently measured.
+
 ## Update (2026-09-15): decode-time eviction risk found live in production; scoped `--mlock-experts-only` patch added
 
 Follow-up to the 2026-09-14 storage-move update (user question: can startup be

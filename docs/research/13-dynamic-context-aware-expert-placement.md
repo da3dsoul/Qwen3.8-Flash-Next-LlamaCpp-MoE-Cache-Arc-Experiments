@@ -1636,3 +1636,216 @@ woke at tier 0, not tier 1. Logs: `logs/tier3-deescalate/`. Not yet
 re-verified against the real production model/tiers (the CPU rig proves the
 logic; a production run would only reconfirm the already-validated reload
 path, per §9's and §12's own reasoning for why the cheap rig suffices).
+
+---
+
+## 14. Addendum, 2026-09-13 (later still): §13's own fix caused a real
+## production double-reload, and the "obvious" repair is unsafe -- reverted
+## to a simpler one
+
+**The regression, with real evidence.** Deployed to the live `llm-b70`
+production container (the sibling `coding-agent` repo's `docker-compose.
+qwen4exp-moe.override.yml`), §13's fix produced exactly the failure mode its
+own tradeoff analysis predicted was possible but didn't quantify: a
+conversation already at tier 1 (123,606 tokens) went idle, slept (correctly
+logging `sleeping: also resetting context tier 1 -> 0`), and when the *same*
+conversation resumed, paid **two full reloads back to back** -- wake into
+tier 0 (`load_model` 23:08:03 -> `n_ctx_slot = 122880` ready 23:11:42, **3m
+39s**), immediately followed by `ctx_tier_upd: switching context tier 0 -> 1
+(request is 123606 tokens + 16384 reserved)` and a second reload to tier 1
+(ready 23:14:28, **2m 45s** more). **6m 25s of pure reload before the first
+prompt token processed**, for a request one reload straight into tier 1
+would have served. Real user-reported symptom: "starting a new context takes
+a really long time, even if the prefill amount is low" -- the delay was
+never prefill, it was two model loads.
+
+**The fix that looks obvious does not work, and this section explains why in
+enough detail that nobody re-attempts it without re-deriving the same
+finding.** The design considered: don't reset to tier 0 at sleep entry; defer
+the reload past wake-exit instead; force exactly one reload, sized by the
+first real task's own depth, from inside `ctx_tier_update()`. This requires
+`wait_until_no_sleep()` (`server-queue.cpp:115-128`, called from
+`server_res_generator`'s constructor, `server-context.cpp:4409-4415`, which
+every HTTP handler that touches `ctx_server` constructs before doing
+anything else) to return *before* the model is reloaded.
+
+That breaks a real invariant several call sites depend on without
+re-checking it. `handle_completions_impl` (`server-context.cpp:4471-4481`,
+and the same shape at `:5068`, `:5617`) takes only a **shared** lock on
+`mutex_model` and reads `ctx_server.vocab` immediately after
+`create_response()` (which is what calls `wait_until_no_sleep()`) returns --
+the shared lock protects against a *concurrent* reload racing the read, not
+against reading a pointer that was never valid in the first place. In the
+current (working) design this is safe because `handle_sleeping_state(false)`
+calls `load_model(params_base)` **synchronously, before** flipping `sleeping
+= false` -- so by the time `wait_until_no_sleep()`'s condition
+(`!sleeping`) is satisfied, `vocab` (set at `server-context.cpp:1286`,
+inside `load_model()`) is already valid. `destroy()`
+(`server-context.cpp:936-942`) frees `model_tgt` but never resets `vocab`
+itself, so it becomes a **dangling pointer**, not a null one, the moment
+`destroy()` runs. Deferring the reload past `wait_until_no_sleep()`'s return
+means every one of those shared-lock tokenize sites would read that dangling
+pointer on the HTTP thread, with no writer holding the exclusive lock at
+that moment to serialize against -- a real use-after-free, not a race
+that occasionally loses. `/tokenize`, `/detokenize` and `/apply-template`
+already have a version of this gap today (§9.7's "pre-existing exposure" --
+they never call `wait_until_no_sleep()` at all, so they can read a stale
+`vocab` for the entire sleep duration already); the deferred-reload design
+would have extended the same class of gap to every completion-shaped
+endpoint too, for the length of "however long until the next real request,"
+which is unbounded. Not attempted.
+
+**What shipped instead: the smaller, safe half of the fix.** Delete the
+`ctx_tier_set(0)` call §13 added at sleep entry (`server-context.cpp`,
+`handle_sleeping_state`, the `if (new_state)` branch) and nothing else. Wake
+still eagerly calls `load_model(params_base)` before flipping `sleeping`
+(unchanged, still holds the invariant above) -- but since nothing reset the
+tier at sleep time, it reloads straight back into whichever tier the session
+was actually at, in one shot. This fully fixes the reported bug (a resumed
+session gets exactly one reload, sized correctly) at the honest, disclosed
+cost of reintroducing part of §9.8's original limitation: a genuinely new,
+shallow session that happens to be the *first* request after a long sleep
+now wakes into whatever tier was last active rather than the cheap default,
+until 64 consecutive shallow requests bring it back down. Net effect vs. the
+pre-§13 baseline: strictly better (same reload-into-last-tier behavior on
+wake, same as before §13 ever shipped) -- §13's own contribution is fully
+retracted, not replaced by something new. A real fix for the shallow-first
+case exists in principle (thread the request's known token count through to
+`wait_until_no_sleep()` so wake reloads directly into the tier *that
+specific request* needs, preserving the "always loaded before returning"
+invariant) but requires plumbing depth information through every
+`server_res_generator`-constructing call site across the server, which is
+real surgery, not a five-line fix -- left as a scoped-but-undone option, not
+attempted here.
+
+**Validated, CPU-only rig, both real-world cases -- not just the one that
+broke.** `staging/work/tier3_deescalate_serve.sh`, same setup as §13
+(`--sleep-idle-seconds 6`, tiers `1024:512:4,8192:1024:8,280000:1024:12`).
+
+| case | scenario | reloads | result |
+|---|---|---|---|
+| A | escalate to tier 1, sleep, **same-depth** request resumes | **1** | wakes straight into `n_ctx_slot = 8192` -- no tier-0 stop, no second switch |
+| B | escalate to tier 1, sleep, **short/shallow** request arrives first | **1** | wakes into `n_ctx_slot = 8192` (the stale tier, not 0) -- correct response, no crash, the disclosed tradeoff, not a bug |
+
+Rebuilt via `staging/work/devbuild.sh tools/server/server-context.cpp`,
+clean. Logs: `logs/tier3-wakefix/`. **Not yet redeployed to the live
+production container** -- the fix is validated on the cheap rig only, per
+this project's own established practice of proving a change cheaply before
+touching the box that's actually serving traffic; redeploying `llm-b70` is a
+separate step.
+
+---
+
+## 15. Addendum, 2026-09-13 (later still): §14's fallback was correctly
+## rejected -- a real fix, not another compromise
+
+**§14's fallback traded one bug for a smaller one, and that's not good
+enough.** Reloading into whatever tier was last active fixes the reported
+case (a deep session resumes) but reintroduces exactly the cost the original
+`--sleep-idle-seconds` de-escalation was built to remove: a genuinely new,
+short session that happens to arrive first after a long sleep now pays a
+full reload into an unnecessarily deep tier, every time, until 64 consecutive
+shallow requests bring it back down. Correctly called out as not acceptable
+as a final answer.
+
+**The opening §14 didn't have: a cheap depth signal that exists *before* the
+model-liveness gate, without touching it.** `wait_until_no_sleep()`
+(`server-queue.cpp:115-128`) still returns only once a fully loaded model is
+guaranteed -- §14's use-after-free finding stands, unchanged, and nothing
+here reopens it. What's new is recognizing that every completions-shaped
+route handler already holds its **raw, unparsed** `req.body` before it ever
+calls `create_response()` (which is what triggers the wait) -- no
+tokenization, no even JSON-parsing required to get a usable depth estimate,
+just `req.body.size()`. That estimate can ride along into the wake decision
+without moving where the model becomes valid at all.
+
+**Design, as implemented:**
+
+1. `handle_completions_impl` (`server-context.cpp:4446`, its own
+   `create_response()` call at `:4459`) computes `depth_hint =
+   data.dump().size() / 3.5` (this project's own measured chars/token, doc
+   13 §12) from the already-parsed `data` it receives as a parameter --
+   turned out to be **dead code for every real request**, see the false
+   start below.
+2. `create_response()` (`server-context.h:182` declaration,
+   `server-context.cpp:4724` definition) and `server_res_generator`'s
+   constructor (`:4419`) both grew an `int32_t depth_hint = -1` parameter,
+   threaded straight into `wait_until_no_sleep(depth_hint)`.
+3. `server_queue` gained `wake_depth_hint` (`server-queue.h`, next to
+   `req_stop_sleeping`), set under `mutex_tasks` by `wait_until_no_sleep()`
+   at the same point it sets `req_stop_sleeping = true` -- first caller
+   during a given sleep wins the hint, same as it already wins the wake
+   trigger, no new arbitration needed. `callback_sleeping_state` widened
+   from `std::function<void(bool)>` to `std::function<void(bool, int32_t)>`
+   (one registration site each in `server-context.cpp`'s `init()` and
+   `server_routes`'s constructor -- both updated, the second ignores the
+   hint, it only needs the boolean) so `start_loop()`
+   (`server-queue.cpp:322-350`) can hand the hint to the wake callback: `cb(true,
+   -1)` entering sleep (no hint exists yet), `callback_sleeping_state[i-1](false,
+   depth_hint)` on the way out, reading `wake_depth_hint` once and resetting
+   it to -1 immediately after, under the same lock.
+4. `handle_sleeping_state(bool new_state, int32_t depth_hint)`
+   (`server-context.cpp:968`): on wake, if `ctx_tiers.size() >= 2 &&
+   depth_hint >= 0`, call `ctx_tier_set(ctx_tier_for(depth_hint))` before
+   `load_model(params_base)` -- skipped, falling through to §14's unchanged
+   fallback (reload into whatever `ctx_tier_cur` already is), whenever no
+   caller offered a hint.
+
+**A false start worth recording, not hiding: the first version of this did
+not work, and the reason is itself informative.** Point 1 above --
+computing the hint inside `handle_completions_impl` -- compiled clean and
+looked right, but every one of the ~7 route lambdas that call it
+(`post_completions`, `post_completions_oai`, `post_chat_completions`,
+`post_infill`, `post_responses_oai`, `post_transcriptions_oai`,
+`post_anthropic_messages`, `server-context.cpp:5030-5251`) already call
+`create_response()` themselves, **first**, per this file's own standing
+convention ("IMPORTANT: all lambda functions must start with
+`create_response()`", `:4850`) -- and that first, hint-less call is the one
+that actually triggers `wait_until_no_sleep()`. By the time
+`handle_completions_impl`'s own hinted call runs, `sleeping` is already
+`false` and `wait_until_no_sleep()`'s fast path (`if (!sleeping) return;`)
+skips the hint entirely -- confirmed the hard way, first live test of the
+"shallow request after a deep sleep" case still woke into the stale deep
+tier, unchanged from §14. **Fix: moved the estimate one level up**, to each
+of those 7 outer lambdas' own `create_response()` call, computed from
+`req.body.size() / 3.5` (available even before JSON parsing, cheaper than
+point 1's `data.dump()`). `handle_completions_impl`'s own hinted call stays
+as harmless defense in depth for any future caller that reaches it directly.
+Scope held to completions/infill-shaped endpoints only, per the original
+directive -- `post_control`, embeddings, slots, health, metrics, tokenize,
+etc. all keep calling plain `create_response()` and fall through to the
+unchanged §14 fallback, which is the correct behavior for requests with no
+real prompt to estimate from.
+
+**Validated, CPU-only rig, all three cases with a log trace for each --
+including the one that was missing.**
+`staging/work/tier3_deescalate_serve.sh`, same setup as §13/§14
+(`--sleep-idle-seconds 6`, tiers `1024:512:4,8192:1024:8,280000:1024:12`).
+
+| case | scenario | reloads | log evidence |
+|---|---|---|---|
+| A | deep session resumes after sleep | **1** | straight to `n_ctx_slot = 8192`, no `switching context tier` line follows |
+| B | no-hint endpoint wakes the server (`POST /props`) | **1** | no `waking: sizing reload` line (hint absent, as designed) -- falls back to stale `n_ctx_slot = 8192`, matching §14's already-validated behavior, unchanged |
+| C | **new, shallow completion request arrives first** | **1** | `waking: sizing reload from tier 1 to 0 for a 37-token hint`, then `n_ctx_slot = 1024` directly -- no stop at tier 1 |
+
+Case C is the one the earlier report was held to, and it's the one that was
+actually broken by §14's fallback: a 19-token request (`req.body.size()` 130
+bytes / 3.5 = 37) now wakes the server directly into the cheap tier instead
+of the stale deep one, with the same single-reload cost either way. Rebuilt
+clean via `staging/work/devbuild.sh tools/server/server-queue.h
+tools/server/server-queue.cpp tools/server/server-context.h
+tools/server/server-context.cpp`. Logs: `logs/tier3-wakefix2/`.
+
+**Known imprecision, not a correctness issue.** `req.body.size() / 3.5`
+overshoots the real token count by however much JSON structure (field
+names, message-role wrappers, tool definitions) inflates the raw byte count
+over the actual prompt text -- this can only push the estimate **up**, which
+can only pick a tier *at least as deep* as the request needs, never too
+shallow. The failure mode this design cannot produce is the one that
+matters (waking into a tier too small for the request); the one it can
+produce (waking one tier deeper than strictly necessary, on a borderline
+request) costs at most one extra tier's reload margin, not correctness.
+
+**Not yet redeployed to the live production container**, same posture as
+every change in this file -- validated on the cheap rig, `llm-b70`
+redeployment is a separate, later step.
