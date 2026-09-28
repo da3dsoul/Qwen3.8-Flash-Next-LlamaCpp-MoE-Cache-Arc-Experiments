@@ -2505,6 +2505,247 @@ correct, tested, and a generically useful capability for any future
 model/quant that actually ships real `Q3_K` experts at a `ne[0]` divisible by
 256, independent of whether it helps this project's own model.
 
+## Update (2026-09-19, later still): the MTP+Q3_K_XL cliff is closed by user
+## decision, not by a root cause -- not worth the GPU time to chase further
+
+The three remaining live suspects above (KV-cache type mismatch -- already
+ruled out; near-VRAM-ceiling thrashing; an MTP code-path gap specific to
+non-IQ3_XXS quants) still require a real GPU-loaded MTP+Q3_K_XL decode run to
+settle, and the user decided that run isn't worth spending freed GPU time on
+today, in favor of the hybrid `MUL_MAT_ID` follow-ups (`docs/research/05`
+§10.6) instead. **Closing this thread as "avoid the combination," not as
+"understood."** Standing rule, unchanged from the 2026-09-11 finding: **do
+not run MTP with UD-Q3_K_XL** (3.2 tok/s vs. ~22 tok/s for the target quant
+alone, ~7x). Production config remains IQ3_XXS + `-ncmoe 26` +
+`--spec-type draft-mtp --spec-draft-n-max 2`, which already works and was
+never in question. Re-open only if a future need specifically requires
+Q3_K_XL's quality tier together with MTP's speedup at the same time.
+
+## Update (2026-09-19, later still): `docs/research/05` sec 10.6's two cheap
+## follow-ups, run live -- both close out. The uncached hybrid path stays dead.
+
+`llm-b70` (production) was stopped for the session; both checks named in
+sec 10.6 as needing "zero new code, only GPU time on a quiet box" were run.
+Restarted after. Full detail: `docs/research/05` sec 11.
+
+- **MTP re-run (sec 8 question 2), closed.** The FRACTION sweep from sec 10.3
+  was re-run with `-md .../mtp-Qwen3.8-Flash-Next-Q8_0.gguf --spec-type
+  draft-mtp --spec-draft-n-max 2` added, otherwise identical. **The inverted
+  curve reproduces under MTP**: 31.8 -> 22.4 -> 14.3 -> 9.0 -> 5.2 tok/s at
+  fraction 0/0.1/0.25/0.5/1.0, same monotonic shape as the non-MTP sweep
+  (24.0 -> 17.5 -> 12.2 -> 8.7 -> 5.2). MTP's own uplift shows cleanly at
+  fraction 0 (31.8 vs. 24.0 tok/s, matching known ~1.3x) and is fully
+  swallowed by fraction 1.0 (5.2 tok/s both arms, within noise). The
+  round-trip and per-row calibration numbers are unchanged from sec 10.4 under
+  MTP too (e.g. 20-row host-weight calibration: 480-484 us here vs. 474.5 us
+  there). **"Cache never engages with a GPU-resident drafter" is not what
+  happens here -- the hybrid path is simply dead regardless of MTP.**
+- **PCIe cold/hot gap (sec 10.5), ruled out for the huge-pages candidate
+  specifically, with proof rather than a null result.** THP on this box is
+  `madvise` mode (`cat /sys/kernel/mm/transparent_hugepage/enabled`), so a
+  one-line diagnostic was added: `madvise(ptr, size, MADV_HUGEPAGE)` right
+  after `sycl::malloc_host` in `ggml_backend_sycl_host_malloc`
+  (`ggml-sycl.cpp:1546`), behind `GGML_SYCL_HOST_MADV_HUGEPAGE=1` (not
+  committed, local diagnostic only). A/B at `FRACTION=1.0`, no MTP: cold
+  round-trip 2067-2079 us and hot calibration 480-492 us in **both** arms,
+  decode 5.1 tok/s in both -- no measurable difference. **Verified this
+  wasn't a silent no-op**: `docker inspect --format '{{.State.Pid}}'` plus
+  `/proc/<pid>/smaps` on a live run with the flag set showed **`AnonHugePages`
+  total 0 kB** across the whole process. The `madvise` call itself is a
+  no-op here, most likely because `sycl::malloc_host` already faults and pins
+  the pages (via the Level Zero driver) before returning the pointer, i.e.
+  before our code ever gets to ask for huge pages -- or the USM host
+  allocation isn't a plain anonymous mapping at all. **Ruled out as a
+  fixable-by-us cause; the remaining candidate (Level Zero host-USM DMA setup
+  per distinct region) would need driver-level tracing to chase further, not
+  attempted, not clearly worth it** given sec 10.6's own ceiling finding
+  (28-32 tok/s projected best case, still short of 47 tok/s target).
+
+**Net: neither check changes sec 10.6's recommendation.** The uncached hybrid
+path is confirmed dead under both the original and the production-relevant
+(MTP) configuration; the cold-read gap's cheapest candidate cause is
+eliminated with a verified negative, not just an unmeasured guess. A cached
+Step 2 remains conditional-go-at-reduced-ambition, unbuilt, and not clearly
+worth the ~1,600 lines against a 28-32 tok/s ceiling below the 47 tok/s
+target -- this document takes no position on whether to build it, only
+reports that today's two cheap checks are now closed out.
+
+---
+
+## Update (2026-09-27/28): conversation-state persistence designed, built,
+## validated on real hardware, and deployed to production
+
+Triggered by a direct question: with prefill (TTFT) the confirmed bottleneck
+at long context, could the server store a faster-to-load state so a resumed
+conversation comes back in seconds instead of re-prefilling? Two research
+threads, then a full implementation-and-deploy cycle, in one extended
+session. Everything below is documented in depth in `docs/research/16`
+through `21`; this entry is the chronological summary.
+
+**Research phase.** `docs/research/16-prefill-speedup-scoping.md` and
+`docs/research/17-kv-state-persistence-scoping.md` ran in parallel and
+independently converged on the same #1 finding: the server's existing
+host-RAM prompt cache is thrown away on every `--context-tiers` reload and
+every sleep/wake cycle, so the triggering turn re-prefills its whole
+conversation from scratch -- doc 16's own production-log analysis found this
+was **~56% of all prefilled tokens on one logged day** (~16 minutes of TTFT
+from two events alone). Doc 17 found the good news doc 13 §6/§9.8 hadn't
+banked on: all three of this hybrid model's state kinds (12 conventional-KV
+layers, 36 Gated-DeltaNet recurrent layers, the QSA indexer-KV) already
+round-trip through upstream's own `llama_state_seq_get_data`/`set_data` and a
+real byte-level save/restore test exists for this exact architecture family.
+Doc 16 separately identified two more candidates -- vendoring upstream PR
+#29245 (a grouped MoE GEMM for SYCL) and pinning CPU-resident experts fully
+instead of `mmap+mlock` -- both closed out later this session (see below).
+
+**Planning phase.** `docs/research/18-conversation-state-persistence-plan.md`
+turned doc 17's recommendation into a staged build: disk persistence (not
+just an in-RAM reload survivor, since the real target was surviving a full
+process restart), fingerprint-gated so a tier switch stays valid but a RoPE
+or model change correctly invalidates old entries, with checkpoints and the
+full state blob carried in the server's own `.pcs` format rather than
+upstream's `/slots` save path (whose own PR #26004 for hybrid-model
+checkpoints turned out unneeded here). The plan found a genuine new bug
+while researching, not just designing: under production's `-np 2 -kvu`,
+restoring a second persisted conversation runs **before** the other idle
+slot's KV cells are freed, so two conversations that together exceed the
+tier's pool can silently fail to restore and fully re-prefill -- worse with
+persistence than without it, since a wake typically brings back more than
+one conversation at once. Fixed as task T4 before any of this shipped.
+
+**Implementation.** Built in dependency order across ~12 tasks (T1-T12,
+~960 LOC of feature code, ~770 LOC of harness/scripts) entirely CPU-side
+first: an alignment guard (T3) catching the sglang#39830 class of
+off-by-one-position restore bug at the bookkeeping layer; the T4 pre-clear
+fix; RAM-carry across an in-process reload (T5, Stage 1); the CLI flags and
+a fingerprint builder that deliberately excludes `n_ctx`/`n_ubatch`/`-ncmoe`
+from what invalidates a cache entry, since none of them affect restore
+validity (T6/T7); the `.pcs` atomic-write/read format with truncation
+detection (T8); disk-only lazy-load index entries (T9); the directory scan,
+disk-mode spill, and graceful-shutdown save (T10-T12). **Gate G0** (Arm 0,
+upstream's own byte-level save/restore test on a synthetic `qwen4exp`
+fixture) passed clean. **Gate G1** (Arm 1, a full 10-step CPU server test on
+`Qwen3.6-35B-A3B`) passed, and its step 6 negative control **reproduced the
+T4 bug on a pre-fix binary and confirmed the fix** -- a real bug, not a
+theoretical one. Arm 1 also surfaced two real product bugs, both fixed and
+re-verified before moving on: stale disk entries weren't pruned the way the
+RAM path already was (`persist_before_reload_disk` bypassed `alloc()`'s
+prefix rule), and a SIGTERM during active generation left the process hung
+after persisting cleanly -- root-caused as a **pre-existing bug in the base
+server's HTTP-thread shutdown path, unrelated to this feature**, verified
+safe to leave (the persist always fsyncs and completes before the hang, so
+Docker's default SIGKILL-after-grace-period costs time, not data).
+
+**First real-hardware validation (Arm 2) found a genuinely mixed result.**
+O1 (byte idempotence), O2 (alignment), O4 (QSA pooled-key exactness) and O5
+(a real cross-tier restore, 15/15 planted-fact recalls) all passed cleanly
+on the B70. O3 (a logits-divergence oracle) technically failed its
+literal pass criterion -- but investigation showed this was the oracle
+comparing against the wrong baseline, not a real ambiguity: the restored
+continuation was **bit/logit-identical** to a live one at both 8K and 120K,
+and the "known-bad" mutation control scored *below* the noise floor only
+because 36 of 48 layers don't use position at all. **Held back from
+production anyway on user instruction, pending a better oracle** -- the
+plan's own G2 gate was written as a hard stop precisely to prevent exactly
+this "the evidence looks fine, ship it" reasoning without sign-off.
+
+**O3x: the oracle redesign.** `docs/research/20-improved-state-restore-oracle-design.md`
+replaced cross-run statistical comparison (defeated by this backend's
+documented run-to-run noise, `PLAN.md:1129-1136`) with an exact-replay-plus-
+corruption-ladder design: `rest` must match `orig` bit-for-bit, then 8-9
+deliberate corruptions modelling real bugs in this fork's own state-read
+code (stale recurrent state, shifted KV/indexer cells, swapped layers, a
+wiped indexer) must each be caught, with two of them requiring a targeted
+early-context question specifically so sparse attention can't hide them. A
+same-launch "twin" oracle and a byte-exact fragmented-pool restore check
+(O1x) were added to cover the `-np 2 -kvu` two-conversation path Arm 2 never
+exercised (it only ever restored into an empty pool).
+
+**Second real-hardware validation.** Ran to completion: **O3x's core
+result held** -- restored logits exactly bit-identical to live at both 8K
+and 120K, and **9/9 realistic corruptions caught cleanly at both depths**,
+including both early-context arms. **O1x passed cleanly**, 0 byte
+differences restoring into a fragmented pool in all 4 tested
+configurations -- direct evidence the two-conversation path works. Two
+things did *not* work as designed, reported plainly rather than rounded to
+a pass: the fingerprint diagnostic itself introduces a small
+non-determinism (an internal top-k value, not the logits) that rules out
+gating on fingerprint-exactness as originally planned, and the "twin"
+same-launch technique was `BLIND` in all 4 tested configurations --
+same-launch SYCL cross-partition noise turned out larger than the
+corruption signal for every bug class tried. Both are supplementary/
+diagnostic-tooling findings, not evidence against the feature itself, which
+the two checks that actually establish correctness (the corruption ladder,
+O1x) both passed.
+
+**Closed out alongside this, from doc 16's other two candidates:**
+- **Upstream PR #29245 (grouped MoE GEMM), hand-merged cleanly** (no
+  conflicts -- this fork's own MoE dispatch changes are all decode-only,
+  the PR's grouped kernel only fires on the prefill path). Correctness
+  passed (`test-backend-ops -o MUL_MAT_ID`, 11/11 real dispatch-type cases
+  identical with the grouped path on vs. off). **Measured perf on
+  production's actual config: 372.29 vs. 369.07 tok/s at 116K, a -0.9%
+  wash** -- the author's own +34% was measured on a `-lm none` config this
+  deployment doesn't use. **Not deployed**, correctly rejected for zero
+  benefit.
+- **CPU-expert pinning.** Production's current `-lm mmap+mlock
+  --mlock-experts-only` measured **372.29 tok/s at 116K, 94.4% of the
+  394 tok/s fully-pinned historical ceiling** -- up from a 64% gap
+  historically, likely closed by `-ncmoe 25` and other work landing since.
+  **Closed, not worth further pursuit** with only ~5.6% headroom left.
+- **Streamable compression for the state blob**, investigated after a
+  disk-space concern was raised mid-session.
+  `docs/research/21-state-blob-compression-scoping.md` measured real
+  captured `.pcs` blobs, not synthetic data: the recurrent-state checkpoints
+  are **essentially incompressible** (93.7-94.2% of original at any zstd
+  level 1-19, 100% with lz4), and even the more-compressible main blob's
+  gain is undercut by decompression throughput (1.4-2.0 GB/s) being
+  **slower than the Garudias NVMe's own read speed** (4.4-4.9 GB/s) --
+  compression would make a restore slower on this hardware, not faster.
+  **Not built**, correctly rejected; noted as worth revisiting only if this
+  ever moves to slower storage.
+
+**Disk-budget gap found and fixed mid-session.** `enforce_disk_budget()`
+(the byte-cap LRU GC) was only ever called from the three reload-triggered
+save paths, not from the two paths that spill a RAM-cache entry to disk
+during ordinary operation (`alloc()`'s make-room loop, `update()`'s
+limits) -- a busy multi-conversation server could exceed the configured
+`--prompt-cache-disk-mib` for a long time between reloads. Fixed by calling
+the GC from those paths too, plus a new independent `--prompt-cache-disk-max-age`
+flag (default off) for time-based expiry, plus a log line reporting what
+each GC pass actually reclaimed.
+
+**Deployed to `llm-b70`.** Conversation-state persistence and the disk-GC
+fix are live; PR #29245 is deliberately excluded (rebuilt from a clean
+worktree with just its two touched files reverted, verified via symbol
+inspection with no `fused_gemm`/`xmx_gather` present, after an initial
+build accidentally reused a stale incremental-build artifact -- caught by a
+hash comparison before it shipped). Compose changes:
+`docker-compose.qwen4exp-moe.override.yml` gained `stop_grace_period: 90s`,
+a `/media/da3dsoul/Garudias/llm-state/qwen4exp-b70:/state` volume, and
+`--prompt-cache-dir ${B70_PROMPT_CACHE_DIR:-/state}`. Verified post-deploy:
+clean startup, fingerprint computed and logged, a real completion request
+served normally. **What to watch going forward, per doc 20's own
+findings**: `pcache: restored`/`persisted` log lines, and whether the
+fingerprint or twin-oracle limitations ever need revisiting before this
+gets used as the permanent regression gate (today's validation was a
+one-off pass, not a repeatable CI check).
+
+**A production-safety incident during this session, worth recording as
+process, not just outcome.** An early attempt to snapshot the running
+binary via `/proc/1/map_files` (to guard against `restart: unless-stopped`
+picking up an untested binary from a bind-mounted build directory) was
+correctly blocked by the permission classifier as a production-deploy-
+adjacent action; the safer fix used instead was rebuilding the prior
+binary from the last **git-committed** `patches/llama.cpp.patch` in an
+isolated `git worktree`, never touching the live working tree or the
+running container's memory. A first attempt at that rebuild produced a
+crash loop (`exit 139`) from cherry-picking three binary files while
+`GGML_BACKEND_DL=ON` split real code across several inter-dependent shared
+libraries with mismatched build generations -- fixed by always deploying
+the complete, single-build `build/bin/` output rather than individual
+files, a rule followed for the rest of the session.
+
 ---
 
 ## Phase 0 — Go/no-go gates before writing any cache code

@@ -1141,3 +1141,67 @@ answer outright:
 Neither of those needs new code. The spike's own code should stay in the tree, unreverted and behind its
 `FRACTION=0` default, because §10.4's calibration triplet is the only instrument this project has for asking
 "what does a GPU round trip cost right now," and Step 2 will need it on every run.
+
+---
+
+## 11. §10.6's two follow-ups, run live (2026-09-19)
+
+`llm-b70` (production) was stopped for this session so both checks could run on a quiet box; restarted
+after. `PLAN.md`'s 2026-09-19 update has the summary; this section has the numbers.
+
+### 11.1 MTP re-run -- §8 question 2 closed
+
+Same FRACTION sweep as §10.3, with `-md /models/.../mtp-Qwen3.8-Flash-Next-Q8_0.gguf --spec-type draft-mtp
+--spec-draft-n-max 2` added and otherwise identical (`-ngl 99 -fa 1 -ncmoe 26 -lm none -st -n 300 --temp 0
+--seed 42`, prompt `Count from one to fifty.`, UD-IQ3_XXS -- never UD-Q3_K_XL, see `PLAN.md`'s MTP+Q3_K_XL
+closure).
+
+| `GGML_SYCL_MMID_HYBRID_FRACTION` | decode t/s (MTP) | decode t/s (§10.3, no MTP) |
+|---|---:|---:|
+| 0 | 31.8 | 24.0 |
+| 0.1 | 22.4 | 17.5 |
+| 0.25 | 14.3 | 12.2 |
+| 0.5 | 9.0 | 8.7 |
+| 1.0 | 5.2 | 5.2 |
+
+**The inverted curve reproduces exactly under MTP.** MTP's own uplift is visible at fraction 0 (31.8 vs.
+24.0 tok/s, in line with the known ~1.3x) and is fully gone by fraction 1.0 (5.2 tok/s in both arms, within
+noise) -- the GPU round trip cost dominates hard enough to erase MTP's gain entirely once the hybrid path is
+doing real work. The §10.4 per-row calibration numbers are also unchanged under MTP (20-row host-weight
+chain: 480-484 us here vs. 474.5 us in §10.4's table). **§7(1)'s "cache never engages with a GPU-resident
+drafter" concern does not apply -- there is no cache here for MTP to fail to engage with, and the hybrid
+path's own cost dominates regardless of MTP being present.**
+
+### 11.2 PCIe cold/hot gap -- huge-pages candidate ruled out, with proof
+
+THP on this box is `madvise` mode (`/sys/kernel/mm/transparent_hugepage/enabled`), meaning a region only gets
+huge pages if something explicitly asks via `madvise(MADV_HUGEPAGE)`. One-line diagnostic added at
+`ggml-sycl.cpp:1546` (`ggml_backend_sycl_host_malloc`, the actual allocator behind `-lm none` pinned expert
+weights): call `madvise(ptr, size, MADV_HUGEPAGE)` right after `sycl::malloc_host` returns, gated behind
+`GGML_SYCL_HOST_MADV_HUGEPAGE=1` (not committed -- local diagnostic, `#ifdef __linux__` guarded).
+
+A/B at `FRACTION=1.0`, no MTP, no other change:
+
+| arm | cold round trip (10 rows) | hot calibration (20 rows) | decode t/s |
+|---|---:|---:|---:|
+| no madvise | 2078.6-2079.9 us | 483.7-492.4 us mean | 5.1 |
+| `MADV_HUGEPAGE` | 2066.7-2072.5 us | 479.6-484.6 us mean | 5.1 |
+
+No measurable difference in either number. **This was verified to not be a silent no-op**: with the flag set,
+`docker inspect --format '{{.State.Pid}}'` gave the host PID of a live run, and `/proc/<pid>/smaps` summed
+`AnonHugePages: 0 kB` across the whole process. The `madvise` call is a real no-op on this allocation, most
+likely because `sycl::malloc_host` (Level Zero USM host allocation) already faults and pins its pages before
+returning the pointer -- i.e. before this code gets a chance to ask for huge pages -- or because the
+allocation isn't a plain anonymous mapping THP applies to at all. Either way, **huge pages are ruled out as a
+cause this project can fix by asking for them**, not just untested. The remaining named candidate (Level Zero
+host-USM DMA setup cost per distinct region) would need driver-level tracing to chase further; not attempted,
+and not obviously worth it given the ceiling below.
+
+### 11.3 Net effect on §10.6's recommendation: none
+
+Both checks close out without changing the verdict. The uncached hybrid path is dead under the production
+MTP configuration exactly as it was without MTP, and the cold-read gap's cheapest, most fixable candidate
+cause is eliminated with a verified negative rather than left as an open guess. §10.6's projected ceiling
+(28-32 tok/s, conditional-go-at-reduced-ambition on a ~1,600-line cached Step 2, still short of the 47 tok/s
+target) stands unchanged. This section takes no position on whether Step 2 is worth building -- only that the
+two items named as blocking that decision are now answered.

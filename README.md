@@ -48,6 +48,18 @@ This file is an entry point.
   deployment's config lives in the sibling `coding-agent` repo (out of scope
   here) — this repo is the research, the port, and the validated artifacts
   it's built from.
+- **Conversation state now survives a reload or a full server restart,
+  instead of re-prefilling from scratch.** A disk-backed prompt cache
+  (`docs/research/16`-`18`) fixed a real cost — ~56% of a production day's
+  prefilled tokens were the same conversation re-prefilled after a tier
+  switch or sleep/wake. Validated on the real B70 with a from-scratch
+  correctness-oracle design (`docs/research/20`) covering both a corruption
+  ladder of 9 realistic save/restore bug classes and a byte-exact restore
+  into a fragmented KV pool, and deployed. Two adjacent candidates from the
+  same investigation — vendoring an upstream grouped-MoE-GEMM PR, and
+  compressing the saved state — were tested on real data and correctly
+  **not** shipped, for zero measured benefit and slower-than-disk
+  decompression respectively (`docs/research/19`, `21`).
 
 ## Repo layout
 
@@ -55,7 +67,7 @@ This file is an entry point.
 |---|---|
 | `PLAN.md` | The full, chronological project log. Every phase, every dated update, every course-correction, in order. Start here for *how* a conclusion was reached; the docs below are where individual questions got answered in depth. |
 | `docs/00-background.md` | Ground rules and the CUDA-fork mechanism this project ports from, condensed from a prior research thread. |
-| `docs/research/*.md` | 14 deep-dive scoping/investigation docs, each answering one specific technical question (index below). |
+| `docs/research/*.md` | 20 deep-dive scoping/investigation docs, each answering one specific technical question (index below). |
 | `docker/` | Dockerfiles for the SYCL/Vulkan runtime and build environments, plus the standalone kernel-equivalence test harnesses used during development. |
 | `patches/llama.cpp.patch` | **The actual code.** A unified diff of every change made against the pinned upstream llama.cpp checkout — see "The code" below. |
 | `staging/work/*.sh` `*.py` | The real benchmark/validation drivers this project's numbers came from — reload/tier-crossing tests, YaRN quality probes, per-depth decode-scaling sweeps, the production metrics tailer, etc. Reproducible, not one-off scratch. |
@@ -75,11 +87,14 @@ flash attention, `--context-tiers`, the idle de-escalation fix, MTP support
 for `qwen4exp`, and everything else — lives as **local modifications on top
 of a pinned upstream llama.cpp checkout**, not as a standalone codebase. That
 vendored tree isn't committed (see above), so the changes are captured as
-`patches/llama.cpp.patch`: a single diff covering 31 modified files and 13
+`patches/llama.cpp.patch`: a single diff covering 35 modified files and 15
 new files (mostly under `ggml/src/ggml-sycl/` — `moe-cache.{cpp,hpp}`,
 `fattn-sparse.{cpp,hpp}`, `hyper_connect.{cpp,hpp}`, `topk-radix.{cpp,hpp}`,
-`mmid-hybrid.{cpp,hpp}`, `expert-pool.{cpp,hpp}` — plus the server/arch/model
-plumbing that wires them in).
+`mmid-hybrid.{cpp,hpp}`, `expert-pool.{cpp,hpp}`, `fused-gemm.{cpp,hpp}` (the
+PR #29245 merge, built and correctness-tested but not enabled in production —
+see `docs/research/19`) — plus the server/arch/model plumbing that wires them
+in, including the conversation-state-persistence feature in `tools/server/`
+(`docs/research/18`, `20`)).
 
 To reproduce: check out `ggml-org/llama.cpp` at commit `6d9c82ea2` (pinned
 2026-09-09, the commit both the Vulkan `ggml_vk_fill` fix and the SYCL
@@ -110,6 +125,12 @@ if you need the evidence.
 | `13-dynamic-context-aware-expert-placement.md` | The largest doc — scopes, builds, and validates `--context-tiers` (dynamic context-length-aware expert placement), the 500K tier, the nearunity YaRN unlock, and idle-based de-escalation, ending in a real production-scale validation run. |
 | `14-usage-based-static-expert-placement.md` | A complementary idea: static placement informed by real per-expert usage skew rather than context length. Scoped, not built. |
 | `15-yarn-and-long-context-rope.md` | Resolves the YaRN/RoPE question directly: is scaled or unscaled extrapolation the right call past the trained context length? |
+| `16-prefill-speedup-scoping.md` | What's actually consuming long-context prefill time, and what would speed it up — finds the biggest single lever is not re-prefilling reloaded conversations at all. |
+| `17-kv-state-persistence-scoping.md` | Can this hybrid model's full state (KV + recurrent + QSA indexer) round-trip through `llama_state_seq_get_data`/`set_data` at all? (Yes, mostly for free — the pooled QSA cache is the one exception, and it doesn't need saving.) |
+| `18-conversation-state-persistence-plan.md` | The implementation plan for disk-backed conversation persistence: file format, fingerprint, save/restore triggers, the correctness-gate design, and a staged task breakdown — finds and fixes a real `-np 2 -kvu` restore-ordering bug along the way. |
+| `19-pr29245-grouped-moe-gemm-merge-notes.md` | Hand-merges upstream PR #29245 (grouped MoE GEMM for SYCL) against this fork's local changes; measured on production's actual config, it's a wash — not deployed. |
+| `20-improved-state-restore-oracle-design.md` | Redesigns the state-restore correctness oracle after cross-run statistical comparison proved defeated by this backend's own run-to-run noise — an exact-replay-plus-corruption-ladder design instead, validated on the real B70. |
+| `21-state-blob-compression-scoping.md` | Measures real compression ratio/throughput on captured state blobs to answer whether streaming compression is worth adding — it isn't, on this hardware. |
 
 ## How to reproduce / use
 

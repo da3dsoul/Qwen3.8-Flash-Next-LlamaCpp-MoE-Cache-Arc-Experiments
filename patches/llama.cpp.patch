@@ -1,5 +1,5 @@
 diff --git a/common/arg.cpp b/common/arg.cpp
-index 43052d58d..0843c3f9a 100644
+index 43052d58d..bb19469d7 100644
 --- a/common/arg.cpp
 +++ b/common/arg.cpp
 @@ -259,6 +259,25 @@ static void parse_tensor_buffer_overrides(const std::string & value, std::vector
@@ -82,7 +82,50 @@ index 43052d58d..0843c3f9a 100644
      add_opt(common_arg(
          {"-n", "--predict", "--n-predict"}, "N",
          string_format(
-@@ -2715,6 +2781,19 @@ common_params_context common_params_parser_init(common_params & params, llama_ex
+@@ -1717,6 +1783,42 @@ common_params_context common_params_parser_init(common_params & params, llama_ex
+             params.cache_ram_mib = value;
+         }
+     ).set_env("LLAMA_ARG_CACHE_RAM").set_examples({LLAMA_EXAMPLE_SERVER, LLAMA_EXAMPLE_CLI}));
++    add_opt(common_arg(
++        {"--prompt-cache-dir"}, "PATH",
++        "directory for the disk tier of the prompt cache (default: disabled, RAM cache only)",
++        [](common_params & params, const std::string & value) {
++            params.prompt_cache_dir = value;
++        }
++    ).set_env("LLAMA_ARG_PROMPT_CACHE_DIR").set_examples({LLAMA_EXAMPLE_SERVER}));
++    add_opt(common_arg(
++        {"--prompt-cache-disk-mib"}, "N",
++        string_format("max size of the disk prompt cache in MiB, LRU-evicted (default: %d)", params.prompt_cache_disk_mib),
++        [](common_params & params, int value) {
++            params.prompt_cache_disk_mib = value;
++        }
++    ).set_env("LLAMA_ARG_PROMPT_CACHE_DISK_MIB").set_examples({LLAMA_EXAMPLE_SERVER}));
++    add_opt(common_arg(
++        {"--prompt-cache-disk-ckpts"}, "N",
++        string_format("number of newest context checkpoints to persist per disk cache entry (default: %d)", params.prompt_cache_disk_ckpts),
++        [](common_params & params, int value) {
++            params.prompt_cache_disk_ckpts = value;
++        }
++    ).set_env("LLAMA_ARG_PROMPT_CACHE_DISK_CKPTS").set_examples({LLAMA_EXAMPLE_SERVER}));
++    add_opt(common_arg(
++        {"--prompt-cache-disk-min-tokens"}, "N",
++        string_format("don't persist prompts shorter than this many tokens to the disk cache (default: %d)", params.prompt_cache_disk_min_tokens),
++        [](common_params & params, int value) {
++            params.prompt_cache_disk_min_tokens = value;
++        }
++    ).set_env("LLAMA_ARG_PROMPT_CACHE_DISK_MIN_TOKENS").set_examples({LLAMA_EXAMPLE_SERVER}));
++    add_opt(common_arg(
++        {"--prompt-cache-disk-max-age"}, "N",
++        string_format("delete a disk cache entry once it has been unused for this many seconds, "
++            "regardless of --prompt-cache-disk-mib (default: %d, 0 = disabled)", params.prompt_cache_disk_max_age_s),
++        [](common_params & params, int value) {
++            params.prompt_cache_disk_max_age_s = value;
++        }
++    ).set_env("LLAMA_ARG_PROMPT_CACHE_DISK_MAX_AGE").set_examples({LLAMA_EXAMPLE_SERVER}));
+     add_opt(common_arg(
+         {"-kvu", "--kv-unified"},
+         {"-no-kvu", "--no-kv-unified"},
+@@ -2715,6 +2817,19 @@ common_params_context common_params_parser_init(common_params & params, llama_ex
              else { throw std::invalid_argument("invalid value"); }
          }
      ).set_env("LLAMA_ARG_LAZY_MODE"));
@@ -145,7 +188,7 @@ index d162a3880..7210669df 100644
      mparams.check_tensors   = params.check_tensors;
      mparams.use_extra_bufts = !params.no_extra_bufts;
 diff --git a/common/common.h b/common/common.h
-index 63d0badd0..17f57c0da 100644
+index 63d0badd0..4cede76dc 100644
 --- a/common/common.h
 +++ b/common/common.h
 @@ -445,6 +445,14 @@ struct lr_opt {
@@ -174,10 +217,18 @@ index 63d0badd0..17f57c0da 100644
      common_cpu_params cpuparams;
      common_cpu_params cpuparams_batch;
  
-@@ -631,6 +643,11 @@ struct common_params {
+@@ -631,6 +643,19 @@ struct common_params {
      int32_t checkpoint_min_step = 8192;  // minimum spacing between context checkpoints
      int32_t cache_ram_mib       = 8192;  // -1 = no limit, 0 - disable, 1 = 1 MiB, etc.
  
++    // disk tier of the prompt cache: persists slots and RAM cache entries across restarts,
++    // not just in-process reloads. empty dir = feature off (RAM-only behavior, unchanged)
++    std::string prompt_cache_dir             = "";    // NOLINT
++    int32_t     prompt_cache_disk_mib        = 65536; // max bytes on disk, LRU-evicted
++    int32_t     prompt_cache_disk_ckpts      = 4;      // newest context checkpoints kept per persisted entry
++    int32_t     prompt_cache_disk_min_tokens = 4096;   // don't persist prompts shorter than this
++    int32_t     prompt_cache_disk_max_age_s  = 0;      // 0 = disabled; entries idle longer than this are GC'd regardless of the byte budget
++
 +    // reload the model into another placement when a request needs more (or less) context
 +    std::vector<common_context_tier> context_tiers;
 +    int32_t context_tier_reserve    = 4096; // tokens kept free for the generation when picking a tier
@@ -186,6 +237,18 @@ index 63d0badd0..17f57c0da 100644
      std::string hostname      = "127.0.0.1";
      std::string public_path   = "";                                                                         // NOLINT
      std::string api_prefix    = "";                                                                         // NOLINT
+diff --git a/docs/backend/SYCL.md b/docs/backend/SYCL.md
+index 4a640e442..08b7a1520 100644
+--- a/docs/backend/SYCL.md
++++ b/docs/backend/SYCL.md
+@@ -810,6 +810,7 @@ User can use the device management in [docs/multi-gpu.md](https://github.com/ggm
+ | GGML_SYCL_MKL_FA_DIAG | 0 (default) or 1 | Enable output fingerprinting for MKL flash attention. Dumps the first 64 float output values for the first 6 FA calls with n_kv ≥ 1024, labeled with kernel type (MKL/TILE/VEC) for cross-kernel comparison. |
+ | GGML_SYCL_ENABLE_FUSION | 0 or 1 (default) | Enable fused-kernel dispatch in graph compute. Unsupported types and layouts fall back to the standalone op kernels. See `ggml_sycl_can_fuse()`. |
+ | GGML_SYCL_ENABLE_ESIMD | 0 or 1 (default)| Enable ESIMD kernels when available. |
++| GGML_SYCL_XMX_GATHER_TYPES | decimal bitmask, all bits set (default) | Select which quantized weight formats may take the XMX dequant-GEMM paths, where the weights are dequantized inside the GEMM (gathered straight into the XMX tiles) instead of being written out to f16 and read back. This covers the grouped `MUL_MAT_ID` path used by MoE models, and the plain `MUL_MAT` path when built with `GGML_SYCL_F16=ON` (the plain path sits inside that build's f16 branch). Both compute in f16 on the XMX units regardless of `GGML_SYCL_F16`, so enabling them for `MUL_MAT_ID` trades some precision for speed relative to the per-expert library GEMM they replace. Mainly affects prompt processing; token generation is unaffected. One bit per format, so a format can be enabled or benchmarked on its own:<br>* 1: IQ4_NL<br>* 2: IQ3_S<br>* 4: IQ4_XS<br>* 8: IQ3_XXS<br>* 16: IQ2_XXS<br>* 32: IQ2_XS<br>* 64: IQ2_S<br>* 128: IQ1_S<br>* 256: IQ1_M<br>Set to 0 to disable the paths entirely and fall back to the library GEMM, which is the baseline to compare against. A format is only taken when the shape also fits (the weights must cover whole blocks, and the tile is only used while N is narrow), so setting a bit does not force the path. Formats outside this list are never affected by this variable. |
+ | ZES_ENABLE_SYSMAN | 0 (default) or 1 | Support to get free memory of GPU by sycl::aspect::ext_intel_free_memory.<br>Recommended to use when --split-mode = layer |
+ | UR_L0_ENABLE_RELAXED_ALLOCATION_LIMITS | 0 (default) or 1 | Allow SYCL/Unified Runtime Level Zero device allocations larger than 4 GiB. llama.cpp's direct Level Zero allocation path requests the relaxed maximum-size limit itself when GGML_SYCL_ENABLE_LEVEL_ZERO=1. |
+ | GGML_SYCL_USM_SYSTEM | 0 (default) or 1 | Enable experimental support for [USM system allocations](https://github.khronos.org/SYCL_Reference/iface/usm_basic_concept.html#system-allocations) for large GPU buffers. This requires enough host memory for model weights and caches, an Intel Xe2+ GPU such as BMG or newer and supported on Linux only, with CONFIG_DRM_XE_GPUSVM enabled. |
 diff --git a/ggml/src/ggml-backend.cpp b/ggml/src/ggml-backend.cpp
 index 40e50c5c9..b2e83e6ff 100644
 --- a/ggml/src/ggml-backend.cpp
@@ -442,6 +505,81 @@ index 87a329f26..2989ea544 100644
  }
  
  /////////////////////////////////
+diff --git a/ggml/src/ggml-cpu/iqp.cpp b/ggml/src/ggml-cpu/iqp.cpp
+index b9201db38..d62521e26 100644
+--- a/ggml/src/ggml-cpu/iqp.cpp
++++ b/ggml/src/ggml-cpu/iqp.cpp
+@@ -490,6 +490,60 @@ static void iqp_decode_iq4_xs(const void * GGML_RESTRICT vx,
+     }
+ }
+ 
++// K-quant superblock of 256: 16 groups of 16 weights, each with its own signed 6 bit scale and no
++// separate min (symmetric, like the I-quant grids above) - so it maps onto block_iqp_x8 exactly like
++// them, one iscale per group of IQP_SB_SIZE weights. Layout/formula from dequantize_row_q3_K in
++// ggml-quants.c (not re-derived): value = ((qs >> shift) & 3) - (hmask bit set ? 0 : 4), scale = sc - 32,
++// y = d_all * scale * value. This decode reproduces that scan order exactly (see kmask1/kmask2 unpack
++// of the packed 6 bit scales, and the per sub-block (nb128, j, half) -> (byte offset, shift, hmask bit)
++// mapping), just restructured as a loop over the 16 sub-blocks instead of the reference's nested
++// n/j/half loop, since the two are equivalent for the fixed 256-weight super-block.
++static void iqp_decode_q3_K(const void * GGML_RESTRICT vx,
++                            int8_t * GGML_RESTRICT     vals,
++                            int8_t * GGML_RESTRICT     iscales,
++                            float * GGML_RESTRICT      dfac) {
++    const block_q3_K * x = (const block_q3_K *) vx;
++
++    const uint32_t kmask1 = 0x03030303;
++    const uint32_t kmask2 = 0x0f0f0f0f;
++
++    uint32_t aux[4];
++    const int8_t * scales = (const int8_t *) aux;
++
++    memcpy(aux, x->scales, 12);
++    const uint32_t tmp = aux[2];
++    aux[2] = ((aux[0] >> 4) & kmask2) | (((tmp >> 4) & kmask1) << 4);
++    aux[3] = ((aux[1] >> 4) & kmask2) | (((tmp >> 6) & kmask1) << 4);
++    aux[0] = (aux[0] & kmask2) | (((tmp >> 0) & kmask1) << 4);
++    aux[1] = (aux[1] & kmask2) | (((tmp >> 2) & kmask1) << 4);
++
++    *dfac = GGML_CPU_FP16_TO_FP32(x->d);
++
++    const uint8_t * q  = x->qs;
++    const uint8_t * hm = x->hmask;
++
++    for (int sb = 0; sb < IQP_NSB; sb++) {
++        iscales[sb] = (int8_t) (scales[sb] - 32);
++
++        const int nb128 = sb / 8;
++        const int ls    = sb % 8;
++        const int j     = ls / 2;
++        const int half  = ls % 2;
++
++        const int     shift = 2 * j;
++        const uint8_t m     = (uint8_t) (1u << (4 * nb128 + j));
++
++        // q advances 32 bytes between the two 128-wide halves of the super-block, but hmask does not:
++        // its 32 bytes are reused for both halves, distinguished only by which of the 8 mask bits (m) is tested
++        const uint8_t * qb  = q + 32 * nb128 + (half ? 16 : 0);
++        const uint8_t * hmb = hm + (half ? 16 : 0);
++
++        for (int l = 0; l < IQP_SB_SIZE; l++) {
++            vals[sb * IQP_SB_SIZE + l] = (int8_t) (((qb[l] >> shift) & 3) - ((hmb[l] & m) ? 0 : 4));
++        }
++    }
++}
++
+ // expanded by the eligibility test and the decode dispatch
+ #define IQP_TYPE_LIST(T) \
+     T(IQ2_XXS, iq2_xxs)  \
+@@ -499,7 +553,8 @@ static void iqp_decode_iq4_xs(const void * GGML_RESTRICT vx,
+     T(IQ3_S, iq3_s)      \
+     T(IQ1_S, iq1_s)      \
+     T(IQ1_M, iq1_m)      \
+-    T(IQ4_XS, iq4_xs)
++    T(IQ4_XS, iq4_xs)    \
++    T(Q3_K, q3_K)
+ 
+ static bool iqp_decode_superblock(enum ggml_type             type,
+                                   const void * GGML_RESTRICT vx,
 diff --git a/ggml/src/ggml-mmid-hybrid.h b/ggml/src/ggml-mmid-hybrid.h
 new file mode 100644
 index 000000000..e89eed04e
@@ -542,10 +680,30 @@ index 51ab6f930..827c00b67 100644
  #include "upscale.hpp"
  #include "wkv.hpp"
 diff --git a/ggml/src/ggml-sycl/common.hpp b/ggml/src/ggml-sycl/common.hpp
-index 355dd442b..9b700fcd0 100644
+index 355dd442b..199a68a1f 100644
 --- a/ggml/src/ggml-sycl/common.hpp
 +++ b/ggml/src/ggml-sycl/common.hpp
-@@ -69,6 +69,7 @@ extern int g_ggml_sycl_enable_flash_attention;
+@@ -65,10 +65,27 @@ extern int g_ggml_sycl_enable_optimize;
+ extern int g_ggml_sycl_enable_fusion;
+ extern int g_ggml_sycl_enable_esimd;
+ extern int g_ggml_sycl_prioritize_dmmv;
++
++// Which quantized weight formats may take the XMX dequant-GEMM paths. A bitmask rather than one
++// flag per path, so a format can be enabled or measured on its own and adding a format is one bit.
++enum ggml_sycl_xmx_gather_type {
++    GGML_SYCL_XMX_GATHER_IQ4_NL   = 1 << 0,
++    GGML_SYCL_XMX_GATHER_IQ3_S    = 1 << 1,
++    GGML_SYCL_XMX_GATHER_IQ4_XS   = 1 << 2,
++    GGML_SYCL_XMX_GATHER_IQ3_XXS  = 1 << 3,
++    GGML_SYCL_XMX_GATHER_IQ2_XXS  = 1 << 4,
++    GGML_SYCL_XMX_GATHER_IQ2_XS   = 1 << 5,
++    GGML_SYCL_XMX_GATHER_IQ2_S    = 1 << 6,
++    GGML_SYCL_XMX_GATHER_IQ1_S    = 1 << 7,
++    GGML_SYCL_XMX_GATHER_IQ1_M    = 1 << 8,
++};
++static constexpr int GGML_SYCL_XMX_GATHER_TYPES_DEFAULT = ~0;
++extern int g_ggml_sycl_xmx_gather_types;
+ extern int g_ggml_sycl_enable_flash_attention;
  extern int g_ggml_sycl_dev2dev_memcpy;
  extern int g_ggml_sycl_fa_onednn;
  extern int g_ggml_sycl_fa_onednn_max_kv;
@@ -553,6 +711,27 @@ index 355dd442b..9b700fcd0 100644
  extern int g_ggml_sycl_enable_mkl_fa;
  extern int g_ggml_sycl_memtrace;
  extern int g_ggml_sycl_memtrace_step;
+@@ -332,6 +349,12 @@ struct mmid_row_mapping {
+     int32_t i2;
+ };
+ 
++struct ggml_sycl_gg_tile {
++    int32_t expert;
++    int32_t n0;
++    int32_t n1;
++};
++
+ namespace sycl_ex = sycl::ext::oneapi::experimental;
+ struct ggml_backend_sycl_context {
+     int device;
+@@ -430,6 +453,7 @@ struct ggml_backend_sycl_context {
+     std::unique_ptr<ggml_sycl_pool> host_pools[GGML_SYCL_MAX_DEVICES];
+ 
+     std::vector<mmid_row_mapping> mmid_row_mapping_host;
++    std::vector<ggml_sycl_gg_tile> mmid_tile_schedule_host;
+ 
+     static std::unique_ptr<ggml_sycl_pool> new_pool_for_device(queue_ptr qptr, int device);
+ 
 diff --git a/ggml/src/ggml-sycl/dmmv.cpp b/ggml/src/ggml-sycl/dmmv.cpp
 index d47d6831a..bc86981ac 100644
 --- a/ggml/src/ggml-sycl/dmmv.cpp
@@ -1460,11 +1639,750 @@ index 394cda593..59b66f45d 100644
      // n_kv watchdog: log when n_kv differs from the last FA call with
      // the same D — helps detect cache-truncation issues.
      static int nkv_debug = ggml_sycl_get_env("GGML_SYCL_MKL_FA_DEBUG", 0);
+diff --git a/ggml/src/ggml-sycl/fused-gemm.cpp b/ggml/src/ggml-sycl/fused-gemm.cpp
+new file mode 100644
+index 000000000..f14b2d39e
+--- /dev/null
++++ b/ggml/src/ggml-sycl/fused-gemm.cpp
+@@ -0,0 +1,633 @@
++#include "fused-gemm.hpp"
++
++#include <sycl/ext/oneapi/matrix/matrix.hpp>
++
++#include <mutex>
++#include <unordered_map>
++
++namespace mx = sycl::ext::oneapi::experimental::matrix;
++
++// XMX f16 tile: 8x16 (A) times 16x16 (B) into an 8x16 f32 accumulator
++static constexpr int FG_TM = 8;
++static constexpr int FG_TN = 16;
++static constexpr int FG_TK = 16;
++
++// a sub-group owns 16 rows (2 A tiles), stages 32 weight values per lane per step and
++// walks its own K range; the sub-groups of a work-group are summed at the end
++static constexpr int FG_SG_ROWS = 2 * FG_TM;
++static constexpr int FG_BK      = QK4_NL;   // iq3_s splits its superblock into steps of this width
++static constexpr int FG_BN      = 2 * FG_TN;
++static constexpr int FG_KSPLIT  = 4;
++static constexpr int FG_WG_SIZE = FG_KSPLIT * WARP_SIZE;
++static_assert(FG_SG_ROWS == WARP_SIZE, "the A stage maps one lane to one row");
++static_assert(2 * FG_BN == GGML_SYCL_FG_MAX_N, "header gate must match the tile width");
++
++static size_t grouped_gemm_packed_capacity(size_t size) {
++    size_t capacity = 1;
++    while (capacity < size) {
++        capacity *= 2;
++    }
++    return capacity;
++}
++
++static bool fused_gemm_f16_supported(dpct::queue_ptr stream) {
++    try {
++        const auto combinations = stream->get_device().get_info<
++            sycl::ext::oneapi::experimental::info::device::matrix_combinations>();
++        for (const auto & c : combinations) {
++            if (c.atype == mx::matrix_type::fp16 && c.btype == mx::matrix_type::fp16 &&
++                c.ctype == mx::matrix_type::fp32 && c.dtype == mx::matrix_type::fp32 &&
++                (c.max_msize >= FG_TM || c.msize == FG_TM) &&
++                (c.max_nsize >= FG_TN || c.nsize == FG_TN) &&
++                (c.max_ksize >= FG_TK || c.ksize == FG_TK)) {
++                return true;
++            }
++        }
++    } catch (const sycl::exception &) {
++    }
++    return false;
++}
++
++// src1 [N][K] -> VNNI packed [K/2][Npad][2] so B tiles load straight from global memory
++static void fused_gemm_pack_b(const sycl::half * y, sycl::half * packed, int N, int Npad, int K, dpct::queue_ptr stream) {
++    const int kpairs = K / 2;
++    stream->parallel_for(sycl::range<1>((size_t) Npad * kpairs), [=](sycl::id<1> id) {
++        const int idx = id[0];
++        const int n   = idx / kpairs;
++        const int kp  = idx - n * kpairs;
++        sycl::half v0 = (sycl::half) 0.0f;
++        sycl::half v1 = (sycl::half) 0.0f;
++        if (n < N) {
++            const sycl::half * src = y + (size_t) n * K + 2 * kp;
++            v0 = src[0];
++            v1 = src[1];
++        }
++        sycl::half * out = packed + ((size_t) kp * Npad + n) * 2;
++        out[0] = v0;
++        out[1] = v1;
++    });
++}
++
++// A stage: one lane owns one row and decodes FG_BK values of it per k step, with every scale
++// folded into the f16 so the mad below sees plain f16. One overload per weight format.
++static __dpct_inline__ void fg_stage_a(const block_iq4_nl * __restrict__ xrow, const int kb, sycl::half2 * a) {
++    const block_iq4_nl blk = xrow[kb];
++    const float        d   = (float) blk.d;
++#pragma unroll
++    for (int j = 0; j < QK4_NL / 2; j += 2) {
++        const uint8_t q0 = blk.qs[j];
++        const uint8_t q1 = blk.qs[j + 1];
++        a[j / 2]     = sycl::half2((sycl::half) (d * kvalues_iq4nl[q0 & 0xf]), (sycl::half) (d * kvalues_iq4nl[q1 & 0xf]));
++        a[j / 2 + 8] = sycl::half2((sycl::half) (d * kvalues_iq4nl[q0 >> 4]),  (sycl::half) (d * kvalues_iq4nl[q1 >> 4]));
++    }
++}
++
++// iq3_s: k step kb is sub-block kb % 8 of superblock kb / 8. The superblock is 110 bytes, so read
++// only the fields of that sub-block instead of copying the block. Same decode as
++// dequantize_block_iq3_s: grid entries are taken as dwords and the sign bit is a plain shift.
++static __dpct_inline__ void fg_stage_a(const block_iq3_s * __restrict__ xrow, const int kb, sycl::half2 * a) {
++    static_assert(QK_K == 256, "the iq3_s A stage assumes 8 sub-blocks per superblock");
++    const block_iq3_s * blk = xrow + kb / (QK_K / 32);
++    const int           ib8 = kb % (QK_K / 32);
++    const uint8_t *     qs  = blk->qs + 8 * ib8;
++    const int           qh  = blk->qh[ib8];
++    const float         d   = (float) blk->d * (1 + 2 * ((blk->scales[ib8 / 2] >> (4 * (ib8 % 2))) & 0xf));
++#pragma unroll
++    for (int il = 0; il < 4; ++il) {
++        const uint32_t grid1 = iq3s_grid[qs[2 * il + 0] | ((qh << (8 - 2 * il)) & 256)];
++        const uint32_t grid2 = iq3s_grid[qs[2 * il + 1] | ((qh << (7 - 2 * il)) & 256)];
++        const int      signs = blk->signs[4 * ib8 + il];
++#pragma unroll
++        for (int j = 0; j < 2; ++j) {
++            const float g1a = (float) ((grid1 >> (16 * j + 0)) & 0xff);
++            const float g1b = (float) ((grid1 >> (16 * j + 8)) & 0xff);
++            const float g2a = (float) ((grid2 >> (16 * j + 0)) & 0xff);
++            const float g2b = (float) ((grid2 >> (16 * j + 8)) & 0xff);
++            const int   s   = 2 * j;
++            a[4 * il + j]     = sycl::half2((sycl::half) (d * ((signs & (1 << (s + 0))) ? -g1a : g1a)),
++                                            (sycl::half) (d * ((signs & (1 << (s + 1))) ? -g1b : g1b)));
++            a[4 * il + j + 2] = sycl::half2((sycl::half) (d * ((signs & (1 << (s + 4))) ? -g2a : g2a)),
++                                            (sycl::half) (d * ((signs & (1 << (s + 5))) ? -g2b : g2b)));
++        }
++    }
++}
++
++// values per stored block, so a row of K values is K/qk blocks
++template <typename block_q_t> struct fg_block_traits;
++template <> struct fg_block_traits<block_iq4_nl> { static constexpr int qk = QK4_NL; };
++template <> struct fg_block_traits<block_iq3_s>  { static constexpr int qk = QK_K; };
++template <> struct fg_block_traits<block_iq3_xxs> { static constexpr int qk = QK_K; };
++template <> struct fg_block_traits<block_iq4_xs>  { static constexpr int qk = QK_K; };
++template <> struct fg_block_traits<block_iq2_xxs> { static constexpr int qk = QK_K; };
++template <> struct fg_block_traits<block_iq2_xs>  { static constexpr int qk = QK_K; };
++template <> struct fg_block_traits<block_iq2_s>   { static constexpr int qk = QK_K; };
++template <> struct fg_block_traits<block_iq1_s>   { static constexpr int qk = QK_K; };
++template <> struct fg_block_traits<block_iq1_m>   { static constexpr int qk = QK_K; };
++
++// The A stages below are the dequantize_block_iq* kernels rewritten for one k step. There a
++// work-item handled one quarter (il) of one 32-wide sub-block (ib); here one lane produces the
++// whole step, so il becomes a loop and ib is kb inside the superblock. Each quarter yields 8
++// consecutive values, i.e. 4 half2 at a[4*il], so nothing larger than 8 floats is ever live.
++#define FG_SUPERBLOCK(T)                                                         \
++    static_assert(QK_K == 256, "the " #T " A stage assumes 8 sub-blocks per superblock"); \
++    const T * blk = xrow + kb / (QK_K / 32);                                     \
++    const int ib  = kb % (QK_K / 32)
++
++static __dpct_inline__ void fg_pack_quarter(const float * __restrict__ t, sycl::half2 * a, int il) {
++#pragma unroll
++    for (int j = 0; j < 4; ++j) {
++        a[4 * il + j] = sycl::half2((sycl::half) t[2 * j], (sycl::half) t[2 * j + 1]);
++    }
++}
++
++static __dpct_inline__ void fg_stage_a(const block_iq4_xs * __restrict__ xrow, const int kb, sycl::half2 * a) {
++    FG_SUPERBLOCK(block_iq4_xs);
++    // low nibbles fill the first half of the step, high nibbles the second, so the two halves
++    // land at a[0..7] and a[8..15] and no quarter loop is needed
++    const float d = (float) blk->d *
++        ((((blk->scales_l[ib / 2] >> (4 * (ib % 2))) & 0xf) | (((blk->scales_h >> (2 * ib)) & 3) << 4)) - 32);
++    const uint8_t * q4 = blk->qs + 16 * ib;
++#pragma unroll
++    for (int j = 0; j < 8; ++j) {
++        a[j]     = sycl::half2((sycl::half) (d * kvalues_iq4nl[q4[2 * j] & 0xf]),
++                               (sycl::half) (d * kvalues_iq4nl[q4[2 * j + 1] & 0xf]));
++        a[8 + j] = sycl::half2((sycl::half) (d * kvalues_iq4nl[q4[2 * j] >> 4]),
++                               (sycl::half) (d * kvalues_iq4nl[q4[2 * j + 1] >> 4]));
++    }
++}
++
++static __dpct_inline__ void fg_stage_a(const block_iq3_xxs * __restrict__ xrow, const int kb, sycl::half2 * a) {
++    FG_SUPERBLOCK(block_iq3_xxs);
++    const uint8_t *  q3    = blk->qs + 8 * ib;
++    const uint16_t * gas   = (const uint16_t *) (blk->qs + QK_K / 4) + 2 * ib;
++    const uint32_t   aux32 = gas[0] | (gas[1] << 16);
++    const float      d     = (float) blk->d * (0.5f + (aux32 >> 28)) * 0.5f;
++#pragma unroll
++    for (int il = 0; il < 4; ++il) {
++        const uint8_t * grid1 = (const uint8_t *) (iq3xxs_grid + q3[2 * il + 0]);
++        const uint8_t * grid2 = (const uint8_t *) (iq3xxs_grid + q3[2 * il + 1]);
++        const uint8_t   signs = ksigns_iq2xs[(aux32 >> (7 * il)) & 127];
++        float t[8];
++#pragma unroll
++        for (int j = 0; j < 4; ++j) {
++            t[j + 0] = d * grid1[j] * (signs & kmask_iq2xs[j + 0] ? -1.f : 1.f);
++            t[j + 4] = d * grid2[j] * (signs & kmask_iq2xs[j + 4] ? -1.f : 1.f);
++        }
++        fg_pack_quarter(t, a, il);
++    }
++}
++
++static __dpct_inline__ void fg_stage_a(const block_iq2_xxs * __restrict__ xrow, const int kb, sycl::half2 * a) {
++    FG_SUPERBLOCK(block_iq2_xxs);
++    const uint16_t * q2    = blk->qs + 4 * ib;
++    const uint8_t *  aux8  = (const uint8_t *) q2;
++    const uint32_t   aux32 = q2[2] | (q2[3] << 16);
++    const float      d     = (float) blk->d * (0.5f + (aux32 >> 28)) * 0.25f;
++#pragma unroll
++    for (int il = 0; il < 4; ++il) {
++        const uint8_t * grid  = (const uint8_t *) (iq2xxs_grid + aux8[il]);
++        const uint8_t   signs = ksigns_iq2xs[(aux32 >> (7 * il)) & 127];
++        float t[8];
++#pragma unroll
++        for (int j = 0; j < 8; ++j) {
++            t[j] = d * grid[j] * (signs & kmask_iq2xs[j] ? -1.f : 1.f);
++        }
++        fg_pack_quarter(t, a, il);
++    }
++}
++
++static __dpct_inline__ void fg_stage_a(const block_iq2_xs * __restrict__ xrow, const int kb, sycl::half2 * a) {
++    FG_SUPERBLOCK(block_iq2_xs);
++    const uint16_t * q2 = blk->qs + 4 * ib;
++#pragma unroll
++    for (int il = 0; il < 4; ++il) {
++        const uint8_t * grid  = (const uint8_t *) (iq2xs_grid + (q2[il] & 511));
++        const float     d     = (float) blk->d * (0.5f + ((blk->scales[ib] >> (4 * (il / 2))) & 0xf)) * 0.25f;
++        const uint8_t   signs = ksigns_iq2xs[q2[il] >> 9];
++        float t[8];
++#pragma unroll
++        for (int j = 0; j < 8; ++j) {
++            t[j] = d * grid[j] * (signs & kmask_iq2xs[j] ? -1.f : 1.f);
++        }
++        fg_pack_quarter(t, a, il);
++    }
++}
++
++static __dpct_inline__ void fg_stage_a(const block_iq2_s * __restrict__ xrow, const int kb, sycl::half2 * a) {
++    FG_SUPERBLOCK(block_iq2_s);
++#pragma unroll
++    for (int il = 0; il < 4; ++il) {
++        const uint8_t * grid =
++            (const uint8_t *) (iq2s_grid + (blk->qs[4 * ib + il] | ((blk->qh[ib] << (8 - 2 * il)) & 0x300)));
++        const float   d     = (float) blk->d * (0.5f + ((blk->scales[ib] >> (4 * (il / 2))) & 0xf)) * 0.25f;
++        const uint8_t signs = blk->qs[QK_K / 8 + 4 * ib + il];
++        float t[8];
++#pragma unroll
++        for (int j = 0; j < 8; ++j) {
++            t[j] = d * grid[j] * (signs & kmask_iq2xs[j] ? -1.f : 1.f);
++        }
++        fg_pack_quarter(t, a, il);
++    }
++}
++
++static __dpct_inline__ void fg_stage_a(const block_iq1_s * __restrict__ xrow, const int kb, sycl::half2 * a) {
++    FG_SUPERBLOCK(block_iq1_s);
++    const float delta = blk->qh[ib] & 0x8000 ? -1 - IQ1S_DELTA : -1 + IQ1S_DELTA;
++    const float d     = (float) blk->d * (2 * ((blk->qh[ib] >> 12) & 7) + 1);
++#pragma unroll
++    for (int il = 0; il < 4; ++il) {
++        uint32_t       grid32[2];
++        const int8_t * q = (const int8_t *) grid32;
++        grid32[0] = iq1s_grid_gpu[blk->qs[4 * ib + il] | (((blk->qh[ib] >> (3 * il)) & 7) << 8)];
++        grid32[1] = (grid32[0] >> 4) & 0x0f0f0f0f;
++        grid32[0] &= 0x0f0f0f0f;
++        float t[8];
++#pragma unroll
++        for (int j = 0; j < 8; ++j) {
++            t[j] = d * (q[j] + delta);
++        }
++        fg_pack_quarter(t, a, il);
++    }
++}
++
++static __dpct_inline__ void fg_stage_a(const block_iq1_m * __restrict__ xrow, const int kb, sycl::half2 * a) {
++    FG_SUPERBLOCK(block_iq1_m);
++    const uint16_t * sc = (const uint16_t *) blk->scales;
++    iq1m_scale_t     scale;
++    scale.u16 = (sc[0] >> 12) | ((sc[1] >> 8) & 0x00f0) | ((sc[2] >> 4) & 0x0f00) | (sc[3] & 0xf000);
++#pragma unroll
++    for (int il = 0; il < 4; ++il) {
++        const int   ib16  = 2 * ib + il / 2;
++        const float d     = (float) scale.f16 * (2 * ((sc[ib16 / 4] >> (3 * (ib16 % 4))) & 0x7) + 1);
++        const float delta = blk->qh[2 * ib + il / 2] & (0x08 << (4 * (il % 2))) ? -1 - IQ1M_DELTA : -1 + IQ1M_DELTA;
++        uint32_t       grid32[2];
++        const int8_t * q = (const int8_t *) grid32;
++        grid32[0] = iq1s_grid_gpu[blk->qs[4 * ib + il] |
++                                  (((blk->qh[2 * ib + il / 2] >> (4 * (il % 2))) & 7) << 8)];
++        grid32[1] = (grid32[0] >> 4) & 0x0f0f0f0f;
++        grid32[0] &= 0x0f0f0f0f;
++        float t[8];
++#pragma unroll
++        for (int j = 0; j < 8; ++j) {
++            t[j] = d * (q[j] + delta);
++        }
++        fg_pack_quarter(t, a, il);
++    }
++}
++
++// one FG_SG_ROWS x FG_BN output tile: B columns [b0, b0 + FG_BN) of packed_b go to dst columns
++// [n0, n1), n1 - n0 <= FG_BN
++template <typename block_q_t>
++[[sycl::reqd_sub_group_size(WARP_SIZE)]]
++static void fused_dequant_gemm_tile(
++    const block_q_t * __restrict__ x,
++    const sycl::half * __restrict__ packed_b,
++    float * __restrict__ dst,
++    const int M, const int Npad, const int K, const int ldd,
++    const int b0, const int n0, const int n1,
++    sycl::local_accessor<sycl::half, 1> tile_a,
++    sycl::local_accessor<float, 1> tile_c,
++    const sycl::nd_item<2> & item) {
++    const auto sg     = item.get_sub_group();
++    const int  sg_id  = sg.get_group_id()[0];
++    const int  lane   = sg.get_local_id()[0];
++    const int  m0     = item.get_group(1) * FG_SG_ROWS;
++    const int  nstep  = K / FG_BK;
++    const int  a_base = sg_id * FG_SG_ROWS * FG_BK;
++    const int  c_base = sg_id * FG_SG_ROWS * FG_BN;
++
++    mx::joint_matrix<sycl::sub_group, float, mx::use::accumulator, FG_TM, FG_TN> acc[2][2];
++#pragma unroll
++    for (int mt = 0; mt < 2; ++mt) {
++#pragma unroll
++        for (int nt = 0; nt < 2; ++nt) {
++            mx::joint_matrix_fill(sg, acc[mt][nt], 0.0f);
++        }
++    }
++
++    const int  row    = m0 + lane;
++    const bool row_ok = row < M;
++    const block_q_t * xrow = x + (size_t) (row_ok ? row : 0) * (K / fg_block_traits<block_q_t>::qk);
++    sycl::half2 * a = (sycl::half2 *) &tile_a[a_base + lane * FG_BK];
++
++    const auto b_ptr = sycl::address_space_cast<sycl::access::address_space::global_space,
++                                                sycl::access::decorated::no>(packed_b);
++    const int b_stride = Npad * 2;
++
++    const int kb_begin = (sg_id * nstep) / FG_KSPLIT;
++    const int kb_end   = ((sg_id + 1) * nstep) / FG_KSPLIT;
++    for (int kb = kb_begin; kb < kb_end; ++kb) {
++        if (row_ok) {
++            fg_stage_a(xrow, kb, a);
++        } else {
++#pragma unroll
++            for (int j = 0; j < FG_BK / 2; ++j) {
++                a[j] = sycl::half2((sycl::half) 0.0f, (sycl::half) 0.0f);
++            }
++        }
++        sycl::group_barrier(sg);
++
++#pragma unroll
++        for (int kt = 0; kt < FG_BK / FG_TK; ++kt) {
++            const int kp0 = (kb * FG_BK + kt * FG_TK) / 2;
++            mx::joint_matrix<sycl::sub_group, sycl::half, mx::use::b, FG_TK, FG_TN, mx::layout::ext_intel_packed> sub_b[2];
++#pragma unroll
++            for (int nt = 0; nt < 2; ++nt) {
++                mx::joint_matrix_load(sg, sub_b[nt], b_ptr + (size_t) kp0 * b_stride + (b0 + nt * FG_TN) * 2, b_stride);
++            }
++#pragma unroll
++            for (int mt = 0; mt < 2; ++mt) {
++                mx::joint_matrix<sycl::sub_group, sycl::half, mx::use::a, FG_TM, FG_TK, mx::layout::row_major> sub_a;
++                mx::joint_matrix_load(sg, sub_a,
++                    tile_a.get_multi_ptr<sycl::access::decorated::no>() + a_base + (mt * FG_TM) * FG_BK + kt * FG_TK,
++                    FG_BK);
++#pragma unroll
++                for (int nt = 0; nt < 2; ++nt) {
++                    mx::joint_matrix_mad(sg, acc[mt][nt], sub_a, sub_b[nt], acc[mt][nt]);
++                }
++            }
++        }
++        // the next step overwrites tile_a
++        sycl::group_barrier(sg);
++    }
++
++#pragma unroll
++    for (int mt = 0; mt < 2; ++mt) {
++#pragma unroll
++        for (int nt = 0; nt < 2; ++nt) {
++            mx::joint_matrix_store(sg, acc[mt][nt],
++                tile_c.get_multi_ptr<sycl::access::decorated::no>() + c_base + (mt * FG_TM) * FG_BN + nt * FG_TN,
++                FG_BN, mx::layout::row_major);
++        }
++    }
++    sycl::group_barrier(item.get_group());
++
++    // sum the K splits; consecutive lanes write consecutive rows of one dst column
++    for (int idx = item.get_local_linear_id(); idx < FG_SG_ROWS * FG_BN; idx += FG_WG_SIZE) {
++        const int r = idx % FG_SG_ROWS;
++        const int c = idx / FG_SG_ROWS;
++        const int m = m0 + r;
++        const int n = n0 + c;
++        if (m < M && n < n1) {
++            float sum = 0.0f;
++#pragma unroll
++            for (int s = 0; s < FG_KSPLIT; ++s) {
++                sum += tile_c[s * FG_SG_ROWS * FG_BN + r * FG_BN + c];
++            }
++            dst[(size_t) n * ldd + m] = sum;
++        }
++    }
++}
++
++template <typename block_q_t>
++[[sycl::reqd_sub_group_size(WARP_SIZE)]]
++static void fused_dequant_gemm(
++    const block_q_t * __restrict__ x,
++    const sycl::half * __restrict__ packed_b,
++    float * __restrict__ dst,
++    const int M, const int N, const int Npad, const int K, const int ldd,
++    sycl::local_accessor<sycl::half, 1> tile_a,
++    sycl::local_accessor<float, 1> tile_c,
++    const sycl::nd_item<2> & item) {
++    const int n0 = item.get_group(0) * FG_BN;
++    fused_dequant_gemm_tile<block_q_t>(x, packed_b, dst, M, Npad, K, ldd, n0, n0, N, tile_a, tile_c, item);
++}
++
++// grouped: work-group (t, mt) is tile t of the schedule; its B columns sit at t * FG_BN
++template <typename block_q_t>
++[[sycl::reqd_sub_group_size(WARP_SIZE)]]
++static void grouped_dequant_gemm(
++    const char * __restrict__ src0_base,
++    const size_t expert_stride,
++    const ggml_sycl_gg_tile * __restrict__ tiles,
++    const sycl::half * __restrict__ packed_b,
++    float * __restrict__ dst,
++    const int M, const int Npad, const int K,
++    sycl::local_accessor<sycl::half, 1> tile_a,
++    sycl::local_accessor<float, 1> tile_c,
++    const sycl::nd_item<2> & item) {
++    const int t = item.get_group(0);
++    const ggml_sycl_gg_tile tile = tiles[t];
++    const block_q_t * x = (const block_q_t *) (src0_base + (size_t) tile.expert * expert_stride);
++    fused_dequant_gemm_tile<block_q_t>(x, packed_b, dst, M, Npad, K, M, t * FG_BN, tile.n0, tile.n1, tile_a, tile_c, item);
++}
++
++template <typename block_q_t>
++static void fused_dequant_gemm_launch(const void * src0, const sycl::half * packed, float * dst, const int M,
++                                      const int N, const int Npad, const int K, const int ldd,
++                                      const int64_t groups_n, const int64_t groups_m, dpct::queue_ptr stream) {
++    stream->submit([&](sycl::handler & cgh) {
++        sycl::local_accessor<sycl::half, 1> tile_a(FG_KSPLIT * FG_SG_ROWS * FG_BK, cgh);
++        sycl::local_accessor<float, 1>      tile_c(FG_KSPLIT * FG_SG_ROWS * FG_BN, cgh);
++        cgh.parallel_for(
++            sycl::nd_range<2>(sycl::range<2>(groups_n, groups_m * FG_WG_SIZE), sycl::range<2>(1, FG_WG_SIZE)),
++            [=](sycl::nd_item<2> item) [[sycl::reqd_sub_group_size(WARP_SIZE)]] {
++                fused_dequant_gemm<block_q_t>((const block_q_t *) src0, packed, dst, M, N, Npad, K, ldd,
++                                              tile_a, tile_c, item);
++            });
++    });
++}
++
++template <typename block_q_t>
++static void grouped_dequant_gemm_launch(const char * src0_dd, const size_t expert_stride,
++                                        const ggml_sycl_gg_tile * tiles_ptr, const sycl::half * packed, float * dst,
++                                        const int M, const int Npad, const int K, const int64_t n_tiles,
++                                        const int64_t groups_m, dpct::queue_ptr stream) {
++    stream->submit([&](sycl::handler & cgh) {
++        sycl::local_accessor<sycl::half, 1> tile_a(FG_KSPLIT * FG_SG_ROWS * FG_BK, cgh);
++        sycl::local_accessor<float, 1>      tile_c(FG_KSPLIT * FG_SG_ROWS * FG_BN, cgh);
++        cgh.parallel_for(
++            sycl::nd_range<2>(sycl::range<2>(n_tiles, groups_m * FG_WG_SIZE), sycl::range<2>(1, FG_WG_SIZE)),
++            [=](sycl::nd_item<2> item) [[sycl::reqd_sub_group_size(WARP_SIZE)]] {
++                grouped_dequant_gemm<block_q_t>(src0_dd, expert_stride, tiles_ptr, packed, dst, M, Npad, K,
++                                                tile_a, tile_c, item);
++            });
++    });
++}
++
++// src1 f32 rows -> VNNI packed [K/2][n_tiles*FG_BN][2], tile t holds its rows [n0, n1) at columns
++// t*FG_BN.., zero past n1. The column runs fastest so a sub-group writes one contiguous run.
++static void grouped_gemm_pack_b(const float * y, sycl::half * packed, const ggml_sycl_gg_tile * tiles, int Npad, int K,
++                                dpct::queue_ptr stream) {
++    const int kpairs = K / 2;
++    stream->parallel_for(sycl::range<1>((size_t) Npad * kpairs), [=](sycl::id<1> id) {
++        const size_t idx = id[0];
++        const int    kp  = idx / Npad;
++        const int    n   = idx - (size_t) kp * Npad;
++        const ggml_sycl_gg_tile tile = tiles[n / FG_BN];
++        const int    row = tile.n0 + n % FG_BN;
++        sycl::half v0 = (sycl::half) 0.0f;
++        sycl::half v1 = (sycl::half) 0.0f;
++        if (row < tile.n1) {
++            const float * src = y + (size_t) row * K + 2 * kp;
++            v0 = (sycl::half) src[0];
++            v1 = (sycl::half) src[1];
++        }
++        sycl::half * out = packed + ((size_t) kp * Npad + n) * 2;
++        out[0] = v0;
++        out[1] = v1;
++    });
++}
++
++bool ggml_sycl_fused_dequant_gemm_f16_device_ok(dpct::queue_ptr stream) {
++    // Cached per device, not once: on a mixed box the first caller's verdict is not the others'.
++    static std::mutex                        mtx;
++    static std::unordered_map<sycl::device, bool> known;
++    const sycl::device                       dev = stream->get_device();
++    std::lock_guard<std::mutex>              lock(mtx);
++    const auto                               it = known.find(dev);
++    if (it != known.end()) {
++        return it->second;
++    }
++    const bool ok = fused_gemm_f16_supported(stream);
++    known.emplace(dev, ok);
++    return ok;
++}
++
++bool ggml_sycl_fused_dequant_gemm_f16(ggml_type src0_type, const void * src0, const sycl::half * src1_f16, float * dst,
++                                      int64_t M, int64_t N, int64_t K, int64_t ldd, ggml_sycl_pool & pool,
++                                      dpct::queue_ptr stream) {
++    // every FG_BN columns dequantize A again, so wide N is left to the library GEMM
++    if (!ggml_sycl_xmx_gather_type_enabled(src0_type)) {
++        return false;
++    }
++    if (!ggml_sycl_fused_dequant_gemm_f16_shape_ok(src0_type, M, N, K, ldd)) {
++        return false;
++    }
++    if (!ggml_sycl_fused_dequant_gemm_f16_device_ok(stream)) {
++        return false;
++    }
++
++    const int64_t groups_n = (N + FG_BN - 1) / FG_BN;
++    const int64_t groups_m = (M + FG_SG_ROWS - 1) / FG_SG_ROWS;
++    const int     Npad     = (int) (groups_n * FG_BN);
++
++    ggml_sycl_pool_alloc<sycl::half> packed_b(pool, (size_t) K * Npad);
++    fused_gemm_pack_b(src1_f16, packed_b.get(), (int) N, Npad, (int) K, stream);
++
++    const sycl::half * packed = packed_b.get();
++    switch (src0_type) {
++        case GGML_TYPE_IQ4_NL:
++            fused_dequant_gemm_launch<block_iq4_nl>(src0, packed, dst, (int) M, (int) N, Npad, (int) K, (int) ldd,
++                                                    groups_n, groups_m, stream);
++            break;
++        case GGML_TYPE_IQ3_S:
++            fused_dequant_gemm_launch<block_iq3_s>(src0, packed, dst, (int) M, (int) N, Npad, (int) K, (int) ldd,
++                                                   groups_n, groups_m, stream);
++            break;
++        case GGML_TYPE_IQ4_XS:
++            fused_dequant_gemm_launch<block_iq4_xs>(src0, packed, dst, (int) M, (int) N, Npad, (int) K, (int) ldd,
++                                                    groups_n, groups_m, stream);
++            break;
++        case GGML_TYPE_IQ3_XXS:
++            fused_dequant_gemm_launch<block_iq3_xxs>(src0, packed, dst, (int) M, (int) N, Npad, (int) K, (int) ldd,
++                                                    groups_n, groups_m, stream);
++            break;
++        case GGML_TYPE_IQ2_XXS:
++            fused_dequant_gemm_launch<block_iq2_xxs>(src0, packed, dst, (int) M, (int) N, Npad, (int) K, (int) ldd,
++                                                    groups_n, groups_m, stream);
++            break;
++        case GGML_TYPE_IQ2_XS:
++            fused_dequant_gemm_launch<block_iq2_xs>(src0, packed, dst, (int) M, (int) N, Npad, (int) K, (int) ldd,
++                                                    groups_n, groups_m, stream);
++            break;
++        case GGML_TYPE_IQ2_S:
++            fused_dequant_gemm_launch<block_iq2_s>(src0, packed, dst, (int) M, (int) N, Npad, (int) K, (int) ldd,
++                                                    groups_n, groups_m, stream);
++            break;
++        case GGML_TYPE_IQ1_S:
++            fused_dequant_gemm_launch<block_iq1_s>(src0, packed, dst, (int) M, (int) N, Npad, (int) K, (int) ldd,
++                                                    groups_n, groups_m, stream);
++            break;
++        case GGML_TYPE_IQ1_M:
++            fused_dequant_gemm_launch<block_iq1_m>(src0, packed, dst, (int) M, (int) N, Npad, (int) K, (int) ldd,
++                                                    groups_n, groups_m, stream);
++            break;
++        default:
++            return false;
++    }
++    return true;
++}
++
++bool ggml_sycl_grouped_dequant_gemm_f16(ggml_type src0_type, const void * src0_base, size_t expert_stride,
++                                        const float * src1, float * dst, const int64_t * expert_row_offsets,
++                                        int64_t n_as, int64_t M, int64_t K, int64_t total_rows,
++                                        std::vector<ggml_sycl_gg_tile> & tiles, ggml_sycl_pool & pool,
++                                        dpct::queue_ptr stream) {
++    int64_t n_active = 0;
++    for (int64_t e = 0; e < n_as; ++e) {
++        n_active += expert_row_offsets[e + 1] > expert_row_offsets[e];
++    }
++    if (!ggml_sycl_xmx_gather_type_enabled(src0_type)) {
++        return false;
++    }
++    if (!ggml_sycl_grouped_dequant_gemm_f16_shape_ok(src0_type, M, K, total_rows, n_active)) {
++        return false;
++    }
++    if (!ggml_sycl_fused_dequant_gemm_f16_device_ok(stream)) {
++        return false;
++    }
++
++    // the host knows every slice, so it lays out the work-groups: no search on the device
++    tiles.clear();
++    for (int64_t e = 0; e < n_as; ++e) {
++        const int64_t end = expert_row_offsets[e + 1];
++        for (int64_t n0 = expert_row_offsets[e]; n0 < end; n0 += FG_BN) {
++            tiles.push_back({ (int32_t) e, (int32_t) n0, (int32_t) std::min(n0 + FG_BN, end) });
++        }
++    }
++    const int64_t n_tiles  = tiles.size();
++    const int64_t groups_m = (M + FG_SG_ROWS - 1) / FG_SG_ROWS;
++    const int     Npad     = (int) (n_tiles * FG_BN);
++
++    ggml_sycl_pool_alloc<ggml_sycl_gg_tile> tiles_dev(pool, n_tiles);
++    SYCL_CHECK(CHECK_TRY_ERROR(stream->memcpy(tiles_dev.get(), tiles.data(), n_tiles * sizeof(ggml_sycl_gg_tile))));
++
++    ggml_sycl_pool_alloc<sycl::half> packed_b(pool, grouped_gemm_packed_capacity((size_t) K * Npad));
++    grouped_gemm_pack_b(src1, packed_b.get(), tiles_dev.get(), Npad, (int) K, stream);
++
++    const sycl::half *       packed    = packed_b.get();
++    const ggml_sycl_gg_tile * tiles_ptr = tiles_dev.get();
++    const char *             src0_dd   = (const char *) src0_base;
++    switch (src0_type) {
++        case GGML_TYPE_IQ4_NL:
++            grouped_dequant_gemm_launch<block_iq4_nl>(src0_dd, expert_stride, tiles_ptr, packed, dst, (int) M, Npad,
++                                                      (int) K, n_tiles, groups_m, stream);
++            break;
++        case GGML_TYPE_IQ3_S:
++            grouped_dequant_gemm_launch<block_iq3_s>(src0_dd, expert_stride, tiles_ptr, packed, dst, (int) M, Npad,
++                                                     (int) K, n_tiles, groups_m, stream);
++            break;
++        case GGML_TYPE_IQ4_XS:
++            grouped_dequant_gemm_launch<block_iq4_xs>(src0_dd, expert_stride, tiles_ptr, packed, dst, (int) M, Npad,
++                                                    (int) K, n_tiles, groups_m, stream);
++            break;
++        case GGML_TYPE_IQ3_XXS:
++            grouped_dequant_gemm_launch<block_iq3_xxs>(src0_dd, expert_stride, tiles_ptr, packed, dst, (int) M, Npad,
++                                                    (int) K, n_tiles, groups_m, stream);
++            break;
++        case GGML_TYPE_IQ2_XXS:
++            grouped_dequant_gemm_launch<block_iq2_xxs>(src0_dd, expert_stride, tiles_ptr, packed, dst, (int) M, Npad,
++                                                    (int) K, n_tiles, groups_m, stream);
++            break;
++        case GGML_TYPE_IQ2_XS:
++            grouped_dequant_gemm_launch<block_iq2_xs>(src0_dd, expert_stride, tiles_ptr, packed, dst, (int) M, Npad,
++                                                    (int) K, n_tiles, groups_m, stream);
++            break;
++        case GGML_TYPE_IQ2_S:
++            grouped_dequant_gemm_launch<block_iq2_s>(src0_dd, expert_stride, tiles_ptr, packed, dst, (int) M, Npad,
++                                                    (int) K, n_tiles, groups_m, stream);
++            break;
++        case GGML_TYPE_IQ1_S:
++            grouped_dequant_gemm_launch<block_iq1_s>(src0_dd, expert_stride, tiles_ptr, packed, dst, (int) M, Npad,
++                                                    (int) K, n_tiles, groups_m, stream);
++            break;
++        case GGML_TYPE_IQ1_M:
++            grouped_dequant_gemm_launch<block_iq1_m>(src0_dd, expert_stride, tiles_ptr, packed, dst, (int) M, Npad,
++                                                    (int) K, n_tiles, groups_m, stream);
++            break;
++        default:
++            return false;
++    }
++    return true;
++}
+diff --git a/ggml/src/ggml-sycl/fused-gemm.hpp b/ggml/src/ggml-sycl/fused-gemm.hpp
+new file mode 100644
+index 000000000..abc566969
+--- /dev/null
++++ b/ggml/src/ggml-sycl/fused-gemm.hpp
+@@ -0,0 +1,80 @@
++#ifndef GGML_SYCL_FUSED_GEMM_HPP
++#define GGML_SYCL_FUSED_GEMM_HPP
++
++#include "common.hpp"
++
++
++// Shape and type gates for the kernels below. Device capability is separate: it needs a queue to ask.
++static constexpr int GGML_SYCL_FG_MAX_N = 64; // 2 * FG_BN
++
++// weight formats the fused A stage decodes; K must cover whole stored blocks
++constexpr bool ggml_sycl_fused_dequant_gemm_f16_type_ok(ggml_type src0_type, int64_t K) {
++    // iq4_nl stores 32 values per block; every other format here is a 256-value superblock that
++    // the A stage walks in steps of 32, so K must cover whole superblocks.
++    if (src0_type == GGML_TYPE_IQ4_NL) {
++        return K % QK4_NL == 0;
++    }
++    const bool superblock =
++           src0_type == GGML_TYPE_IQ3_S ||
++           src0_type == GGML_TYPE_IQ4_XS ||
++           src0_type == GGML_TYPE_IQ3_XXS ||
++           src0_type == GGML_TYPE_IQ2_XXS ||
++           src0_type == GGML_TYPE_IQ2_XS ||
++           src0_type == GGML_TYPE_IQ2_S ||
++           src0_type == GGML_TYPE_IQ1_S ||
++           src0_type == GGML_TYPE_IQ1_M;
++    return superblock && QK_K == 256 && K % QK_K == 0;
++}
++
++constexpr bool ggml_sycl_fused_dequant_gemm_f16_shape_ok(ggml_type src0_type, int64_t M, int64_t N, int64_t K,
++                                                         int64_t ldd) {
++    return ggml_sycl_fused_dequant_gemm_f16_type_ok(src0_type, K) && M > 0 && N > 0 && K > 0 &&
++           N <= GGML_SYCL_FG_MAX_N &&
++           M <= INT32_MAX && N <= INT32_MAX && K <= INT32_MAX && ldd <= INT32_MAX;
++}
++
++// grouped variant: the per-expert fused kernel is only worth it while each expert is narrow,
++// so wider average slices are left to the per-expert library GEMM loop
++constexpr bool ggml_sycl_grouped_dequant_gemm_f16_shape_ok(ggml_type src0_type, int64_t M, int64_t K,
++                                                           int64_t total_rows, int64_t n_active) {
++    return ggml_sycl_fused_dequant_gemm_f16_shape_ok(src0_type, M, 1, K, M) && total_rows > 0 &&
++           total_rows <= INT32_MAX && total_rows <= n_active * GGML_SYCL_FG_MAX_N;
++}
++
++// Runtime type gate, kept out of the constexpr predicates above so those stay pure.
++inline bool ggml_sycl_xmx_gather_type_enabled(ggml_type src0_type) {
++    switch (src0_type) {
++        case GGML_TYPE_IQ4_NL:  return (g_ggml_sycl_xmx_gather_types & GGML_SYCL_XMX_GATHER_IQ4_NL  ) != 0;
++        case GGML_TYPE_IQ3_S:   return (g_ggml_sycl_xmx_gather_types & GGML_SYCL_XMX_GATHER_IQ3_S   ) != 0;
++        case GGML_TYPE_IQ4_XS:  return (g_ggml_sycl_xmx_gather_types & GGML_SYCL_XMX_GATHER_IQ4_XS  ) != 0;
++        case GGML_TYPE_IQ3_XXS: return (g_ggml_sycl_xmx_gather_types & GGML_SYCL_XMX_GATHER_IQ3_XXS ) != 0;
++        case GGML_TYPE_IQ2_XXS: return (g_ggml_sycl_xmx_gather_types & GGML_SYCL_XMX_GATHER_IQ2_XXS ) != 0;
++        case GGML_TYPE_IQ2_XS:  return (g_ggml_sycl_xmx_gather_types & GGML_SYCL_XMX_GATHER_IQ2_XS  ) != 0;
++        case GGML_TYPE_IQ2_S:   return (g_ggml_sycl_xmx_gather_types & GGML_SYCL_XMX_GATHER_IQ2_S   ) != 0;
++        case GGML_TYPE_IQ1_S:   return (g_ggml_sycl_xmx_gather_types & GGML_SYCL_XMX_GATHER_IQ1_S   ) != 0;
++        case GGML_TYPE_IQ1_M:   return (g_ggml_sycl_xmx_gather_types & GGML_SYCL_XMX_GATHER_IQ1_M   ) != 0;
++        default:          return false;
++    }
++}
++
++// True if the device can run the kernel at all; cached, so it is cheap to ask per node.
++bool ggml_sycl_fused_dequant_gemm_f16_device_ok(dpct::queue_ptr stream);
++
++// dst[n*ldd + m] = sum_k dequant(src0)[m*K + k] * src1_f16[n*K + k]
++// Returns false when the case is not handled (type, device, or shape).
++bool ggml_sycl_fused_dequant_gemm_f16(ggml_type src0_type, const void * src0, const sycl::half * src1_f16, float * dst,
++                                      int64_t M, int64_t N, int64_t K, int64_t ldd, ggml_sycl_pool & pool,
++                                      dpct::queue_ptr stream);
++
++// One launch for every expert of a MUL_MAT_ID: rows of src1/dst are grouped by expert, expert e
++// owns rows [expert_row_offsets[e], expert_row_offsets[e+1]) and reads its weights at
++// src0_base + e*expert_stride. tiles is host scratch that must stay alive until the queue drains.
++// dst[n*M + m] = sum_k dequant(src0_e)[m*K + k] * src1[n*K + k]
++// Returns false when the case is not handled (type, device, or shape).
++bool ggml_sycl_grouped_dequant_gemm_f16(ggml_type src0_type, const void * src0_base, size_t expert_stride,
++                                        const float * src1, float * dst, const int64_t * expert_row_offsets,
++                                        int64_t n_as, int64_t M, int64_t K, int64_t total_rows,
++                                        std::vector<ggml_sycl_gg_tile> & tiles, ggml_sycl_pool & pool,
++                                        dpct::queue_ptr stream);
++
++#endif // GGML_SYCL_FUSED_GEMM_HPP
 diff --git a/ggml/src/ggml-sycl/ggml-sycl.cpp b/ggml/src/ggml-sycl/ggml-sycl.cpp
-index 4091f73a4..0f1280c04 100644
+index 4091f73a4..801712c60 100644
 --- a/ggml/src/ggml-sycl/ggml-sycl.cpp
 +++ b/ggml/src/ggml-sycl/ggml-sycl.cpp
-@@ -63,6 +63,11 @@
+@@ -29,6 +29,9 @@
+ #include <fstream>
+ #include <stdio.h>
+ #include <stdlib.h>
++#ifdef __linux__
++#include <sys/mman.h>
++#endif
+ #include <regex>
+ 
+ #include <sycl/sycl.hpp>
+@@ -60,9 +63,15 @@
+ #include "ggml-sycl/common.hpp"
+ #include "ggml-sycl/element_wise.hpp"
+ #include "ggml-sycl/fwht.hpp"
++#include "ggml-sycl/fused-gemm.hpp"
  #include "ggml-sycl/gemm.hpp"
  #include "ggml-sycl/getrows.hpp"
  #include "ggml-sycl/mem.hpp"
@@ -1476,7 +2394,7 @@ index 4091f73a4..0f1280c04 100644
  #include "ggml-sycl/norm.hpp"
  #include "ggml-sycl/presets.hpp"
  #include "ggml-sycl/quantize.hpp"
-@@ -96,6 +101,10 @@ int g_ggml_sycl_enable_graph = 0;
+@@ -96,6 +105,10 @@ int g_ggml_sycl_enable_graph = 0;
  int g_ggml_sycl_enable_dnn = 1;
  int g_ggml_sycl_fa_onednn = 1;
  int g_ggml_sycl_fa_onednn_max_kv = 0;
@@ -1487,7 +2405,15 @@ index 4091f73a4..0f1280c04 100644
  int g_ggml_sycl_enable_mkl_fa = 1;
  int g_ggml_sycl_memtrace = 0;
  int g_ggml_sycl_memtrace_step = 64;
-@@ -314,13 +323,21 @@ static const char* dev2dev_int2str(int dev2dev) {
+@@ -103,6 +116,7 @@ int g_ggml_sycl_enable_vmm = 1;
+ int g_ggml_sycl_enable_fusion = 1;
+ int g_ggml_sycl_enable_esimd = 1;
+ int g_ggml_sycl_prioritize_dmmv = 0;
++int g_ggml_sycl_xmx_gather_types = GGML_SYCL_XMX_GATHER_TYPES_DEFAULT;
+ int g_ggml_sycl_use_async_mem_op = 0;
+ int g_ggml_sycl_use_async_mem_op_requested = 1;
+ int g_ggml_sycl_use_level_zero_api = 0;
+@@ -314,13 +328,21 @@ static const char* dev2dev_int2str(int dev2dev) {
  * It's the first internal function to be called by them in SYCL backend.
  * This function is used to do initialize work for the SYCL backend and set the global variables.
  */
@@ -1514,7 +2440,7 @@ index 4091f73a4..0f1280c04 100644
  #endif
  }
  
-@@ -336,6 +353,7 @@ static void ggml_check_sycl() try {
+@@ -336,6 +358,7 @@ static void ggml_check_sycl() try {
          g_ggml_sycl_enable_dnn = ggml_sycl_get_env("GGML_SYCL_ENABLE_DNN", 1);
          g_ggml_sycl_fa_onednn = ggml_sycl_get_env("GGML_SYCL_FA_ONEDNN", 1);
          g_ggml_sycl_fa_onednn_max_kv = ggml_sycl_get_env("GGML_SYCL_FA_ONEDNN_MAX_KV", 0);
@@ -1522,7 +2448,15 @@ index 4091f73a4..0f1280c04 100644
          g_ggml_sycl_enable_mkl_fa = ggml_sycl_get_env("GGML_SYCL_ENABLE_MKL_FA", 1);
          g_ggml_sycl_memtrace = ggml_sycl_get_env("GGML_SYCL_MEMTRACE", 0);
          g_ggml_sycl_memtrace_step = ggml_sycl_get_env("GGML_SYCL_MEMTRACE_STEP", 64);
-@@ -424,6 +442,7 @@ static void ggml_check_sycl() try {
+@@ -343,6 +366,7 @@ static void ggml_check_sycl() try {
+         g_ggml_sycl_enable_fusion = ggml_sycl_get_env("GGML_SYCL_ENABLE_FUSION", 1);
+         g_ggml_sycl_enable_esimd = ggml_sycl_get_env("GGML_SYCL_ENABLE_ESIMD", 1);
+         g_ggml_sycl_prioritize_dmmv = ggml_sycl_get_env("GGML_SYCL_PRIORITIZE_DMMV", 0);
++        g_ggml_sycl_xmx_gather_types = ggml_sycl_get_env("GGML_SYCL_XMX_GATHER_TYPES", GGML_SYCL_XMX_GATHER_TYPES_DEFAULT);
+ 
+         g_ggml_sycl_dev2dev_memcpy = ggml_sycl_get_env("GGML_SYCL_DEV2DEV_MEMCPY", DEV2DEV_MEMCPY_SYCL);
+         g_ggml_sycl_get_mem_api = ggml_sycl_get_env("GGML_SYCL_GET_MEM_API", MEMORY_API_TYPE_LEVEL_ZERO);
+@@ -424,6 +448,7 @@ static void ggml_check_sycl() try {
          GGML_LOG_INFO("  GGML_SYCL_FA_ONEDNN: %d\n", g_ggml_sycl_fa_onednn);
  #endif
          GGML_LOG_INFO("  GGML_SYCL_FA_ONEDNN_MAX_KV: %d\n", g_ggml_sycl_fa_onednn_max_kv);
@@ -1530,7 +2464,15 @@ index 4091f73a4..0f1280c04 100644
          GGML_LOG_INFO("  GGML_SYCL_ENABLE_MKL_FA: %d\n", g_ggml_sycl_enable_mkl_fa);
          GGML_LOG_INFO("  GGML_SYCL_MEMTRACE: %d\n", g_ggml_sycl_memtrace);
          GGML_LOG_INFO("  GGML_SYCL_MEMTRACE_STEP: %d\n", g_ggml_sycl_memtrace_step);
-@@ -503,6 +522,11 @@ static void ggml_check_sycl() try {
+@@ -441,6 +466,7 @@ static void ggml_check_sycl() try {
+ #endif
+ 
+         GGML_LOG_INFO("  GGML_SYCL_ENABLE_OPT: %d\n", g_ggml_sycl_enable_optimize);
++        GGML_LOG_INFO("  GGML_SYCL_XMX_GATHER_TYPES: %d\n", g_ggml_sycl_xmx_gather_types);
+ 
+ #if defined(GGML_SYCL_SUPPORT_VMM)
+         GGML_LOG_INFO("  GGML_SYCL_ENABLE_VMM: %d\n", g_ggml_sycl_enable_vmm);
+@@ -503,6 +529,11 @@ static void ggml_check_sycl() try {
          initialized = true;
          g_sycl_loaded = true;
          ggml_backend_sycl_print_sycl_devices();
@@ -1542,7 +2484,21 @@ index 4091f73a4..0f1280c04 100644
      }
  }
  catch (sycl::exception const &exc) {
-@@ -2591,6 +2615,10 @@ static void top_k_scan_merge_f32(
+@@ -1533,6 +1564,13 @@ static void * ggml_backend_sycl_host_malloc(size_t size) {
+         GGML_LOG_WARN("%s: failed to allocate %.2f MiB of pinned memory\n", __func__,
+                 size / 1024.0 / 1024.0);
+     }
++#ifdef __linux__
++    // docs/research/05 sec 10.5 diagnostic: THP is "madvise" mode on this box, so
++    // USM host allocations get 4K pages unless a region opts in explicitly.
++    if (ptr != nullptr && getenv("GGML_SYCL_HOST_MADV_HUGEPAGE") != nullptr) {
++        madvise(ptr, size, MADV_HUGEPAGE);
++    }
++#endif
+ 
+     return ptr;
+ }
+@@ -2591,6 +2629,10 @@ static void top_k_scan_merge_f32(
      }
  }
  
@@ -1553,7 +2509,55 @@ index 4091f73a4..0f1280c04 100644
  static void top_k_f32_sycl(
      ggml_backend_sycl_context & ctx,
      const float * src,
-@@ -3098,9 +3126,54 @@ static void ggml_sycl_op_top_k(ggml_backend_sycl_context & ctx, ggml_tensor * ds
+@@ -2911,20 +2953,6 @@ inline void ggml_sycl_op_mul_mat_sycl(
+ 
+     if ((src0->type == GGML_TYPE_F16 || ggml_is_quantized(src0->type)) && use_fp16 && ggml_is_contiguous(src0) &&
+         row_diff == src0->ne[1] && dst->op_params[0] == GGML_PREC_DEFAULT) {
+-        ggml_sycl_pool_alloc<sycl::half> src0_as_f16(ctx.pool());
+-        if (src0->type != GGML_TYPE_F16) {
+-            scope_op_debug_print scope_dbg_print(__func__, "/to_fp16_sycl", dst, /*num_src=*/2,
+-                                                 " : converting src0 to fp16");
+-            const to_fp16_sycl_t to_fp16_sycl = ggml_get_to_fp16_sycl(src0->type, dst);
+-            GGML_ASSERT(to_fp16_sycl != nullptr);
+-            size_t ne = row_diff*ne00;
+-            src0_as_f16.alloc(ne);
+-            to_fp16_sycl(src0_dd_i, src0_as_f16.get(), ne, stream);
+-        }
+-        const sycl::half *src0_ptr = src0->type == GGML_TYPE_F16
+-                                         ? (const sycl::half *)src0_dd_i
+-                                         : src0_as_f16.get();
+-
+         ggml_sycl_pool_alloc<sycl::half> src1_as_f16(ctx.pool());
+         if (src1->type != GGML_TYPE_F16) {
+             scope_op_debug_print scope_dbg_print(__func__, "/to_fp16_sycl", dst, /*num_src=*/2,
+@@ -2939,6 +2967,26 @@ inline void ggml_sycl_op_mul_mat_sycl(
+                 ? (const sycl::half *)src1->data + src1_padded_row_size
+                                          : src1_as_f16.get();
+ 
++        // dequantize inside the GEMM instead of writing the f16 weights out and reading them back
++        if (src0->type != GGML_TYPE_F16 &&
++            ggml_sycl_fused_dequant_gemm_f16(src0->type, src0_dd_i, src1_ptr, dst_dd_i, row_diff, src1_ncols, ne10, ldc, ctx.pool(), stream)) {
++            return;
++        }
++
++        ggml_sycl_pool_alloc<sycl::half> src0_as_f16(ctx.pool());
++        if (src0->type != GGML_TYPE_F16) {
++            scope_op_debug_print scope_dbg_print(__func__, "/to_fp16_sycl", dst, /*num_src=*/2,
++                                                 " : converting src0 to fp16");
++            const to_fp16_sycl_t to_fp16_sycl = ggml_get_to_fp16_sycl(src0->type, dst);
++            GGML_ASSERT(to_fp16_sycl != nullptr);
++            size_t ne = row_diff*ne00;
++            src0_as_f16.alloc(ne);
++            to_fp16_sycl(src0_dd_i, src0_as_f16.get(), ne, stream);
++        }
++        const sycl::half *src0_ptr = src0->type == GGML_TYPE_F16
++                                         ? (const sycl::half *)src0_dd_i
++                                         : src0_as_f16.get();
++
+ #if GGML_SYCL_DNNL
+         if (g_ggml_sycl_enable_dnn) {
+                 DnnlGemmWrapper::row_gemm(ctx,row_diff, src1_ncols , ne10, src0_ptr,
+@@ -3098,9 +3146,54 @@ static void ggml_sycl_op_top_k(ggml_backend_sycl_context & ctx, ggml_tensor * ds
      const int64_t ncols = src0->ne[0];
      const int64_t nrows = ggml_nrows(src0);
  
@@ -1609,7 +2613,7 @@ index 4091f73a4..0f1280c04 100644
      top_k_f32_sycl(ctx, src0_dd, dst_dd, ncols, nrows, k, main_stream);
  }
  
-@@ -4040,6 +4113,7 @@ static bool ggml_sycl_supports_dmmv(enum ggml_type type) {
+@@ -4040,6 +4133,7 @@ static bool ggml_sycl_supports_dmmv(enum ggml_type type) {
          case GGML_TYPE_Q4_K:
          case GGML_TYPE_Q5_K:
          case GGML_TYPE_Q6_K:
@@ -1617,7 +2621,7 @@ index 4091f73a4..0f1280c04 100644
          case GGML_TYPE_F16:
          case GGML_TYPE_BF16:
              return true;
-@@ -4685,8 +4759,15 @@ static bool can_use_dequantize_mul_mat_vec(const ggml_tensor * src0, const ggml_
+@@ -4685,8 +4779,15 @@ static bool can_use_dequantize_mul_mat_vec(const ggml_tensor * src0, const ggml_
      // need ne[0] % DMMV_X == 0.
      const int64_t dmmv_x_required = (src0->type == GGML_TYPE_BF16 || src0->type == GGML_TYPE_F16) ?
                                      2*GGML_SYCL_DMMV_X : GGML_SYCL_DMMV_X;
@@ -1635,7 +2639,7 @@ index 4091f73a4..0f1280c04 100644
  }
  
  static bool can_use_mul_mat_vec_q(const ggml_tensor * src0, const ggml_tensor * src1, ggml_tensor * dst) {
-@@ -5033,6 +5114,97 @@ static bool ggml_sycl_mul_mat_id_mmvq_fused(
+@@ -5033,6 +5134,97 @@ static bool ggml_sycl_mul_mat_id_mmvq_fused(
          src1_row_stride, stream);
  }
  
@@ -1733,7 +2737,7 @@ index 4091f73a4..0f1280c04 100644
  // counting sort of the routed rows by expert id (row_id_i, as chosen by the router):
  // builds a projection of a memory layout where each expert's slice is contiguous
  static void mmid_counting_sort_rows(
-@@ -5089,12 +5261,57 @@ static void ggml_sycl_mul_mat_id(ggml_backend_sycl_context & ctx,
+@@ -5089,19 +5281,66 @@ static void ggml_sycl_mul_mat_id(ggml_backend_sycl_context & ctx,
      const int64_t n_as = ne02;
      const int64_t n_ids = ids->ne[0];
  
@@ -1792,7 +2796,17 @@ index 4091f73a4..0f1280c04 100644
      std::vector<char> ids_host(ggml_nbytes(ids));
      const char * ids_dev = (const char *) ids->data;
  
-@@ -5127,7 +5344,78 @@ static void ggml_sycl_mul_mat_id(ggml_backend_sycl_context & ctx,
+     SYCL_CHECK(CHECK_TRY_ERROR(
+         stream->memcpy(ids_host.data(), ids_dev, ggml_nbytes(ids))));
+ 
+-    // also ensures ctx.mmid_row_mapping_host is drained before we use it again
++    // also ensures ctx.mmid_row_mapping_host and ctx.mmid_tile_schedule_host are drained before we
++    // refill them: the grouped GEMM enqueues an async copy out of the tile schedule, so removing
++    // this wait would let the next node overwrite a buffer the device is still reading
+     SYCL_CHECK(CHECK_TRY_ERROR(stream->wait()));
+ 
+     ggml_tensor src0_row = *src0;
+@@ -5127,7 +5366,78 @@ static void ggml_sycl_mul_mat_id(ggml_backend_sycl_context & ctx,
      dst_row.ne[3] = 1;
      dst_row.nb[2] = nb1;
      dst_row.nb[3] = nb1;
@@ -1872,7 +2886,26 @@ index 4091f73a4..0f1280c04 100644
          for (int64_t iid1 = 0; iid1 < ids->ne[1]; iid1++) {
              for (int64_t id = 0; id < n_ids; id++) {
                  const int32_t i02 = *(const int32_t *) (ids_host.data() + iid1*ids->nb[1] + id*ids->nb[0]);
-@@ -5920,6 +6208,410 @@ static int ggml_sycl_try_gdn_cache_fusion(const ggml_cgraph * cgraph, int node_i
+@@ -5192,7 +5502,17 @@ static void ggml_sycl_mul_mat_id(ggml_backend_sycl_context & ctx,
+             });
+         }
+ 
+-        for (int64_t i02 = 0; i02 < n_as; i02++) {
++        bool grouped = false;
++        if (ggml_is_contiguous(src0) && src1->type == GGML_TYPE_F32 &&
++            dst->type == GGML_TYPE_F32 && dst->op_params[0] == GGML_PREC_DEFAULT &&
++            nb11 == sizeof(float)*ne10 && nb1 == sizeof(float)*ne0) {
++            grouped = ggml_sycl_grouped_dequant_gemm_f16(src0->type, src0_original, nb02,
++                                                         (const float *) src1_contiguous.get(), (float *) dst_contiguous.get(),
++                                                         expert_row_offsets.data(), n_as, ne01, ne10, n_routed_rows,
++                                                         ctx.mmid_tile_schedule_host, ctx.pool(), stream);
++        }
++
++        for (int64_t i02 = 0; i02 < n_as && !grouped; i02++) {
+             const int64_t num_src1_rows = expert_row_counts[i02];
+ 
+             if (num_src1_rows == 0) {
+@@ -5920,6 +6240,410 @@ static int ggml_sycl_try_gdn_cache_fusion(const ggml_cgraph * cgraph, int node_i
      return skip;
  }
  
@@ -2283,7 +3316,7 @@ index 4091f73a4..0f1280c04 100644
  static void ggml_backend_sycl_graph_compute_impl(ggml_backend_sycl_context * sycl_ctx, ggml_cgraph * cgraph) {
      ggml_sycl_set_main_device(sycl_ctx->device);
  
-@@ -5931,6 +6623,7 @@ static void ggml_backend_sycl_graph_compute_impl(ggml_backend_sycl_context * syc
+@@ -5931,6 +6655,7 @@ static void ggml_backend_sycl_graph_compute_impl(ggml_backend_sycl_context * syc
          if ((node->flags & GGML_TENSOR_FLAG_COMPUTE) == 0) {
              continue;
          }
@@ -2291,7 +3324,7 @@ index 4091f73a4..0f1280c04 100644
  
          const int nodes_to_skip = ggml_sycl_fuse(*sycl_ctx, cgraph, i);
          if (nodes_to_skip != 0) {
-@@ -5991,6 +6684,23 @@ static void ggml_backend_sycl_graph_compute_impl(ggml_backend_sycl_context * syc
+@@ -5991,6 +6716,23 @@ static void ggml_backend_sycl_graph_compute_impl(ggml_backend_sycl_context * syc
              }
          }
  
@@ -2315,7 +3348,7 @@ index 4091f73a4..0f1280c04 100644
          if (node->op == GGML_OP_MUL_MAT && ggml_sycl_mul_mat_glu_mmvq_fused(*sycl_ctx, cgraph, i)) {
              i += 2;
              continue;
-@@ -6091,8 +6801,21 @@ static ggml_status ggml_backend_sycl_graph_compute(ggml_backend_t backend, ggml_
+@@ -6091,8 +6833,21 @@ static ggml_status ggml_backend_sycl_graph_compute(ggml_backend_t backend, ggml_
      } else
  #endif
      {
@@ -2338,7 +3371,7 @@ index 4091f73a4..0f1280c04 100644
      return GGML_STATUS_SUCCESS;
  }
  
-@@ -6603,7 +7326,7 @@ static bool do_ggml_backend_sycl_device_supports_op(ggml_backend_dev_t dev, cons
+@@ -6603,7 +7358,7 @@ static bool do_ggml_backend_sycl_device_supports_op(ggml_backend_dev_t dev, cons
                  op->type == GGML_TYPE_I32 &&
                  src0->type == GGML_TYPE_F32 &&
                  ggml_is_contiguous(src0) &&
@@ -2347,7 +3380,7 @@ index 4091f73a4..0f1280c04 100644
          }
          case GGML_OP_POOL_2D:
          case GGML_OP_POOL_1D:
-@@ -6665,6 +7388,18 @@ static bool ggml_backend_sycl_device_supports_op(ggml_backend_dev_t dev, const g
+@@ -6665,6 +7420,18 @@ static bool ggml_backend_sycl_device_supports_op(ggml_backend_dev_t dev, const g
  }
  
  static bool ggml_backend_sycl_device_supports_buft(ggml_backend_dev_t dev, ggml_backend_buffer_type_t buft) {
@@ -2366,7 +3399,7 @@ index 4091f73a4..0f1280c04 100644
      if (buft->iface.get_name != ggml_backend_sycl_buffer_type_get_name) {
          return false;
      }
-@@ -7030,6 +7765,10 @@ static void *ggml_backend_sycl_reg_get_proc_address(ggml_backend_reg_t reg, cons
+@@ -7030,6 +7797,10 @@ static void *ggml_backend_sycl_reg_get_proc_address(ggml_backend_reg_t reg, cons
          return (void *)ggml_backend_sycl_split_buffer_type;
      }
  
@@ -7728,18 +8761,231 @@ index 2deb90f6a..e3c9fdeb0 100644
          for (auto cols : {128, 1024, 4096, 8192, 16384, 32768, 65536, 131072, 200000, 2000000}) {
              test_cases.emplace_back(new test_cumsum(GGML_TYPE_F32, {cols, nrows, 1, 1}));
 diff --git a/tools/server/server-context.cpp b/tools/server/server-context.cpp
-index fe068d3e9..74f914c44 100644
+index fe068d3e9..b87014789 100644
 --- a/tools/server/server-context.cpp
 +++ b/tools/server/server-context.cpp
-@@ -24,6 +24,7 @@
+@@ -24,6 +24,8 @@
  #include <memory>
  #include <filesystem>
  #include <random>
 +#include <shared_mutex>
++#include <sstream>
  #include <utility>
  #include <fstream>
  
-@@ -850,6 +851,10 @@ public:
+@@ -236,6 +238,11 @@ struct server_batch {
+     }
+ };
+ 
++// true if the recurrent/hybrid part of the sequence's memory agrees with the slot's own
++// token count - see slot_state_aligned() below for the definition, defined once the
++// full server_slot type is available
++bool slot_state_aligned(const server_slot & slot);
++
+ struct server_slot {
+     int id;
+ 
+@@ -244,6 +251,10 @@ struct server_slot {
+ 
+     common_memory mem;
+ 
++    // set once at load_model() time, from common_context_can_seq_rm(ctx_tgt);
++    // needed by slot_state_aligned() without re-running that (destructive) probe
++    common_context_seq_rm_type ctx_tgt_seq_rm_type = COMMON_CONTEXT_SEQ_RM_TYPE_NO;
++
+     // multimodal
+     mtmd_context * mctx = nullptr;
+     mtmd::batch_ptr mbatch = nullptr;
+@@ -301,6 +312,13 @@ struct server_slot {
+             return false;
+         }
+ 
++        if (!slot_state_aligned(*this)) {
++            SLT_WRN(*this, "%s", "prompt state is misaligned with the token count, skipping cache save\n");
++            return false;
++        }
++
++        SLT_INF(*this, "%s", "prompt state aligned, saving to cache\n");
++
+         const size_t cur_size_tgt =           llama_state_seq_get_size_ext(ctx_tgt, id, LLAMA_STATE_SEQ_FLAGS_NONE);
+         const size_t cur_size_dft = ctx_dft ? llama_state_seq_get_size_ext(ctx_dft, id, LLAMA_STATE_SEQ_FLAGS_NONE) : 0;
+ 
+@@ -322,8 +340,10 @@ struct server_slot {
+         return true;
+     }
+ 
+-    bool prompt_load(server_prompt_cache & prompt_cache, const server_tokens & tokens) {
+-        bool res = prompt_cache.load(prompt, tokens, ctx_tgt, ctx_dft, id);
++    // T4: the pick (it_best) is made by the caller via prompt_cache.find_best() before this
++    // runs, so a unified-KV pre-clear of other idle slots can happen in between, if needed
++    bool prompt_restore(server_prompt_cache & prompt_cache, server_prompt_cache::iterator it_best) {
++        bool res = prompt_cache.restore(it_best, prompt, ctx_tgt, ctx_dft, id, n_ctx, mctx != nullptr);
+         if (!res) {
+             SLT_WRN(*this, "%s", "failed to load prompt from cache\n");
+         }
+@@ -734,6 +754,161 @@ struct server_slot {
+     }
+ };
+ 
++// checks that the recurrent/hybrid state's position agrees with the slot's own token count,
++// with no forward pass. catches the sglang#39830 / arXiv 2609.15030 class of off-by-one bug
++// between the server's bookkeeping and the memory module's recurrent state before it is
++// persisted or trusted after a restore.
++//
++// the recurrent cache holds exactly one position per sequence (the last one), so when a hybrid
++// or recurrent memory is aligned, pos_min == pos_max == the slot's last token position. one
++// position behind shows up as pos_max being too low; one position ahead as pos_min > pos_max.
++bool slot_state_aligned(const server_slot & slot) {
++    if (slot.prompt.tokens.size() == 0) {
++        return true;
++    }
++
++    llama_memory_t mem = llama_get_memory(slot.ctx_tgt);
++
++    const llama_pos pos_min = llama_memory_seq_pos_min(mem, slot.id);
++    const llama_pos pos_max = llama_memory_seq_pos_max(mem, slot.id);
++    const llama_pos pos_exp = slot.prompt.tokens.pos_next() - 1;
++
++    if (slot.ctx_tgt_seq_rm_type == COMMON_CONTEXT_SEQ_RM_TYPE_FULL) {
++        return pos_min == pos_max && pos_max == pos_exp;
++    }
++
++    return pos_max == pos_exp;
++}
++
++// bumped by hand: any change to src/llama-memory-*.cpp, src/llama-kv-cache.cpp or
++// src/models/qwen4exp.cpp that changes what a cached row *means* must bump this. llama_commit()
++// alone can't identify that, because this fork carries uncommitted memory/model-code changes on
++// top of it. see docs/research/18-conversation-state-persistence-plan.md §3.2
++static constexpr int PCS_COMPAT_EPOCH = 1;
++
++// the .pcs file format itself (§3.3), independent of PCS_COMPAT_EPOCH above
++static constexpr int PCS_FORMAT_VERSION = 1;
++
++// the disk cache directory name and the fingerprint.txt content described in
++// docs/research/18-conversation-state-persistence-plan.md §3.2
++struct server_prompt_fingerprint {
++    std::string text; // full "key=value\n" text, written verbatim to fingerprint.txt
++    std::string hash; // 16 hex chars of an FNV-1a hash of `text`, used as the cache dir name
++};
++
++static uint64_t fnv1a_64(const std::string & s) {
++    uint64_t h = 0xcbf29ce484222325ULL; // FNV offset basis
++    for (unsigned char c : s) {
++        h ^= c;
++        h *= 0x100000001b3ULL; // FNV prime
++    }
++    return h;
++}
++
++// builds the fingerprint that decides whether a saved KV blob is valid to restore (§3.2). it
++// covers everything that changes what a blob *means* but that llama_state_seq_set_data does not
++// itself check (§4.1: model identity, cache layout, RoPE, LoRA/control vectors).
++//
++// deliberately excludes n_ctx, n_batch, n_ubatch, n_parallel, -ncmoe/tensor_buft_overrides,
++// mlock/mmap and thread counts: none of them affect whether a restore is valid (§4.1), and
++// including them would make every --context-tiers tier its own cache, the mistake found in
++// upstream PR #28092 (§1.4).
++//
++// returns an empty fingerprint (text and hash both empty) when a LoRA adapter or control vector
++// is loaded: their effect on the KV contents isn't modeled here, so persistence is refused
++// wholesale instead of being fingerprinted.
++static server_prompt_fingerprint server_prompt_build_fingerprint(
++        const common_params & params,
++        llama_model * model_tgt) {
++    if (!params.lora_adapters.empty() || !params.control_vectors.empty()) {
++        SRV_WRN("%s", "pcache: refusing to fingerprint - a LoRA adapter or control vector is loaded\n");
++        return {};
++    }
++
++    std::ostringstream os;
++
++    // model identity: every GGUF shard's path, size and mtime, plus the model's own identity
++    {
++        int n_split = 1;
++        char split_count_buf[32];
++        if (llama_model_meta_val_str(model_tgt, "split.count", split_count_buf, sizeof(split_count_buf)) > 0) {
++            n_split = std::max(1, atoi(split_count_buf));
++        }
++
++        std::vector<std::string> shard_paths;
++        if (n_split > 1) {
++            std::vector<char> buf(4096, 0);
++            int len = llama_split_prefix(buf.data(), buf.size(), params.model.path.c_str(), 0, n_split);
++            if (len > 0) {
++                const std::string prefix(buf.data(), len);
++                for (int i = 0; i < n_split; i++) {
++                    len = llama_split_path(buf.data(), buf.size(), prefix.c_str(), i, n_split);
++                    shard_paths.emplace_back(buf.data(), len);
++                }
++            }
++        }
++        if (shard_paths.empty()) {
++            shard_paths.push_back(params.model.path);
++        }
++
++        for (size_t i = 0; i < shard_paths.size(); i++) {
++            std::error_code ec;
++            const uint64_t size  = (uint64_t) std::filesystem::file_size(shard_paths[i], ec);
++            const auto     mtime = std::filesystem::last_write_time(shard_paths[i], ec);
++            const int64_t  mtime_s = ec ? 0 : std::chrono::duration_cast<std::chrono::seconds>(mtime.time_since_epoch()).count();
++
++            os << "model.shard[" << i << "].path=" << shard_paths[i] << "\n";
++            os << "model.shard[" << i << "].size=" << (ec ? 0 : size) << "\n";
++            os << "model.shard[" << i << "].mtime=" << mtime_s << "\n";
++        }
++
++        char arch_buf[128] = {0};
++        llama_model_meta_val_str(model_tgt, "general.architecture", arch_buf, sizeof(arch_buf));
++
++        os << "model.n_params=" << llama_model_n_params(model_tgt) << "\n";
++        os << "model.size=" << llama_model_size(model_tgt) << "\n";
++        os << "model.architecture=" << arch_buf << "\n";
++    }
++
++    // cache layout: what state_read checks structurally, but restated here for the human-readable file
++    os << "cache.type_k=" << ggml_type_name(params.cache_type_k) << "\n";
++    os << "cache.type_v=" << ggml_type_name(params.cache_type_v) << "\n";
++    os << "cache.flash_attn_type=" << (int) params.flash_attn_type << "\n";
++    os << "cache.kv_unified=" << (params.kv_unified ? 1 : 0) << "\n";
++    os << "cache.swa_full=" << (params.swa_full ? 1 : 0) << "\n";
++    os << "cache.no_kv_offload=" << (params.no_kv_offload ? 1 : 0) << "\n";
++
++    // RoPE: silently accepted by state_read on a mismatch, so it must be caught here (§4.1)
++    os << "rope.scaling_type=" << (int) params.rope_scaling_type << "\n";
++    os << std::hexfloat;
++    os << "rope.freq_base=" << params.rope_freq_base << "\n";
++    os << "rope.freq_scale=" << params.rope_freq_scale << "\n";
++    os << "rope.yarn_ext_factor=" << params.yarn_ext_factor << "\n";
++    os << "rope.yarn_attn_factor=" << params.yarn_attn_factor << "\n";
++    os << "rope.yarn_beta_fast=" << params.yarn_beta_fast << "\n";
++    os << "rope.yarn_beta_slow=" << params.yarn_beta_slow << "\n";
++    os << std::defaultfloat;
++    os << "rope.yarn_orig_ctx=" << params.yarn_orig_ctx << "\n";
++
++    // draft model, or empty
++    os << "draft.path=" << params.speculative.draft.mparams.path << "\n";
++
++    // versions
++    os << "version.state_seq=" << LLAMA_STATE_SEQ_VERSION << "\n";
++    os << "version.commit=" << llama_commit() << "\n";
++    os << "version.pcs_format=" << PCS_FORMAT_VERSION << "\n";
++    os << "version.pcs_epoch=" << PCS_COMPAT_EPOCH << "\n";
++
++    server_prompt_fingerprint fp;
++    fp.text = os.str();
++
++    char hash_buf[17];
++    snprintf(hash_buf, sizeof(hash_buf), "%016" PRIx64, fnv1a_64(fp.text));
++    fp.hash = hash_buf;
++
++    return fp;
++}
++
+ // returns 0 on success
+ // caller need to update prompt.tokens after a successful call to keep track of the processing progress
+ // note: this is not a member of server_slot because we want to run it inside yield_to_queue
+@@ -850,6 +1025,10 @@ public:
      // note: chat_params must not be refreshed upon existing sleeping state
      server_chat_params chat_params;
  
@@ -7750,7 +8996,7 @@ index fe068d3e9..74f914c44 100644
      server_state_callback_t callback_state = [](server_state, json) -> void {};
  
      server_context_impl() {
-@@ -933,6 +938,16 @@ private:
+@@ -933,8 +1112,152 @@ private:
  
      bool sleeping = false;
  
@@ -7766,8 +9012,144 @@ index fe068d3e9..74f914c44 100644
 +
      int64_t t_last_load_progress_ms = 0;
  
++    // T10 (SS4.5 step 1): scans <prompt_cache_dir>/<fp_hash>/*.pcs and pushes one disk-only
++    // entry per valid file - tokens and disk_path/n_bytes_disk only, no blob data loaded. Called
++    // from load_model() right after prompt_cache->configure_disk(), on every load with a disk
++    // directory configured, not just fresh starts. `slot_n_ctx = -1` skips the "fits in the
++    // slot" check here (slots may still be undersized for a deep entry until a later tier
++    // switch); read_entry() re-validates that for real at restore time.
++    void prompt_cache_scan_disk() {
++        const std::string dir = server_prompt_disk::fp_dir_path(prompt_cache->disk_dir, prompt_cache->fp_hash);
++
++        std::error_code ec;
++        if (!std::filesystem::exists(dir, ec)) {
++            return;
++        }
++
++        int n_found = 0;
++
++        for (const auto & file : std::filesystem::directory_iterator(dir, ec)) {
++            if (ec || file.path().extension() != ".pcs") {
++                continue;
++            }
++
++            server_prompt_disk::header hdr;
++            server_tokens              tokens;
++
++            if (!server_prompt_disk::read_header(file.path().string(), prompt_cache->fp_hash,
++                        ctx_tgt, mctx != nullptr, -1, hdr, tokens)) {
++                continue; // read_header() already deleted a corrupt file and logged a warning
++            }
++
++            server_prompt_cache_state state;
++            state.prompt.tokens = std::move(tokens);
++            state.disk_path     = file.path().string();
++            state.n_bytes_disk  = (size_t) std::filesystem::file_size(file.path(), ec);
++
++            prompt_cache->states.push_back(std::move(state));
++            n_found++;
++        }
++
++        if (n_found > 0) {
++            SRV_INF("pcache: scanned %d disk cache entr%s from %s\n", n_found, n_found == 1 ? "y" : "ies", dir.c_str());
++        }
++    }
++
++    // T11 (SS2.3 "Stage 2+, disk configured: spill"). Writes every live slot's state straight to
++    // disk, bypassing alloc(): at depth, a single blob can exceed --cache-ram and alloc() would
++    // silently skip it (SS2.3 point 1). Every existing RAM cache entry gets the same treatment,
++    // then loses its RAM blob (points 2-3), and enforce_disk_budget() runs once at the end
++    // (point 4). Called by persist_before_reload() instead of the RAM-carry path when a disk
++    // directory is configured.
++    void persist_before_reload_disk(const char * reason) {
++        auto & disk = *prompt_cache;
++
++        for (auto & slot : slots) {
++            if (slot.prompt.tokens.size() == 0) {
++                continue;
++            }
++
++            if (!slot_state_aligned(slot)) {
++                SLT_WRN(slot, "%s", "prompt state is misaligned with the token count, skipping disk persist\n");
++                continue;
++            }
++
++            if (!server_prompt_disk::should_persist(slot.prompt.n_tokens(), disk.disk_min_tokens)) {
++                continue;
++            }
++
++            // this slot's tokens are about to get their own (content-hashed) .pcs file below,
++            // which does not overwrite any older entry from an earlier persist of the same
++            // growing conversation - drop those now, the same way alloc() prunes RAM entries
++            // that a new one has made obsolete, so they don't pile up on disk untouched (this
++            // write bypasses alloc() on purpose, see the comment above persist_before_reload_disk)
++            disk.prune_prefixes_of(slot.prompt.tokens);
++
++            const size_t size_tgt =              llama_state_seq_get_size_ext(slot.ctx_tgt, slot.id, LLAMA_STATE_SEQ_FLAGS_NONE);
++            const size_t size_dft = slot.ctx_dft ? llama_state_seq_get_size_ext(slot.ctx_dft, slot.id, LLAMA_STATE_SEQ_FLAGS_NONE) : 0;
++
++            std::vector<uint8_t> data_tgt(size_tgt);
++            std::vector<uint8_t> data_dft(size_dft);
++
++            llama_state_seq_get_data_ext(slot.ctx_tgt, data_tgt.data(), size_tgt, slot.id, LLAMA_STATE_SEQ_FLAGS_NONE);
++            if (slot.ctx_dft) {
++                llama_state_seq_get_data_ext(slot.ctx_dft, data_dft.data(), size_dft, slot.id, LLAMA_STATE_SEQ_FLAGS_NONE);
++            }
++
++            llama_memory_t   mem     = llama_get_memory(slot.ctx_tgt);
++            const llama_pos  pos_min = llama_memory_seq_pos_min(mem, slot.id);
++            const llama_pos  pos_max = llama_memory_seq_pos_max(mem, slot.id);
++
++            const std::string path = server_prompt_disk::entry_path(disk.disk_dir, disk.fp_hash,
++                    server_prompt_disk::token_hash(slot.prompt.tokens.serialize()));
++
++            if (server_prompt_disk::write_entry(path, disk.fp_hash, slot.prompt,
++                        data_tgt.data(), data_tgt.size(), data_dft.data(), data_dft.size(),
++                        reason, disk.disk_ckpts, pos_min, pos_max)) {
++                SRV_INF("pcache: persisted slot %d to disk, %d tokens, reason=%s\n", slot.id, slot.prompt.n_tokens(), reason);
++            }
++        }
++
++        // every existing RAM-resident cache entry (from runtime idle-slot caching) gets written
++        // to disk too, then loses its RAM blob - demote_to_disk_or_drop() (extended by T11 to
++        // write on demand, which is also what makes S4's evict-to-disk actually happen) does
++        // both in one call, tagged with this reload's own reason instead of the "evict" default
++        for (auto it = disk.states.begin(); it != disk.states.end(); ) {
++            auto next = std::next(it);
++            disk.demote_to_disk_or_drop(it, reason);
++            it = next;
++        }
++
++        disk.enforce_disk_budget();
++    }
++
++    // Stage 1 (no disk configured): carries every non-empty slot's KV into the RAM prompt
++    // cache before a reload tears the context down, so load_model()'s is_resume path can
++    // hand it back to the same conversation instead of reprefilling. `reason` is only for
++    // the log line. Stage 2+ (disk configured) spills to disk instead (T11).
++    void persist_before_reload(const char * reason) {
++        if (!prompt_cache) {
++            return;
++        }
++
++        if (prompt_cache->disk_enabled()) {
++            persist_before_reload_disk(reason);
++            return;
++        }
++
++        for (auto & slot : slots) {
++            if (slot.prompt_save(*prompt_cache)) {
++                SRV_INF("pcache: persisted slot %d, %d tokens, reason=%s\n", slot.id, slot.prompt.n_tokens(), reason);
++            }
++        }
++
++        prompt_cache->update();
++    }
++
      void destroy() {
-@@ -951,7 +966,9 @@ private:
+         spec.reset();
+         spec_init.reset();
+@@ -951,7 +1274,9 @@ private:
          mctx = nullptr;
      }
  
@@ -7778,7 +9160,7 @@ index fe068d3e9..74f914c44 100644
          GGML_ASSERT(sleeping != new_state);
          if (new_state) {
              if (callback_state) {
-@@ -959,9 +976,23 @@ private:
+@@ -959,9 +1284,24 @@ private:
                  // note: for sleeping == false, event is emitted by load_model()
              }
              SRV_INF("%s", "server is entering sleeping state\n");
@@ -7788,6 +9170,7 @@ index fe068d3e9..74f914c44 100644
 +            // request is visible. The wake path below picks the right tier itself when
 +            // the waking request offered a depth hint; falling back to whatever was
 +            // last active is only for the case where it didn't.
++            persist_before_reload("sleep");
              destroy();
          } else {
              SRV_INF("%s", "server is exiting sleeping state\n");
@@ -7802,7 +9185,7 @@ index fe068d3e9..74f914c44 100644
              if (!load_model(params_base)) {
                  GGML_ABORT("failed to reload model after sleeping");
              }
-@@ -969,6 +1000,152 @@ private:
+@@ -969,6 +1309,156 @@ private:
          sleeping = new_state;
      }
  
@@ -7923,7 +9306,11 @@ index fe068d3e9..74f914c44 100644
 +
 +        ctx_tier_set(tier);
 +
-+        // the KV cache, the slots and the prompt cache do not survive this, the next turn reprefills
++        // the KV cache and the slots do not survive this - persist_before_reload() carries
++        // each slot's prompt into the RAM prompt cache first, so load_model()'s is_resume
++        // path can restore it instead of the next turn reprefilling from scratch
++        persist_before_reload("tier");
++
 +        ctx_tier_switching = true;
 +        destroy();
 +        bool ok = load_model(params_base);
@@ -7955,7 +9342,7 @@ index fe068d3e9..74f914c44 100644
      struct load_progress_data {
          server_context_impl * ctx;
          std::string stage;
-@@ -1008,9 +1185,14 @@ private:
+@@ -1008,9 +1498,14 @@ private:
          load_progress_data load_progress_mmproj(this, "mmproj_model");
          load_progress_data load_progress_spec  (this, "spec_model");
  
@@ -7971,7 +9358,63 @@ index fe068d3e9..74f914c44 100644
          const auto output_limits = server_output_limits(params_base);
          params_base.n_outputs_max = output_limits.total;
          params_base.n_outputs_max_per_seq = output_limits.per_seq;
-@@ -1411,8 +1593,8 @@ private:
+@@ -1113,6 +1608,16 @@ private:
+ 
+         vocab = llama_model_get_vocab(model_tgt);
+ 
++        // T7/T10 (disk prompt cache): the cache-directory fingerprint is computed on every
++        // load. T10 below uses it to configure and scan the disk cache directory; this is also
++        // what a T6/T7 isolation test greps for: two launches differing only in RoPE fields must
++        // log different hashes, two launches differing only in n_ctx/n_ubatch/-ncmoe must log
++        // the same one.
++        const server_prompt_fingerprint fp = server_prompt_build_fingerprint(params_base, model_tgt);
++        if (!fp.hash.empty()) {
++            SRV_INF("pcache: fingerprint hash=%s\n", fp.hash.c_str());
++        }
++
+         n_ctx = llama_n_ctx(ctx_tgt);
+ 
+         add_bos_token = llama_vocab_get_add_bos(vocab);
+@@ -1293,6 +1798,7 @@ private:
+             slot.mem.init(ctx_tgt, ctx_dft);
+             slot.spec    = spec.get();
+             slot.n_ctx   = n_ctx_slot();
++            slot.ctx_tgt_seq_rm_type = ctx_tgt_seq_rm_type;
+ 
+             slot.mctx                   = mctx;
+             slot.prompt.tokens.has_mtmd = mctx != nullptr;
+@@ -1356,7 +1862,29 @@ private:
+             }
+             SRV_TRC("%s", "use `--cache-ram 0` to disable the prompt cache\n");
+ 
+-            prompt_cache = std::make_unique<server_prompt_cache>(params_base.cache_ram_mib, n_ctx);
++            // T10 (disk prompt cache): a disk directory makes disk the source of truth, so the
++            // cache object is recreated fresh on every load_model() call, not just fresh starts
++            // - its RAM contents don't matter once the directory scan below rebuilds the index.
++            // `fp.hash` is empty when a LoRA adapter or control vector is loaded (SS3.2), which
++            // falls back to the no-disk RAM-only behavior below.
++            const bool disk_configured = !params_base.prompt_cache_dir.empty() && !fp.hash.empty();
++
++            if (disk_configured) {
++                prompt_cache = std::make_unique<server_prompt_cache>(params_base.cache_ram_mib, n_ctx);
++                prompt_cache->configure_disk(params_base.prompt_cache_dir, fp.hash,
++                        params_base.prompt_cache_disk_mib, params_base.prompt_cache_disk_ckpts,
++                        params_base.prompt_cache_disk_min_tokens, params_base.prompt_cache_disk_max_age_s);
++
++                server_prompt_disk::ensure_fp_dir(params_base.prompt_cache_dir, fp.hash, fp.text);
++                prompt_cache_scan_disk();
++            } else if (is_resume && prompt_cache) {
++                // no disk dir: carry the cache across the reload instead of dropping it (T5) -
++                // this is what lets persist_before_reload()'s entries survive a tier switch or a
++                // sleep/wake
++                prompt_cache->limit_tokens = n_ctx;
++            } else {
++                prompt_cache = std::make_unique<server_prompt_cache>(params_base.cache_ram_mib, n_ctx);
++            }
+         } else {
+             SRV_TRC("%s", "prompt cache is disabled - use `--cache-ram N` to enable it\n");
+         }
+@@ -1411,8 +1939,8 @@ private:
          queue_tasks.on_update_slots([this]() {
              update_slots();
          });
@@ -7982,7 +9425,91 @@ index fe068d3e9..74f914c44 100644
          });
  
          metrics.init();
-@@ -2395,6 +2577,12 @@ private:
+@@ -1544,6 +2072,33 @@ private:
+         return nullptr;
+     }
+ 
++    // saves every idle slot's prompt to the RAM cache and, under a unified KV cache, clears
++    // it to free its cells. `exclude`, if given, is left alone (used when the caller is about
++    // to restore into that slot itself and it is not yet marked as processing).
++    //
++    // shared by the post-launch idle-slot caching below and by get_available_slot()'s T4
++    // pre-clear, which needs the same effect to run earlier, before a restore that would
++    // otherwise not fit alongside the other slot's still-resident cells (see [TAG_IDLE_SLOT_CLEAR]).
++    void save_and_clear_idle_slots(const server_slot * exclude = nullptr) {
++        for (auto & slot : slots) {
++            if (&slot == exclude || slot.is_processing()) {
++                continue;
++            }
++
++            SLT_TRC(slot, "%s", "saving idle slot to prompt cache\n");
++
++            if (slot.prompt_save(*prompt_cache)) {
++                SLT_DBG(slot, "%s", "__TEST_TAG_CACHE_IDLE_SLOT__\n");
++                prompt_cache->update();
++            }
++
++            if (params_base.kv_unified) {
++                // [TAG_IDLE_SLOT_CLEAR]
++                slot.prompt_clear();
++            }
++        }
++    }
++
+     server_slot * get_available_slot(const server_task & task) {
+         server_slot * ret = nullptr;
+ 
+@@ -1646,7 +2201,48 @@ private:
+ 
+                 ret->prompt_save(*prompt_cache);
+ 
+-                if (!ret->prompt_load(*prompt_cache, task.tokens)) {
++                auto it_best = prompt_cache->find_best(ret->prompt, task.tokens);
++
++                // with a unified KV cache, an idle slot's cells are still resident here - they
++                // are only freed later, after this task launches (see [TAG_IDLE_SLOT_CLEAR]).
++                // if the entry we are about to restore does not fit alongside them, free the
++                // other idle slots now instead of letting the restore fail and fall back to a
++                // full reprefill (see doc 18 SS4.4)
++                if (params_base.kv_unified && it_best != prompt_cache->states.end()) {
++                    const size_t need = (size_t) it_best->prompt.n_tokens();
++
++                    size_t free = (size_t) n_ctx;
++                    for (const auto & other : slots) {
++                        if (&other != ret) {
++                            free -= std::min(free, (size_t) other.prompt.n_tokens());
++                        }
++                    }
++
++                    if (need > free) {
++                        SRV_INF("pcache: restore needs %zu tokens of room, only %zu free under unified KV - clearing idle slots early\n", need, free);
++                        save_and_clear_idle_slots(ret);
++                    }
++                }
++
++                // captured before prompt_restore() runs: on the RAM path, a successful restore
++                // moves-and-erases it_best, so it must not be dereferenced afterward. a disk-only
++                // entry is left in place by a successful restore (T9), so it_best stays valid.
++                const bool restore_was_disk_only = it_best != prompt_cache->states.end() && it_best->is_disk_only();
++
++                if (!ret->prompt_restore(*prompt_cache, it_best)) {
++                    ret->prompt_clear();
++                } else if (!slot_state_aligned(*ret)) {
++                    SLT_WRN(*ret, "%s", "restored prompt state failed the alignment check, clearing\n");
++
++                    if (restore_was_disk_only) {
++                        // a blob that restores misaligned once will do it again (SS2.4) - delete
++                        // the backing file and drop the index entry, instead of letting it keep
++                        // winning find_best() and failing the same way on every future request
++                        std::error_code ec;
++                        std::filesystem::remove(it_best->disk_path, ec);
++                        prompt_cache->states.erase(it_best);
++                    }
++
+                     ret->prompt_clear();
+                 }
+ 
+@@ -2395,6 +2991,12 @@ private:
  
                      const int id_task = task.id;
  
@@ -7995,7 +9522,57 @@ index fe068d3e9..74f914c44 100644
                      server_slot * slot = get_available_slot(task);
  
                      //
-@@ -4228,12 +4416,13 @@ server_context_meta server_context::get_meta() const {
+@@ -2434,21 +3036,7 @@ private:
+                     }
+ 
+                     if (params_base.cache_idle_slots) {
+-                        for (auto & slot : slots) {
+-                            if (!slot.is_processing()) {
+-                                SLT_TRC(slot, "%s", "saving idle slot to prompt cache\n");
+-
+-                                if (slot.prompt_save(*prompt_cache)) {
+-                                    SLT_DBG(slot, "%s", "__TEST_TAG_CACHE_IDLE_SLOT__\n");
+-                                    prompt_cache->update();
+-                                }
+-
+-                                if (params_base.kv_unified) {
+-                                    // [TAG_IDLE_SLOT_CLEAR]
+-                                    slot.prompt_clear();
+-                                }
+-                            }
+-                        }
++                        save_and_clear_idle_slots();
+                     }
+                 } break;
+             case SERVER_TASK_TYPE_CANCEL:
+@@ -4164,6 +4752,26 @@ bool server_context::load_model(common_params & params) {
+ void server_context::start_loop() {
+     auto & params = impl->params_base;
+     impl->queue_tasks.start_loop(params.sleep_idle_seconds * 1000);
++
++    // T12, S3 (SS2.2): start_loop() only returns here once terminate() has unblocked the queue
++    // loop, which happens after SIGTERM. By this point the loop is fully stopped on the main
++    // thread and no decode is in flight - this must NOT run in the SIGTERM handler itself, which
++    // fires on a signal context or an HTTP thread and must never touch llama_context (server.cpp).
++    // If sleeping, S2 already persisted everything and the context is already gone - nothing to
++    // save. Otherwise this is the same spill as S1/S2 (persist_before_reload_disk() in disk
++    // mode, or the RAM carry in Stage 1 - though the RAM carry is moot here, since nothing
++    // reloads after this and the process just exits).
++    //
++    // TODO(deploy, Stage 4): this needs `stop_grace_period: 90s` in the compose override so
++    // Docker's default 10s doesn't SIGKILL the process mid-save at depth (SS5 Stage 3 estimate).
++    if (!impl->sleeping) {
++        const int64_t t_start_ms = ggml_time_ms();
++        SRV_INF("%s", "pcache: shutdown persist starting\n");
++
++        impl->persist_before_reload("shutdown");
++
++        SRV_INF("pcache: shutdown persist finished in %.2f s\n", (ggml_time_ms() - t_start_ms) / 1000.0);
++    }
+ }
+ 
+ void server_context::terminate() {
+@@ -4228,12 +4836,13 @@ server_context_meta server_context::get_meta() const {
  // may have bypass_sleep = true if the task does not use ctx_server
  struct server_res_generator : server_res_spipe {
      server_response_reader rd;
@@ -8011,7 +9588,7 @@ index fe068d3e9..74f914c44 100644
          }
      }
      void ok(const json & response_data) {
-@@ -4262,7 +4451,12 @@ std::unique_ptr<server_res_generator> server_routes::handle_completions_impl(
+@@ -4262,7 +4871,12 @@ std::unique_ptr<server_res_generator> server_routes::handle_completions_impl(
              task_response_type res_type) {
      GGML_ASSERT(type == SERVER_TASK_TYPE_COMPLETION || type == SERVER_TASK_TYPE_INFILL);
  
@@ -8025,7 +9602,7 @@ index fe068d3e9..74f914c44 100644
      auto completion_id = gen_chatcmplid();
      auto & rd = res->rd;
      auto & params = this->params;
-@@ -4291,12 +4485,17 @@ std::unique_ptr<server_res_generator> server_routes::handle_completions_impl(
+@@ -4291,12 +4905,17 @@ std::unique_ptr<server_res_generator> server_routes::handle_completions_impl(
          // process prompt
          std::vector<server_tokens> inputs;
  
@@ -8049,7 +9626,7 @@ index fe068d3e9..74f914c44 100644
          }
  
          // tasks.reserve(inputs.size()); // TODO: this is inaccurate due to child tasks
-@@ -4522,8 +4721,8 @@ std::unique_ptr<server_res_generator> server_routes::handle_completions_impl(
+@@ -4522,8 +5141,8 @@ std::unique_ptr<server_res_generator> server_routes::handle_completions_impl(
      return res;
  }
  
@@ -8060,7 +9637,7 @@ index fe068d3e9..74f914c44 100644
  }
  
  server_routes::server_routes(const common_params & params, server_context & ctx_server)
-@@ -4535,7 +4734,7 @@ server_routes::server_routes(const common_params & params, server_context & ctx_
+@@ -4535,7 +5154,7 @@ server_routes::server_routes(const common_params & params, server_context & ctx_
  
      // note: this must be registered before load_model()
      //       so that on sleep phase, the callback is called before ctx is destroyed
@@ -8069,7 +9646,7 @@ index fe068d3e9..74f914c44 100644
          update_cached_responses(is_sleeping);
      });
  }
-@@ -4826,7 +5025,9 @@ void server_routes::init_routes() {
+@@ -4826,7 +5445,9 @@ void server_routes::init_routes() {
      };
  
      this->post_infill = [this](const server_http_req & req) {
@@ -8080,7 +9657,7 @@ index fe068d3e9..74f914c44 100644
          // check model compatibility
          std::string err;
          if (llama_vocab_fim_pre(ctx_server.vocab) == LLAMA_TOKEN_NULL) {
-@@ -4880,19 +5081,24 @@ void server_routes::init_routes() {
+@@ -4880,19 +5501,24 @@ void server_routes::init_routes() {
          data["input_extra"] = input_extra; // default to empty array if it's not exist
  
          std::string prompt = json_value(data, "prompt", std::string());
@@ -8118,7 +9695,7 @@ index fe068d3e9..74f914c44 100644
  
          std::vector<raw_buffer> files; // dummy
          return handle_completions_impl(
-@@ -4904,7 +5110,7 @@ void server_routes::init_routes() {
+@@ -4904,7 +5530,7 @@ void server_routes::init_routes() {
      };
  
      this->post_completions = [this](const server_http_req & req) {
@@ -8127,7 +9704,7 @@ index fe068d3e9..74f914c44 100644
          std::vector<raw_buffer> files; // dummy
          const json body = json::parse(req.body);
          return handle_completions_impl(
-@@ -4916,7 +5122,7 @@ void server_routes::init_routes() {
+@@ -4916,7 +5542,7 @@ void server_routes::init_routes() {
      };
  
      this->post_completions_oai = [this](const server_http_req & req) {
@@ -8136,7 +9713,7 @@ index fe068d3e9..74f914c44 100644
          std::vector<raw_buffer> files; // dummy
          const json body = json::parse(req.body);
          return handle_completions_impl(
-@@ -4928,7 +5134,7 @@ void server_routes::init_routes() {
+@@ -4928,7 +5554,7 @@ void server_routes::init_routes() {
      };
  
      this->post_chat_completions = [this](const server_http_req & req) {
@@ -8145,7 +9722,7 @@ index fe068d3e9..74f914c44 100644
          std::vector<raw_buffer> files;
          json body = json::parse(req.body);
          json body_parsed = oaicompat_chat_params_parse(
-@@ -4985,7 +5191,7 @@ void server_routes::init_routes() {
+@@ -4985,7 +5611,7 @@ void server_routes::init_routes() {
      };
  
      this->post_responses_oai = [this](const server_http_req & req) {
@@ -8154,7 +9731,7 @@ index fe068d3e9..74f914c44 100644
          std::vector<raw_buffer> files;
          json body = server_chat_convert_responses_to_chatcmpl(json::parse(req.body));
          SRV_DBG("%s\n", "Request converted: OpenAI Responses -> OpenAI Chat Completions");
-@@ -5007,7 +5213,7 @@ void server_routes::init_routes() {
+@@ -5007,7 +5633,7 @@ void server_routes::init_routes() {
      };
  
      this->post_transcriptions_oai = [this](const server_http_req & req) {
@@ -8163,7 +9740,7 @@ index fe068d3e9..74f914c44 100644
  
          if (!meta->has_mtmd || !meta->chat_params.allow_audio) {
              res->error(format_error_response("The current model does not support audio input.", ERROR_TYPE_NOT_SUPPORTED));
-@@ -5035,7 +5241,7 @@ void server_routes::init_routes() {
+@@ -5035,7 +5661,7 @@ void server_routes::init_routes() {
      };
  
      this->post_anthropic_messages = [this](const server_http_req & req) {
@@ -8172,7 +9749,7 @@ index fe068d3e9..74f914c44 100644
          std::vector<raw_buffer> files;
          json body = server_chat_convert_anthropic_to_oai(json::parse(req.body));
          SRV_DBG("%s\n", "Request converted: Anthropic -> OpenAI Chat Completions");
-@@ -5424,7 +5630,11 @@ std::unique_ptr<server_res_generator> server_routes::handle_embeddings_impl(cons
+@@ -5424,7 +6050,11 @@ std::unique_ptr<server_res_generator> server_routes::handle_embeddings_impl(cons
          }
      }
  
@@ -8286,3 +9863,1262 @@ index e17733a74..8c6fb5899 100644
          callback_sleeping_state.push_back(std::move(callback));
      }
  
+diff --git a/tools/server/server-task.cpp b/tools/server/server-task.cpp
+index 0d3beb313..4fc857355 100644
+--- a/tools/server/server-task.cpp
++++ b/tools/server/server-task.cpp
+@@ -10,8 +10,24 @@
+ #include "speculative.h"
+ #include "server-common.h"
+ 
++#include <algorithm>
++#include <cinttypes>
++#include <cstdio>
++#include <cstring>
++#include <ctime>
++#include <filesystem>
++#include <fstream>
+ #include <sstream>
+ 
++#if defined(_WIN32)
++#    include <process.h>
++#    define pcs_fseek _fseeki64
++#else
++#    include <fcntl.h>
++#    include <unistd.h>
++#    define pcs_fseek fseeko
++#endif
++
+ //
+ // task_params
+ //
+@@ -1685,6 +1701,530 @@ json server_task_result_apply_lora::to_json() {
+     return json {{ "success", true }};
+ }
+ 
++//
++// server_prompt_disk (T8)
++//
++namespace server_prompt_disk {
++
++namespace {
++
++const char MAGIC[4]   = {'L', 'P', 'C', 'S'};
++const char TRAILER[4] = {'S', 'C', 'P', 'L'};
++
++uint64_t fnv1a_64(const void * data, size_t len) {
++    uint64_t h = 0xcbf29ce484222325ULL; // FNV offset basis
++    const auto * p = static_cast<const unsigned char *>(data);
++    for (size_t i = 0; i < len; i++) {
++        h ^= p[i];
++        h *= 0x100000001b3ULL; // FNV prime
++    }
++    return h;
++}
++
++// small FILE* wrapper that turns a short read into a sticky failure instead of garbage data
++struct pcs_reader {
++    FILE * fp = nullptr;
++    bool   ok = false;
++
++    explicit pcs_reader(const std::string & path) {
++        fp = fopen(path.c_str(), "rb");
++        ok = fp != nullptr;
++    }
++
++    ~pcs_reader() {
++        if (fp) {
++            fclose(fp);
++        }
++    }
++
++    void read(void * dst, size_t n) {
++        if (!ok) {
++            return;
++        }
++        if (n > 0 && fread(dst, 1, n, fp) != n) {
++            ok = false;
++        }
++    }
++
++    template <typename T>
++    T read_pod() {
++        T v{};
++        read(&v, sizeof(T));
++        return v;
++    }
++
++    std::vector<char> read_bytes(size_t n) {
++        std::vector<char> v(n);
++        read(v.data(), n);
++        return v;
++    }
++};
++
++bool delete_and_warn(const std::string & path, const char * why) {
++    SRV_WRN("pcache: %s, deleting %s\n", why, path.c_str());
++    std::error_code ec;
++    std::filesystem::remove(path, ec);
++    return false;
++}
++
++// magic, format version and the JSON header - the part common to a full read and a header-only one
++bool read_prologue(pcs_reader & r, const std::string & path, const std::string & fp_hash, header & out) {
++    char magic[4];
++    r.read(magic, 4);
++    const uint32_t version    = r.read_pod<uint32_t>();
++    const uint32_t header_len = r.read_pod<uint32_t>();
++
++    if (!r.ok || memcmp(magic, MAGIC, 4) != 0) {
++        return delete_and_warn(path, "bad or missing .pcs magic");
++    }
++    if (version != FORMAT_VERSION) {
++        return delete_and_warn(path, "unsupported .pcs format version");
++    }
++    if (header_len == 0 || header_len > (1u << 20)) {
++        return delete_and_warn(path, "implausible .pcs header length");
++    }
++
++    const std::vector<char> h_bytes = r.read_bytes(header_len);
++    if (!r.ok) {
++        return delete_and_warn(path, "truncated .pcs header");
++    }
++
++    try {
++        const json h = json::parse(std::string(h_bytes.begin(), h_bytes.end()));
++
++        out.fp        = h.at("fp").get<std::string>();
++        out.n_tokens  = h.at("n_tokens").get<int64_t>();
++        out.n_ckpt    = h.at("n_ckpt").get<int64_t>();
++        out.main_size = h.at("main_size").get<uint64_t>();
++        out.drft_size = h.at("drft_size").get<uint64_t>();
++        out.created   = h.at("created").get<int64_t>();
++        out.last_used = h.at("last_used").get<int64_t>();
++        out.saved_by  = h.at("saved_by").get<std::string>();
++        out.pos_min   = h.at("pos_min").get<int32_t>();
++        out.pos_max   = h.at("pos_max").get<int32_t>();
++    } catch (const std::exception &) {
++        return delete_and_warn(path, "malformed .pcs header JSON");
++    }
++
++    if (out.fp != fp_hash) {
++        return delete_and_warn(path, "fingerprint mismatch in .pcs header");
++    }
++
++    return true;
++}
++
++// the token block right after the header - shared by the full read and the header-only one
++bool read_tokens(pcs_reader & r, const std::string & path, bool has_mtmd, server_tokens & out_tokens) {
++    const uint64_t tokens_bytes = r.read_pod<uint64_t>();
++    if (!r.ok || tokens_bytes % sizeof(llama_token) != 0) {
++        return delete_and_warn(path, "bad .pcs tokens length");
++    }
++
++    llama_tokens packed(tokens_bytes / sizeof(llama_token));
++    r.read(packed.data(), tokens_bytes);
++    if (!r.ok) {
++        return delete_and_warn(path, "truncated .pcs tokens block");
++    }
++
++    try {
++        out_tokens = server_tokens::deserialize(packed, has_mtmd);
++    } catch (const std::exception &) {
++        return delete_and_warn(path, "corrupt .pcs tokens block");
++    }
++
++    return true;
++}
++
++// checked last, once the trailer has been located (by seeking, in the header-only path, or by
++// reading straight through, in the full one): total_len against the real file size, the trailer
++// magic, the vocab ids and the slot's n_ctx. any failure here also deletes the file (SS3.3).
++bool validate_epilogue(
++        const std::string & path,
++        const llama_context * ctx_tgt,
++        int32_t slot_n_ctx,
++        const server_tokens & tokens,
++        uint64_t total_len_field,
++        const char trailer[4]) {
++    std::error_code ec;
++    const uint64_t file_size = (uint64_t) std::filesystem::file_size(path, ec);
++    if (ec || total_len_field != file_size) {
++        return delete_and_warn(path, "total_len does not match .pcs file size");
++    }
++
++    if (memcmp(trailer, TRAILER, 4) != 0) {
++        return delete_and_warn(path, "missing .pcs trailer magic");
++    }
++
++    if (slot_n_ctx > 0 && (int64_t) tokens.size() > slot_n_ctx) {
++        return delete_and_warn(path, "restored prompt does not fit in the slot context");
++    }
++
++    if (ctx_tgt != nullptr && !tokens.validate(ctx_tgt)) {
++        return delete_and_warn(path, "restored tokens failed validation");
++    }
++
++    return true;
++}
++
++} // namespace
++
++bool should_persist(size_t n_tokens, int32_t min_tokens) {
++    return min_tokens <= 0 || (int64_t) n_tokens >= min_tokens;
++}
++
++std::string token_hash(const std::vector<char> & tokens_bytes) {
++    char buf[17];
++    snprintf(buf, sizeof(buf), "%016" PRIx64, fnv1a_64(tokens_bytes.data(), tokens_bytes.size()));
++    return buf;
++}
++
++std::string fp_dir_path(const std::string & cache_dir, const std::string & fp_hash) {
++    return (std::filesystem::path(cache_dir) / fp_hash).string();
++}
++
++std::string entry_path(const std::string & cache_dir, const std::string & fp_hash, const std::string & tokhash) {
++    return (std::filesystem::path(fp_dir_path(cache_dir, fp_hash)) / (tokhash + ".pcs")).string();
++}
++
++void ensure_fp_dir(const std::string & cache_dir, const std::string & fp_hash, const std::string & fp_text) {
++    std::error_code ec;
++    const std::string dir = fp_dir_path(cache_dir, fp_hash);
++    std::filesystem::create_directories(dir, ec);
++
++    const std::string fp_file = (std::filesystem::path(dir) / "fingerprint.txt").string();
++    if (!std::filesystem::exists(fp_file, ec)) {
++        std::ofstream f(fp_file, std::ios::binary | std::ios::trunc);
++        if (f) {
++            f << fp_text;
++        }
++    }
++}
++
++bool write_entry(
++        const std::string & path,
++        const std::string & fp_hash,
++        const server_prompt & prompt,
++        const uint8_t * main_data, size_t main_size,
++        const uint8_t * drft_data, size_t drft_size,
++        const std::string & saved_by,
++        int32_t ckpt_limit,
++        int32_t pos_min,
++        int32_t pos_max,
++        int64_t created) {
++    const std::filesystem::path final_path(path);
++    const std::filesystem::path dir = final_path.parent_path();
++
++    std::error_code ec;
++    std::filesystem::create_directories(dir, ec);
++
++    char pid_buf[32];
++#if defined(_WIN32)
++    snprintf(pid_buf, sizeof(pid_buf), "%d", (int) _getpid());
++#else
++    snprintf(pid_buf, sizeof(pid_buf), "%d", (int) getpid());
++#endif
++    const std::filesystem::path tmp_path = dir / ("." + final_path.filename().string() + ".tmp." + pid_buf);
++
++    FILE * fp = fopen(tmp_path.string().c_str(), "wb");
++    if (!fp) {
++        SRV_ERR("pcache: failed to open %s for writing\n", tmp_path.string().c_str());
++        return false;
++    }
++
++    std::vector<char> iobuf(4 * 1024 * 1024);
++    setvbuf(fp, iobuf.data(), _IOFBF, iobuf.size());
++
++    bool     ok        = true;
++    uint64_t n_written = 0;
++
++    auto wr = [&](const void * data, size_t n) {
++        if (!ok) {
++            return;
++        }
++        if (n > 0 && fwrite(data, 1, n, fp) != n) {
++            ok = false;
++            return;
++        }
++        n_written += n;
++    };
++    auto wr_u32 = [&](uint32_t v) { wr(&v, sizeof(v)); };
++    auto wr_u64 = [&](uint64_t v) { wr(&v, sizeof(v)); };
++    auto wr_i32 = [&](int32_t  v) { wr(&v, sizeof(v)); };
++    auto wr_i64 = [&](int64_t  v) { wr(&v, sizeof(v)); };
++
++    const std::vector<char> tok_bytes = prompt.tokens.serialize();
++
++    const int64_t n_total_ckpt = (int64_t) prompt.checkpoints.size();
++    const int64_t n_ckpt_write = ckpt_limit > 0 ? std::min<int64_t>(n_total_ckpt, ckpt_limit) : 0;
++    const int64_t n_ckpt_skip  = n_total_ckpt - n_ckpt_write;
++
++    const int64_t now = (int64_t) time(nullptr);
++
++    json h = {
++        {"fp",        fp_hash},
++        {"n_tokens",  (int64_t) prompt.tokens.size()},
++        {"n_ckpt",    n_ckpt_write},
++        {"main_size", (uint64_t) main_size},
++        {"drft_size", (uint64_t) drft_size},
++        {"created",   created > 0 ? created : now},
++        {"last_used", now},
++        {"saved_by",  saved_by},
++        {"pos_min",   pos_min},
++        {"pos_max",   pos_max},
++    };
++
++    std::string h_str = h.dump();
++    if (h_str.size() >= HEADER_PAD_SIZE) {
++        SRV_ERR("%s", "pcache: header JSON does not fit the padded header size\n");
++        fclose(fp);
++        std::filesystem::remove(tmp_path, ec);
++        return false;
++    }
++    h_str.resize(HEADER_PAD_SIZE, ' ');
++
++    wr(MAGIC, 4);
++    wr_u32(FORMAT_VERSION);
++    wr_u32((uint32_t) HEADER_PAD_SIZE);
++    wr(h_str.data(), h_str.size());
++
++    wr_u64((uint64_t) tok_bytes.size());
++    wr(tok_bytes.data(), tok_bytes.size());
++
++    if (n_ckpt_write > 0) {
++        auto it = prompt.checkpoints.begin();
++        std::advance(it, n_ckpt_skip);
++        for (int64_t i = 0; i < n_ckpt_write; i++, ++it) {
++            wr_i64(it->n_tokens);
++            wr_i32(it->pos_min);
++            wr_i32(it->pos_max);
++            wr_u64((uint64_t) it->data_tgt.size());
++            wr(it->data_tgt.data(), it->data_tgt.size());
++            wr_u64((uint64_t) it->data_dft.size());
++            wr(it->data_dft.data(), it->data_dft.size());
++            wr_u64((uint64_t) it->data_spec.size());
++            wr(it->data_spec.data(), it->data_spec.size());
++        }
++    }
++
++    wr_u64((uint64_t) main_size);
++    wr(main_data, main_size);
++
++    wr_u64((uint64_t) drft_size);
++    wr(drft_data, drft_size);
++
++    const uint64_t total_len = n_written + sizeof(uint64_t) + sizeof(TRAILER);
++    wr_u64(total_len);
++    wr(TRAILER, sizeof(TRAILER));
++
++    if (ok) {
++        ok = fflush(fp) == 0;
++    }
++#if !defined(_WIN32)
++    if (ok) {
++        ok = fsync(fileno(fp)) == 0;
++    }
++#endif
++    fclose(fp);
++
++    if (!ok) {
++        SRV_ERR("pcache: write failed for %s\n", tmp_path.string().c_str());
++        std::filesystem::remove(tmp_path, ec);
++        return false;
++    }
++
++    std::filesystem::rename(tmp_path, final_path, ec);
++    if (ec) {
++        SRV_ERR("pcache: failed to rename %s -> %s: %s\n",
++                tmp_path.string().c_str(), final_path.string().c_str(), ec.message().c_str());
++        std::filesystem::remove(tmp_path, ec);
++        return false;
++    }
++
++#if !defined(_WIN32)
++    {
++        const int dfd = open(dir.string().c_str(), O_RDONLY);
++        if (dfd >= 0) {
++            fsync(dfd);
++            close(dfd);
++        }
++    }
++#endif
++
++    return true;
++}
++
++bool read_entry(
++        const std::string & path,
++        const std::string & fp_hash,
++        const llama_context * ctx_tgt,
++        bool has_mtmd,
++        int32_t slot_n_ctx,
++        header & out_header,
++        server_prompt & out_prompt,
++        std::vector<uint8_t> & out_main,
++        std::vector<uint8_t> & out_drft) {
++    pcs_reader r(path);
++    if (!r.ok) {
++        return false;
++    }
++
++    if (!read_prologue(r, path, fp_hash, out_header)) {
++        return false;
++    }
++
++    server_tokens tokens;
++    if (!read_tokens(r, path, has_mtmd, tokens)) {
++        return false;
++    }
++
++    std::list<common_prompt_checkpoint> ckpts;
++    for (int64_t i = 0; i < out_header.n_ckpt; i++) {
++        common_prompt_checkpoint ckpt;
++        ckpt.n_tokens = r.read_pod<int64_t>();
++        ckpt.pos_min  = r.read_pod<int32_t>();
++        ckpt.pos_max  = r.read_pod<int32_t>();
++
++        ckpt.data_tgt.resize((size_t) r.read_pod<uint64_t>());
++        r.read(ckpt.data_tgt.data(), ckpt.data_tgt.size());
++
++        ckpt.data_dft.resize((size_t) r.read_pod<uint64_t>());
++        r.read(ckpt.data_dft.data(), ckpt.data_dft.size());
++
++        ckpt.data_spec.resize((size_t) r.read_pod<uint64_t>());
++        r.read(ckpt.data_spec.data(), ckpt.data_spec.size());
++
++        if (!r.ok) {
++            return delete_and_warn(path, "truncated .pcs checkpoint block");
++        }
++
++        ckpts.push_back(std::move(ckpt));
++    }
++
++    std::vector<uint8_t> main_data((size_t) r.read_pod<uint64_t>());
++    r.read(main_data.data(), main_data.size());
++
++    std::vector<uint8_t> drft_data((size_t) r.read_pod<uint64_t>());
++    r.read(drft_data.data(), drft_data.size());
++
++    if (!r.ok) {
++        return delete_and_warn(path, "truncated .pcs blob data");
++    }
++
++    const uint64_t total_len = r.read_pod<uint64_t>();
++    char trailer[4];
++    r.read(trailer, 4);
++    if (!r.ok) {
++        return delete_and_warn(path, "truncated .pcs file");
++    }
++
++    if (!validate_epilogue(path, ctx_tgt, slot_n_ctx, tokens, total_len, trailer)) {
++        return false;
++    }
++
++    out_prompt.tokens      = std::move(tokens);
++    out_prompt.checkpoints = std::move(ckpts);
++    out_main               = std::move(main_data);
++    out_drft               = std::move(drft_data);
++
++    return true;
++}
++
++bool read_header(
++        const std::string & path,
++        const std::string & fp_hash,
++        const llama_context * ctx_tgt,
++        bool has_mtmd,
++        int32_t slot_n_ctx,
++        header & out_header,
++        server_tokens & out_tokens) {
++    pcs_reader r(path);
++    if (!r.ok) {
++        return false;
++    }
++
++    if (!read_prologue(r, path, fp_hash, out_header)) {
++        return false;
++    }
++
++    if (!read_tokens(r, path, has_mtmd, out_tokens)) {
++        return false;
++    }
++
++    // skip straight to the trailer instead of reading through the checkpoints/blobs - this is
++    // what makes a header-only scan cheap regardless of how large the file is (SS3.3)
++    std::error_code ec;
++    const uint64_t file_size = (uint64_t) std::filesystem::file_size(path, ec);
++    if (ec || file_size < sizeof(uint64_t) + sizeof(TRAILER)) {
++        return delete_and_warn(path, "implausibly small .pcs file");
++    }
++
++    if (pcs_fseek(r.fp, (int64_t) (file_size - sizeof(uint64_t) - sizeof(TRAILER)), SEEK_SET) != 0) {
++        return delete_and_warn(path, "failed to seek to .pcs trailer");
++    }
++
++    const uint64_t total_len = r.read_pod<uint64_t>();
++    char trailer[4];
++    r.read(trailer, 4);
++    if (!r.ok) {
++        return delete_and_warn(path, "truncated .pcs file");
++    }
++
++    return validate_epilogue(path, ctx_tgt, slot_n_ctx, out_tokens, total_len, trailer);
++}
++
++bool update_last_used(const std::string & path, int64_t last_used) {
++    FILE * fp = fopen(path.c_str(), "r+b");
++    if (!fp) {
++        return false;
++    }
++
++    char magic[4];
++    bool ok = fread(magic, 1, 4, fp) == 4 && memcmp(magic, MAGIC, 4) == 0;
++
++    uint32_t version    = 0;
++    uint32_t header_len = 0;
++    if (ok) ok = fread(&version, sizeof(version), 1, fp) == 1 && version == FORMAT_VERSION;
++    if (ok) ok = fread(&header_len, sizeof(header_len), 1, fp) == 1;
++
++    std::vector<char> h_bytes;
++    if (ok) {
++        h_bytes.resize(header_len);
++        ok = fread(h_bytes.data(), 1, header_len, fp) == header_len;
++    }
++
++    json h;
++    if (ok) {
++        try {
++            h = json::parse(std::string(h_bytes.begin(), h_bytes.end()));
++            h["last_used"] = last_used;
++        } catch (const std::exception &) {
++            ok = false;
++        }
++    }
++
++    if (ok) {
++        std::string h_str = h.dump();
++        if (h_str.size() >= header_len) {
++            // last_used doesn't change the field count/width, so this should never happen
++            ok = false;
++        } else {
++            h_str.resize(header_len, ' ');
++
++            ok = pcs_fseek(fp, -(int64_t) header_len, SEEK_CUR) == 0;
++            if (ok) ok = fwrite(h_str.data(), 1, h_str.size(), fp) == h_str.size();
++            if (ok) ok = fflush(fp) == 0;
++#if !defined(_WIN32)
++            if (ok) ok = fsync(fileno(fp)) == 0;
++#endif
++        }
++    }
++
++    fclose(fp);
++    return ok;
++}
++
++} // namespace server_prompt_disk
++
+ //
+ // server_prompt_cache
+ //
+@@ -1692,7 +2232,9 @@ size_t server_prompt_cache::size() const {
+     size_t res = 0;
+ 
+     for (const auto & state : states) {
+-        res += state.size();
++        if (!state.is_disk_only()) {
++            res += state.size();
++        }
+     }
+ 
+     return res;
+@@ -1702,12 +2244,39 @@ size_t server_prompt_cache::n_tokens() const {
+     size_t res = 0;
+ 
+     for (const auto & state : states) {
+-        res += state.prompt.n_tokens();
++        if (!state.is_disk_only()) {
++            res += state.prompt.n_tokens();
++        }
+     }
+ 
+     return res;
+ }
+ 
++void server_prompt_cache::prune_prefixes_of(const server_tokens & tokens_new) {
++    for (auto it = states.begin(); it != states.end();) {
++        const int len = it->prompt.tokens.get_common_prefix(tokens_new);
++
++        // strict prefix only (not equal length) - a same-length "prefix" is just the entry
++        // itself, and erasing that here would be wrong for callers that pass one of their own
++        // states' tokens back in (e.g. demote_to_disk_or_drop() checking its own entry)
++        if (len == (int) it->prompt.tokens.size() && it->prompt.tokens.size() < tokens_new.size()) {
++            SRV_TRC(" - removing obsolete cached prompt with length %d\n", len);
++
++            if (!it->disk_path.empty()) {
++                std::error_code ec;
++                std::filesystem::remove(it->disk_path, ec);
++                if (ec) {
++                    SRV_WRN(" - failed to delete obsolete disk cache entry %s: %s\n", it->disk_path.c_str(), ec.message().c_str());
++                }
++            }
++
++            it = states.erase(it);
++        } else {
++            ++it;
++        }
++    }
++}
++
+ server_prompt_cache_state * server_prompt_cache::alloc(const server_prompt & prompt, size_t state_size_tgt, size_t state_size_dft) {
+     // first check if the current state is contained fully in the cache
+     for (auto it = states.begin(); it != states.end(); ++it) {
+@@ -1734,27 +2303,30 @@ server_prompt_cache_state * server_prompt_cache::alloc(const server_prompt & pro
+         return nullptr;
+     }
+ 
+-    // remove any cached prompts that are fully contained in the current prompt
+-    for (auto it = states.begin(); it != states.end();) {
+-        const int len = it->prompt.tokens.get_common_prefix(prompt.tokens);
+-
+-        if (len == (int) it->prompt.tokens.size()) {
+-            SRV_TRC(" - removing obsolete cached prompt with length %d\n", len);
+-
+-            it = states.erase(it);
+-        } else {
+-            ++it;
+-        }
+-    }
++    // remove any cached prompts that are fully contained in the current prompt. a disk-backed
++    // one also loses its .pcs file here - otherwise a growing conversation would leave a trail
++    // of near-identical files behind (SS3.4)
++    prune_prefixes_of(prompt.tokens);
+ 
+     if (limit_size > 0) {
+-        // make room before allocating the new vectors to avoid breaching the limit
++        // make room before allocating the new vectors to avoid breaching the limit. in disk
++        // mode this demotes the oldest RAM-resident entry instead of dropping it outright (S4)
+         while (!states.empty() && size() + state_size_new > limit_size) {
++            auto it = std::find_if(states.begin(), states.end(), [](const server_prompt_cache_state & s) { return !s.is_disk_only(); });
++            if (it == states.end()) {
++                break; // nothing left that counts toward the RAM limit
++            }
++
+             SRV_WRN(" - making room for prompt cache entry, removing oldest entry (size = %.3f MiB)\n",
+-                    states.front().size() / (1024.0 * 1024.0));
++                    it->size() / (1024.0 * 1024.0));
+ 
+-            states.pop_front();
++            demote_to_disk_or_drop(it);
+         }
++
++        // S4 (SS3.4): this eviction just wrote to disk (demote_to_disk_or_drop), so the disk
++        // budget needs checking here too, not only at the next reload - a busy multi-conversation
++        // server can evict from RAM far more often than it reloads/sleeps/shuts down.
++        enforce_disk_budget();
+     }
+ 
+     std::vector<uint8_t> state_data_tgt;
+@@ -1777,20 +2349,22 @@ server_prompt_cache_state * server_prompt_cache::alloc(const server_prompt & pro
+     }
+ 
+     states.push_back({
+-        /*.prompt =*/ {
++        /*.prompt       =*/ {
+             /*.tokens      =*/ prompt.tokens.clone(),
+             /*.checkpoints =*/ prompt.checkpoints,
+         },
+-        /*.data   =*/ {
++        /*.data          =*/ {
+             /*.main =*/ std::move(state_data_tgt),
+             /*.drft =*/ std::move(state_data_dft),
+         },
++        /*.disk_path     =*/ {},
++        /*.n_bytes_disk  =*/ 0,
+     });
+ 
+     return &states.back();
+ }
+ 
+-bool server_prompt_cache::load(server_prompt & prompt, const server_tokens & tokens_new, llama_context * ctx_tgt, llama_context * ctx_dft, int32_t id_slot) {
++server_prompt_cache::iterator server_prompt_cache::find_best(const server_prompt & prompt, const server_tokens & tokens_new) {
+     const int lcp_best = prompt.tokens.get_common_prefix(tokens_new);
+ 
+     float f_keep_best = prompt.tokens.size() > 0 ? float(lcp_best) / prompt.tokens.size() : -1.0f; // empty slot: any cache entry wins
+@@ -1814,7 +2388,14 @@ bool server_prompt_cache::load(server_prompt & prompt, const server_tokens & tok
+             continue;
+         }
+ 
+-        if (f_keep_best < f_keep_cur && f_sim_best < f_sim_cur) {
++        // prefer a candidate that is at least as good on both scores and strictly better on one
++        // (Pareto dominance), not one that strictly improves both. requiring a strict
++        // improvement on both was too tight: two exact-prefix matches of different lengths both
++        // get f_keep = 1.0 (their whole, shorter token list matches), so whichever one the loop
++        // saw first would keep winning ties against a later, longer/better match with a higher
++        // f_sim, purely because of list order (SS4.5 stale-disk-entry bug).
++        if ((f_keep_cur > f_keep_best && f_sim_cur >= f_sim_best) ||
++            (f_keep_cur >= f_keep_best && f_sim_cur > f_sim_best)) {
+             f_keep_best = f_keep_cur;
+             f_sim_best  = f_sim_cur;
+ 
+@@ -1824,41 +2405,77 @@ bool server_prompt_cache::load(server_prompt & prompt, const server_tokens & tok
+ 
+     if (it_best != states.end()) {
+         SRV_TRC(" - found better prompt with f_keep = %.3f, f_sim = %.3f\n", f_keep_best, f_sim_best);
++    }
+ 
+-        {
+-            auto & data = it_best->data.main;
++    return it_best;
++}
++
++bool server_prompt_cache::restore(iterator it_best, server_prompt & prompt, llama_context * ctx_tgt, llama_context * ctx_dft, int32_t id_slot, int32_t slot_n_ctx, bool has_mtmd) {
++    if (it_best == states.end()) {
++        return true;
++    }
+ 
+-            const size_t size = data.size();
+-            const size_t n = llama_state_seq_set_data_ext(ctx_tgt, data.data(), size, id_slot, 0);
+-            if (n != size) {
+-                SRV_ERR("failed to restore state with size %zu\n", size);
++    const bool disk_only = it_best->is_disk_only();
+ 
+-                return false;
+-            }
++    // a disk-only entry (T9, SS4.5 step 6): pull its checkpoints and main/draft blobs into
++    // temporary vectors first. on a size mismatch below, those are simply dropped and the
++    // index entry is left disk-only, same as today's "keep the entry, return false" outcome.
++    server_prompt_disk::header disk_header;
++    server_prompt              disk_prompt;
++    std::vector<uint8_t>       disk_main;
++    std::vector<uint8_t>       disk_drft;
++
++    if (disk_only) {
++        if (!server_prompt_disk::read_entry(it_best->disk_path, fp_hash, ctx_tgt, has_mtmd, slot_n_ctx,
++                    disk_header, disk_prompt, disk_main, disk_drft)) {
++            // read_entry() already deleted the file (or it was already gone) and logged a
++            // warning on any validation failure. unlike a size mismatch below, that file can
++            // never come back, so this index entry is now pointing at nothing - erase it too,
++            // instead of leaving a zombie entry that keeps winning find_best() and always fails
++            states.erase(it_best);
+ 
+-            data.clear();
+-            data.shrink_to_fit();
++            return false;
+         }
++    }
+ 
+-        {
+-            auto & data = it_best->data.drft;
++    auto & data_main = disk_only ? disk_main : it_best->data.main;
++    auto & data_drft = disk_only ? disk_drft : it_best->data.drft;
+ 
+-            if (!data.empty()) {
+-                GGML_ASSERT(ctx_dft);
++    {
++        const size_t size = data_main.size();
++        const size_t n = llama_state_seq_set_data_ext(ctx_tgt, data_main.data(), size, id_slot, 0);
++        if (n != size) {
++            SRV_ERR("failed to restore state with size %zu\n", size);
+ 
+-                const size_t size = data.size();
+-                const size_t n = llama_state_seq_set_data_ext(ctx_dft, data.data(), size, id_slot, 0);
+-                if (n != size) {
+-                    SRV_WRN("failed to restore state with size %zu\n", size);
++            return false;
++        }
+ 
+-                    return false;
+-                }
++        data_main.clear();
++        data_main.shrink_to_fit();
++    }
+ 
+-                data.clear();
+-                data.shrink_to_fit();
+-            }
++    if (!data_drft.empty()) {
++        GGML_ASSERT(ctx_dft);
++
++        const size_t size = data_drft.size();
++        const size_t n = llama_state_seq_set_data_ext(ctx_dft, data_drft.data(), size, id_slot, 0);
++        if (n != size) {
++            SRV_WRN("failed to restore state with size %zu\n", size);
++
++            return false;
+         }
+ 
++        data_drft.clear();
++        data_drft.shrink_to_fit();
++    }
++
++    if (disk_only) {
++        // clone, not move: the disk-only index entry (it_best) must survive a successful
++        // restore, so a crash before the next save can still resume from this same file (SS4.5)
++        prompt = disk_prompt.clone();
++
++        server_prompt_disk::update_last_used(it_best->disk_path, (int64_t) time(nullptr));
++    } else {
+         prompt = std::move(it_best->prompt);
+ 
+         states.erase(it_best);
+@@ -1867,12 +2484,26 @@ bool server_prompt_cache::load(server_prompt & prompt, const server_tokens & tok
+     return true;
+ }
+ 
++bool server_prompt_cache::load(server_prompt & prompt, const server_tokens & tokens_new, llama_context * ctx_tgt, llama_context * ctx_dft, int32_t id_slot, int32_t slot_n_ctx, bool has_mtmd) {
++    return restore(find_best(prompt, tokens_new), prompt, ctx_tgt, ctx_dft, id_slot, slot_n_ctx, has_mtmd);
++}
++
+ void server_prompt_cache::update() {
++    bool evicted = false;
++
+     if (limit_size > 0) {
+-        while (!states.empty() && size() > limit_size) {
+-            SRV_WRN(" - cache size limit reached, removing oldest entry (size = %.3f MiB)\n", states.front().size() / (1024.0 * 1024.0));
++        // in disk mode, demote the oldest RAM-resident entry instead of dropping it (S4);
++        // disk-only entries already don't count toward size(), so this always terminates
++        while (size() > limit_size) {
++            auto it = std::find_if(states.begin(), states.end(), [](const server_prompt_cache_state & s) { return !s.is_disk_only(); });
++            if (it == states.end()) {
++                break;
++            }
++
++            SRV_WRN(" - cache size limit reached, evicting entry (size = %.3f MiB)\n", it->size() / (1024.0 * 1024.0));
+ 
+-            states.pop_front();
++            demote_to_disk_or_drop(it);
++            evicted = true;
+         }
+     }
+ 
+@@ -1883,19 +2514,205 @@ void server_prompt_cache::update() {
+     const size_t limit_tokens_cur = limit_size > 0 ? std::max<size_t>(limit_tokens, limit_size/size_per_token) : limit_tokens;
+ 
+     if (limit_tokens > 0) {
+-        while (!states.empty() && n_tokens() > limit_tokens_cur) {
+-            SRV_WRN(" - cache token limit (%zu, est: %zu) reached, removing oldest entry (size = %.3f MiB)\n",
+-                    limit_tokens, limit_tokens_cur, states.front().size() / (1024.0 * 1024.0));
++        while (n_tokens() > limit_tokens_cur) {
++            auto it = std::find_if(states.begin(), states.end(), [](const server_prompt_cache_state & s) { return !s.is_disk_only(); });
++            if (it == states.end()) {
++                break;
++            }
++
++            SRV_WRN(" - cache token limit (%zu, est: %zu) reached, evicting entry (size = %.3f MiB)\n",
++                    limit_tokens, limit_tokens_cur, it->size() / (1024.0 * 1024.0));
+ 
+-            states.pop_front();
++            demote_to_disk_or_drop(it);
++            evicted = true;
+         }
+     }
+ 
++    // S4 (SS3.4): mirrors alloc()'s own post-eviction call - a busy multi-conversation server
++    // can hit this eviction path far more often than it reloads/sleeps/shuts down, so the disk
++    // budget needs checking here too, not just at the next reload boundary. Gated on `evicted`
++    // so a normal update() call with nothing to evict doesn't pay for a directory scan.
++    if (evicted) {
++        enforce_disk_budget();
++    }
++
+     SRV_TRC(" - cache state: %zu prompts, %.3f MiB (limits: %.3f MiB, %zu tokens, %zu est)\n",
+             states.size(), size() / (1024.0 * 1024.0), limit_size / (1024.0 * 1024.0), limit_tokens, limit_tokens_cur);
+ 
+     for (const auto & state : states) {
+-        SRV_TRC("   - prompt %p: %7d tokens, checkpoints: %2zu, %9.3f MiB\n",
+-                (const void *)&state, state.prompt.n_tokens(), state.prompt.checkpoints.size(), state.size() / (1024.0 * 1024.0));
++        SRV_TRC("   - prompt %p: %7d tokens, checkpoints: %2zu, %9.3f MiB, disk = %d\n",
++                (const void *)&state, state.prompt.n_tokens(), state.prompt.checkpoints.size(), state.size() / (1024.0 * 1024.0), state.is_disk_only());
++    }
++}
++
++std::string server_prompt_cache::disk_path_for(const server_prompt_cache_state & state) const {
++    if (!disk_enabled()) {
++        return {};
++    }
++
++    const std::string tokhash = server_prompt_disk::token_hash(state.prompt.tokens.serialize());
++
++    return server_prompt_disk::entry_path(disk_dir, fp_hash, tokhash);
++}
++
++void server_prompt_cache::demote_to_disk_or_drop(iterator it, const char * saved_by) {
++    if (it->is_disk_only()) {
++        return; // nothing RAM-resident left to free
++    }
++
++    if (disk_enabled()) {
++        const std::string path = it->disk_path.empty() ? disk_path_for(*it) : it->disk_path;
++
++        std::error_code ec;
++        bool have_file = std::filesystem::exists(path, ec);
++
++        // no .pcs file yet for this entry - write one now instead of just dropping the
++        // conversation (S4, SS2.2/SS3.4). skipped for prompts too short to be worth a file
++        if (!have_file && server_prompt_disk::should_persist(it->prompt.n_tokens(), disk_min_tokens)) {
++            const llama_pos pos = (llama_pos) it->prompt.tokens.pos_next() - 1;
++
++            have_file = server_prompt_disk::write_entry(path, fp_hash, it->prompt,
++                    it->data.main.data(), it->data.main.size(), it->data.drft.data(), it->data.drft.size(),
++                    saved_by, disk_ckpts, pos, pos);
++
++            if (have_file) {
++                SRV_INF("pcache: persisted %d tokens to disk, reason=%s\n", it->prompt.n_tokens(), saved_by);
++            }
++        }
++
++        if (have_file) {
++            // keep this as a disk-only index instead of dropping the conversation entirely
++            it->disk_path    = path;
++            it->n_bytes_disk = (size_t) std::filesystem::file_size(path, ec);
++
++            it->data.main.clear();
++            it->data.main.shrink_to_fit();
++            it->data.drft.clear();
++            it->data.drft.shrink_to_fit();
++
++            for (auto & ckpt : it->prompt.checkpoints) {
++                ckpt.clear_tgt();
++                ckpt.clear_dft();
++                ckpt.data_tgt.shrink_to_fit();
++                ckpt.data_dft.shrink_to_fit();
++                ckpt.data_spec.shrink_to_fit();
++            }
++
++            return;
++        }
++    }
++
++    states.erase(it);
++}
++
++void server_prompt_cache::enforce_disk_budget() const {
++    if (!disk_enabled() || (disk_mib <= 0 && disk_max_age_s <= 0)) {
++        return;
++    }
++
++    const uint64_t limit_bytes = disk_mib > 0 ? (uint64_t) disk_mib * 1024ull * 1024ull : UINT64_MAX;
++    const int64_t  now         = (int64_t) time(nullptr);
++
++    struct disk_entry {
++        std::filesystem::path path;
++        int64_t                last_used;
++        uint64_t                size;
++        bool                    stale; // true if not in this process's own fp_hash/ directory
++    };
++
++    std::error_code ec;
++    if (!std::filesystem::exists(disk_dir, ec)) {
++        return;
++    }
++
++    std::vector<disk_entry> entries;
++    uint64_t total = 0;
++
++    for (const auto & fp_entry : std::filesystem::directory_iterator(disk_dir, ec)) {
++        if (ec || !fp_entry.is_directory()) {
++            continue;
++        }
++
++        const std::string dir_fp = fp_entry.path().filename().string();
++        const bool        stale  = dir_fp != fp_hash;
++
++        std::error_code ec_inner;
++        for (const auto & file : std::filesystem::directory_iterator(fp_entry.path(), ec_inner)) {
++            if (ec_inner || file.path().extension() != ".pcs") {
++                continue;
++            }
++
++            server_prompt_disk::header hdr;
++            server_tokens              tokens;
++
++            // no ctx_tgt: a stale directory's model may not even be loaded right now, and this
++            // GC pass only needs last_used and file size, not token validity
++            if (!server_prompt_disk::read_header(file.path().string(), dir_fp, nullptr, false, -1, hdr, tokens)) {
++                continue; // read_header() already deleted a corrupt file
++            }
++
++            std::error_code sz_ec;
++            const uint64_t size = (uint64_t) std::filesystem::file_size(file.path(), sz_ec);
++
++            total += size;
++            entries.push_back({file.path(), hdr.last_used, size, stale});
++        }
++    }
++
++    // --prompt-cache-disk-max-age applies independently of the byte budget: an entry idle past
++    // this age is removed regardless of whether the total is under limit_bytes. Applied first so
++    // the LRU pass below only has to consider what's left.
++    size_t   n_removed_age = 0;
++    uint64_t bytes_removed_age = 0;
++
++    if (disk_max_age_s > 0) {
++        for (auto it = entries.begin(); it != entries.end(); ) {
++            if (now - it->last_used >= disk_max_age_s) {
++                std::error_code rm_ec;
++                std::filesystem::remove(it->path, rm_ec);
++                if (!rm_ec) {
++                    total -= it->size;
++                    n_removed_age++;
++                    bytes_removed_age += it->size;
++                    it = entries.erase(it);
++                    continue;
++                }
++            }
++            ++it;
++        }
++    }
++
++    size_t   n_removed_lru = 0;
++    uint64_t bytes_removed_lru = 0;
++
++    if (total > limit_bytes) {
++        // stale directories first, then oldest last_used first, within each group
++        std::stable_sort(entries.begin(), entries.end(), [](const disk_entry & a, const disk_entry & b) {
++            if (a.stale != b.stale) {
++                return a.stale;
++            }
++            return a.last_used < b.last_used;
++        });
++
++        for (const auto & e : entries) {
++            if (total <= limit_bytes) {
++                break;
++            }
++
++            std::error_code rm_ec;
++            std::filesystem::remove(e.path, rm_ec);
++            if (!rm_ec) {
++                total -= e.size;
++                n_removed_lru++;
++                bytes_removed_lru += e.size;
++            }
++        }
++    }
++
++    if (n_removed_age > 0 || n_removed_lru > 0) {
++        SRV_INF("pcache: disk GC removed %zu aged-out entr%s (%.3f MiB) and %zu over-budget entr%s (%.3f MiB), %.3f MiB remaining\n",
++                n_removed_age, n_removed_age == 1 ? "y" : "ies", bytes_removed_age / (1024.0 * 1024.0),
++                n_removed_lru, n_removed_lru == 1 ? "y" : "ies", bytes_removed_lru / (1024.0 * 1024.0),
++                total / (1024.0 * 1024.0));
+     }
+ }
+diff --git a/tools/server/server-task.h b/tools/server/server-task.h
+index 9c99143f8..607fad453 100644
+--- a/tools/server/server-task.h
++++ b/tools/server/server-task.h
+@@ -3,10 +3,12 @@
+ #include "common.h"
+ #include "llama.h"
+ 
++#include <cstdint>
+ #include <string>
+ #include <unordered_set>
+ #include <list>
+ #include <map>
++#include <vector>
+ 
+ // TODO: prevent including the whole server-common.h as we only use server_tokens
+ #include "server-common.h"
+@@ -594,10 +596,109 @@ struct server_prompt_data {
+     }
+ };
+ 
++//
++// server_prompt_disk: the .pcs on-disk format for one server_prompt_cache_state entry (T8),
++// see docs/research/18-conversation-state-persistence-plan.md SS3.2-3.3
++//
++namespace server_prompt_disk {
++
++// bumped only if the binary layout below changes. independent of PCS_COMPAT_EPOCH in
++// server-context.cpp, which tracks what a cached KV row *means*, not how the file is laid out
++constexpr uint32_t FORMAT_VERSION = 1;
++
++// the JSON header is padded to this many bytes so `last_used` can be rewritten in place later,
++// without touching or resizing the rest of the file
++constexpr size_t HEADER_PAD_SIZE = 512;
++
++struct header {
++    std::string fp;
++    int64_t     n_tokens  = 0;
++    int64_t     n_ckpt    = 0;
++    uint64_t    main_size = 0;
++    uint64_t    drft_size = 0;
++    int64_t     created   = 0;
++    int64_t     last_used = 0;
++    std::string saved_by;
++    int32_t     pos_min = 0;
++    int32_t     pos_max = 0;
++};
++
++// true if a prompt this long is worth writing to disk at all (--prompt-cache-disk-min-tokens)
++bool should_persist(size_t n_tokens, int32_t min_tokens);
++
++// FNV-1a, 16 hex chars - the same scheme server_prompt_build_fingerprint() uses in
++// server-context.cpp, applied here to the serialized token bytes instead of the fingerprint text
++std::string token_hash(const std::vector<char> & tokens_bytes);
++
++std::string fp_dir_path(const std::string & cache_dir, const std::string & fp_hash);
++std::string entry_path(const std::string & cache_dir, const std::string & fp_hash, const std::string & tokhash);
++
++// writes <cache_dir>/<fp_hash>/fingerprint.txt if it does not already exist
++void ensure_fp_dir(const std::string & cache_dir, const std::string & fp_hash, const std::string & fp_text);
++
++// atomically writes one entry: a .tmp file with a large setvbuf, fflush, fsync, rename onto
++// `path`, then fsync of the containing directory (SS3.3). keeps only the newest `ckpt_limit`
++// checkpoints out of `prompt.checkpoints` (already oldest-first). `created`, if 0, is taken as
++// "now" - a caller re-writing an existing entry can pass the original value through instead.
++bool write_entry(
++        const std::string & path,
++        const std::string & fp_hash,
++        const server_prompt & prompt,
++        const uint8_t * main_data, size_t main_size,
++        const uint8_t * drft_data, size_t drft_size,
++        const std::string & saved_by,
++        int32_t ckpt_limit,
++        int32_t pos_min,
++        int32_t pos_max,
++        int64_t created = 0);
++
++// full read: header, tokens, checkpoints and the main/draft blobs, fully validated (SS3.3).
++// `ctx_tgt` may be null to skip vocab-id validation (used by the disk GC, which may scan a
++// stale fingerprint directory belonging to a model that isn't even loaded right now).
++// `slot_n_ctx` <= 0 skips the "fits in this slot" check. on ANY validation failure, `path` is
++// deleted, a warning is logged, and this returns false - "no entry found", never a crash.
++bool read_entry(
++        const std::string & path,
++        const std::string & fp_hash,
++        const llama_context * ctx_tgt,
++        bool has_mtmd,
++        int32_t slot_n_ctx,
++        header & out_header,
++        server_prompt & out_prompt,
++        std::vector<uint8_t> & out_main,
++        std::vector<uint8_t> & out_drft);
++
++// header + tokens only, for the startup scan (T10): reads far less than read_entry(), because
++// it seeks straight to the trailer instead of reading through the checkpoints and blobs. same
++// validation, and the same delete-on-failure behavior, as read_entry().
++bool read_header(
++        const std::string & path,
++        const std::string & fp_hash,
++        const llama_context * ctx_tgt,
++        bool has_mtmd,
++        int32_t slot_n_ctx,
++        header & out_header,
++        server_tokens & out_tokens);
++
++// rewrites just the `last_used` field in place - no rename, no directory fsync (SS4.5 step 6.5)
++bool update_last_used(const std::string & path, int64_t last_used);
++
++} // namespace server_prompt_disk
++
+ struct server_prompt_cache_state {
+     server_prompt prompt;
+     server_prompt_data data;
+ 
++    // set once this entry's blob has been spilled to disk (T9/T11). a RAM-resident entry
++    // leaves this empty. a disk-only entry keeps `data` empty and keeps only `prompt` (tokens
++    // plus checkpoint position metadata, without the checkpoint blob bytes) in RAM.
++    std::string disk_path;
++    size_t      n_bytes_disk = 0;
++
++    bool is_disk_only() const {
++        return !disk_path.empty() && data.main.empty();
++    }
++
+     size_t size() const {
+         size_t res = data.size();
+ 
+@@ -615,6 +716,8 @@ struct server_prompt_cache {
+         this->limit_tokens = limit_tokens;
+     }
+ 
++    using iterator = std::list<server_prompt_cache_state>::iterator;
++
+     std::list<server_prompt_cache_state> states;
+ 
+     // in bytes, 0 = no limit
+@@ -623,15 +726,78 @@ struct server_prompt_cache {
+     // in tokens, 0 = no limit
+     size_t limit_tokens = 0;
+ 
++    // disk-tier config (T6/T9). an empty disk_dir means RAM-only, the Stage 1 fallback. set
++    // once, before any alloc()/update() call that should see it - T10 is expected to call this
++    // right after computing the fingerprint in load_model().
++    std::string disk_dir;
++    std::string fp_hash;
++    int32_t     disk_mib        = 0;
++    int32_t     disk_ckpts      = 4;
++    int32_t     disk_min_tokens = 4096;
++    int32_t     disk_max_age_s  = 0; // 0 = disabled
++
++    void configure_disk(std::string dir, std::string fp, int32_t mib, int32_t ckpts, int32_t min_tokens, int32_t max_age_s) {
++        disk_dir        = std::move(dir);
++        fp_hash         = std::move(fp);
++        disk_mib        = mib;
++        disk_ckpts      = ckpts;
++        disk_min_tokens = min_tokens;
++        disk_max_age_s  = max_age_s;
++    }
++
++    bool disk_enabled() const { return !disk_dir.empty() && !fp_hash.empty(); }
++
++    // RAM-only: excludes disk-only entries, so this reflects what actually needs freeing to
++    // respect --cache-ram, not the (much larger) total including the disk tier
+     size_t size() const;
+ 
+     size_t n_tokens() const;
+ 
+     server_prompt_cache_state * alloc(const server_prompt & prompt, size_t state_size_main, size_t state_size_drft);
+ 
+-    bool load(server_prompt & prompt, const server_tokens & tokens_new, llama_context * ctx_tgt, llama_context * ctx_dft, int32_t id_slot);
++    // removes any cached entry (RAM-resident or disk-only) whose tokens are a strict prefix of
++    // tokens_new, deleting its .pcs file too if it has one. alloc() applies this rule to its own
++    // RAM-path writes; this is the same rule, pulled out so the disk-persist call sites that
++    // write straight to disk and bypass alloc() (T11's persist_before_reload_disk()) can apply
++    // it too - otherwise a growing conversation leaves a trail of stale prefix entries on disk
++    // that outlive the entry that superseded them, and find_best() can later pick one of them.
++    void prune_prefixes_of(const server_tokens & tokens_new);
++
++    // picks the best cache entry for tokens_new against the current prompt, without touching
++    // either - split out of load() so a caller can act on the pick (e.g. free up KV cells for
++    // it under a unified KV cache) before restore() actually runs
++    iterator find_best(const server_prompt & prompt, const server_tokens & tokens_new);
++
++    // restores the picked entry (from find_best()) into ctx_tgt/ctx_dft and moves it into
++    // prompt. it_best == states.end() is a no-op that returns true, same as a "no better
++    // prompt found" outcome from the old load(). `slot_n_ctx` and `has_mtmd` are only used for
++    // a disk-only entry's read-side validation and token deserialization (T9).
++    bool restore(iterator it_best, server_prompt & prompt, llama_context * ctx_tgt, llama_context * ctx_dft, int32_t id_slot, int32_t slot_n_ctx, bool has_mtmd);
++
++    bool load(server_prompt & prompt, const server_tokens & tokens_new, llama_context * ctx_tgt, llama_context * ctx_dft, int32_t id_slot, int32_t slot_n_ctx, bool has_mtmd);
+ 
+     void update();
++
++    // demotes `it` to a disk-only index entry: if disk mode is on and no .pcs file exists for
++    // its tokens yet, writes one first (S4, SS2.2/SS3.4 - skipped for prompts shorter than
++    // --prompt-cache-disk-min-tokens), then drops the RAM blob and checkpoint data either way.
++    // Erases the entry outright if disk mode is off or the write was skipped/failed.
++    // `saved_by` is the header's `saved_by` field (T11's reload-triggered spill passes its own
++    // reason through; the default "evict" is for the make-room/limit call sites below).
++    void demote_to_disk_or_drop(iterator it, const char * saved_by = "evict");
++
++    // the .pcs path this entry would use if it were spilled to disk, or empty if disk mode is off
++    std::string disk_path_for(const server_prompt_cache_state & state) const;
++
++    // disk budget GC (SS3.4): LRU by header last_used, across the whole disk_dir - not just
++    // this process's own fp_hash/ directory. entries in a stale <fp>/ directory (a different
++    // fingerprint than this one) are collected before same-directory entries. Also applies
++    // --prompt-cache-disk-max-age independently of the byte budget: any entry idle longer than
++    // that is removed regardless of total size. Called after every spill/eviction that writes to
++    // disk (S1-S4), not just at reload boundaries, so usage is bounded during steady-state
++    // operation too, not only at the next tier switch/sleep/shutdown. A no-op if disk mode is
++    // off, or if both --prompt-cache-disk-mib and --prompt-cache-disk-max-age are 0 (no caps).
++    void enforce_disk_budget() const;
+ };
+ 
+ // used exclusively by router mode
